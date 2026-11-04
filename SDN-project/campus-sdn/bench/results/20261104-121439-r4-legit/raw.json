@@ -1,0 +1,13 @@
+{
+ "duration_s": 180,
+ "alerts": [],
+ "false_positives": 0,
+ "client_output": [
+  "http=342\n",
+  "360 packets transmitted, 360 received, 0% packet loss, time 179937ms\nrtt min/avg/max/mdev = 0.830/1.505/4.559/0.235 ms\n",
+  "[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.08 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.08 Mbits/sec                  receiver\n[  5]   0.00-10.00  sec  4.88 MBytes  4.09 Mbits/sec    0             sender\n[  5]   0.00-10.01  sec  4.88 MBytes  4.09 Mbits/sec                  receiver\n"
+ ],
+ "pps_mean": 25.6,
+ "pps_max": 50.99,
+ "samples": 189
+}

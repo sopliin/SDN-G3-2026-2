@@ -1,0 +1,3524 @@
+{
+ "trials": [
+  {
+   "index": 1,
+   "attacker": "h1",
+   "probe": "h4",
+   "kind": "udp-flood",
+   "nominal_pps": "max",
+   "attack_start": 1793810575.4068043,
+   "attack_end": 1793810587.4185941,
+   "peak_pps": 76994.86,
+   "detected": true,
+   "detection_s": 2.67,
+   "decision_ms": 52.0,
+   "apply_ms": 203.0,
+   "effect_s": 2.294,
+   "start_to_mitigated_s": 5.219,
+   "action": "RATE_LIMIT",
+   "severity": "high",
+   "attributed": [
+    "fa:16:3e:1d:96:70"
+   ],
+   "attribution_ok": true,
+   "verified": {
+    "incident": "INC-0001",
+    "rates_before": {
+     "pps": 72184.33,
+     "bps": 61212041.21
+    },
+    "rates_after": {
+     "pps": 33639.36,
+     "bps": 28525703.88
+    },
+    "meets_objective": true
+   },
+   "probe_loss": "87 packets transmitted, 87 received, 0% packet loss, time 17826ms",
+   "probe_rtt": "rtt min/avg/max/mdev = 0.161/0.681/4.265/0.489 ms",
+   "recovery_after_apply_s": 31.3,
+   "chain": {
+    "AnomalyDetected": {
+     "event_id": "01a1a771-3a9d-7053-8121-11da28e226d9",
+     "type": "AnomalyDetected",
+     "sender": "detection",
+     "timestamp": "2026-11-04T16:42:58.077Z",
+     "payload": {
+      "type": "flood",
+      "target": {
+       "ip": "10.0.0.3",
+       "service": ""
+      },
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "rates": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "baseline": {
+       "mean": 1.25,
+       "sigma": 1.13
+      },
+      "deviation": 64136.35,
+      "proposed_severity": "high"
+     }
+    },
+    "IncidentOpened": {
+     "event_id": "01a1a771-3ab1-77c5-a9ce-81e78ef74ec6",
+     "type": "IncidentOpened",
+     "sender": "incidents",
+     "timestamp": "2026-11-04T16:42:58.097Z",
+     "payload": {
+      "incident": "INC-0001",
+      "type": "flood",
+      "target": "10.0.0.3",
+      "severity": "high",
+      "opened_at": "2026-11-04T16:42:58.097Z",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ]
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationRequired": {
+     "event_id": "01a1a771-3ad1-7733-9ab1-9bd786114a9e",
+     "type": "MitigationRequired",
+     "sender": "policies",
+     "timestamp": "2026-11-04T16:42:58.129Z",
+     "payload": {
+      "incident": "INC-0001",
+      "action": "RATE_LIMIT",
+      "target": "10.0.0.3",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "parameters": {
+       "rate_pps": 200,
+       "ttl_s": 20
+      },
+      "ttl": 20
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationApplied": {
+     "event_id": "01a1a771-3b9c-7021-a60c-c7ef611bbfea",
+     "type": "MitigationApplied",
+     "sender": "controller_adapter",
+     "timestamp": "2026-11-04T16:42:58.332Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rules": [
+       "of:00001a749039894a:1000:144115188075855875"
+      ],
+      "switches": [
+       "of:00001a749039894a"
+      ],
+      "applied_at": "2026-11-04T16:42:58.332Z"
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationVerified": {
+     "event_id": "01a1a771-4686-779a-9efa-01369ca9ca88",
+     "type": "MitigationVerified",
+     "sender": "monitor",
+     "timestamp": "2026-11-04T16:43:01.126Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rates_before": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "rates_after": {
+       "pps": 33639.36,
+       "bps": 28525703.88
+      },
+      "meets_objective": true
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    }
+   },
+   "metrics": [
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810560.6214705
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.51,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810561.6216588
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810562.6219096
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810563.6221244
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.68,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810564.6222727
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810565.6224694
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810566.6226463
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810567.6227953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.48,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810568.623034
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.63,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810569.6239233
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810570.6240644
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.65,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810571.6241982
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810572.6243486
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810573.6245134
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.6,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810574.6246953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 1983.73,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810575.6248317
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 37014.32,
+     "bps": 31387823.04,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810576.6250122
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 72184.33,
+     "bps": 61212041.21,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810577.6251738
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 76994.86,
+     "bps": 65291318.27,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810578.6253445
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 23715.25,
+     "bps": 20109781.85,
+     "new_flows": 0,
+     "distinct_sources": 3,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810579.6254604
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176011.52,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810580.6255767
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.97,
+     "bps": 173460.5,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810581.6257353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173490.59,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810582.6259048
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176092.06,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810583.626018
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173496.13,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810584.6261556
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.98,
+     "bps": 174764.75,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810585.6262658
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 174037.44,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810586.6264184
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.98,
+     "bps": 173915.14,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810587.6265383
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 69.99,
+     "bps": 59031.99,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810588.626674
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6510.85,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810589.6268506
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.03,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810590.6270978
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3551.28,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810591.6273003
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 7.0,
+     "bps": 6094.83,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810592.627492
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 4.0,
+     "bps": 2767.66,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810593.627614
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810594.6277966
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.5,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810595.6279907
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810596.6281497
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810597.628353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810598.6285503
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.57,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810599.6287165
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810600.628917
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810601.6290994
+    }
+   ],
+   "hping_tail": "805242 packets transmitted, 0 packets received, 100% packet loss\nround-trip min/avg/max = 0.0/0.0/0.0 ms\nHPING 10.0.0.3 (ens4 10.0.0.3): udp mode set, 28 headers + 64 data bytes\n"
+  },
+  {
+   "index": 2,
+   "attacker": "h2",
+   "probe": "h4",
+   "kind": "syn-flood",
+   "nominal_pps": "max",
+   "attack_start": 1793810612.826525,
+   "attack_end": 1793810624.8452485,
+   "peak_pps": 69175.93,
+   "detected": true,
+   "detection_s": -34.75,
+   "decision_ms": 52.0,
+   "apply_ms": 203.0,
+   "effect_s": 2.294,
+   "start_to_mitigated_s": -32.201,
+   "action": "RATE_LIMIT",
+   "severity": "high",
+   "attributed": [
+    "fa:16:3e:1d:96:70"
+   ],
+   "attribution_ok": false,
+   "verified": {
+    "incident": "INC-0001",
+    "rates_before": {
+     "pps": 72184.33,
+     "bps": 61212041.21
+    },
+    "rates_after": {
+     "pps": 33639.36,
+     "bps": 28525703.88
+    },
+    "meets_objective": true
+   },
+   "probe_loss": "87 packets transmitted, 87 received, 0% packet loss, time 17840ms",
+   "probe_rtt": "rtt min/avg/max/mdev = 0.212/0.879/13.014/1.493 ms",
+   "recovery_after_apply_s": 69.9,
+   "chain": {
+    "AnomalyDetected": {
+     "event_id": "01a1a771-3a9d-7053-8121-11da28e226d9",
+     "type": "AnomalyDetected",
+     "sender": "detection",
+     "timestamp": "2026-11-04T16:42:58.077Z",
+     "payload": {
+      "type": "flood",
+      "target": {
+       "ip": "10.0.0.3",
+       "service": ""
+      },
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "rates": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "baseline": {
+       "mean": 1.25,
+       "sigma": 1.13
+      },
+      "deviation": 64136.35,
+      "proposed_severity": "high"
+     }
+    },
+    "IncidentOpened": {
+     "event_id": "01a1a771-3ab1-77c5-a9ce-81e78ef74ec6",
+     "type": "IncidentOpened",
+     "sender": "incidents",
+     "timestamp": "2026-11-04T16:42:58.097Z",
+     "payload": {
+      "incident": "INC-0001",
+      "type": "flood",
+      "target": "10.0.0.3",
+      "severity": "high",
+      "opened_at": "2026-11-04T16:42:58.097Z",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ]
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationRequired": {
+     "event_id": "01a1a771-3ad1-7733-9ab1-9bd786114a9e",
+     "type": "MitigationRequired",
+     "sender": "policies",
+     "timestamp": "2026-11-04T16:42:58.129Z",
+     "payload": {
+      "incident": "INC-0001",
+      "action": "RATE_LIMIT",
+      "target": "10.0.0.3",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "parameters": {
+       "rate_pps": 200,
+       "ttl_s": 20
+      },
+      "ttl": 20
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationApplied": {
+     "event_id": "01a1a771-3b9c-7021-a60c-c7ef611bbfea",
+     "type": "MitigationApplied",
+     "sender": "controller_adapter",
+     "timestamp": "2026-11-04T16:42:58.332Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rules": [
+       "of:00001a749039894a:1000:144115188075855875"
+      ],
+      "switches": [
+       "of:00001a749039894a"
+      ],
+      "applied_at": "2026-11-04T16:42:58.332Z"
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationVerified": {
+     "event_id": "01a1a771-4686-779a-9efa-01369ca9ca88",
+     "type": "MitigationVerified",
+     "sender": "monitor",
+     "timestamp": "2026-11-04T16:43:01.126Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rates_before": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "rates_after": {
+       "pps": 33639.36,
+       "bps": 28525703.88
+      },
+      "meets_objective": true
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    }
+   },
+   "metrics": [
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810560.6214705
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.51,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810561.6216588
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810562.6219096
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810563.6221244
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.68,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810564.6222727
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810565.6224694
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810566.6226463
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810567.6227953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.48,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810568.623034
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.63,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810569.6239233
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810570.6240644
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.65,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810571.6241982
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810572.6243486
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810573.6245134
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.6,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810574.6246953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 1983.73,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810575.6248317
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 37014.32,
+     "bps": 31387823.04,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810576.6250122
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 72184.33,
+     "bps": 61212041.21,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810577.6251738
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 76994.86,
+     "bps": 65291318.27,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810578.6253445
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 23715.25,
+     "bps": 20109781.85,
+     "new_flows": 0,
+     "distinct_sources": 3,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810579.6254604
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176011.52,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810580.6255767
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.97,
+     "bps": 173460.5,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810581.6257353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173490.59,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810582.6259048
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176092.06,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810583.626018
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173496.13,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810584.6261556
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.98,
+     "bps": 174764.75,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810585.6262658
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 174037.44,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810586.6264184
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.98,
+     "bps": 173915.14,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810587.6265383
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 69.99,
+     "bps": 59031.99,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810588.626674
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6510.85,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810589.6268506
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.03,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810590.6270978
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3551.28,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810591.6273003
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 7.0,
+     "bps": 6094.83,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810592.627492
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 4.0,
+     "bps": 2767.66,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810593.627614
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810594.6277966
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.5,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810595.6279907
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810596.6281497
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810597.628353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810598.6285503
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.57,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810599.6287165
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810600.628917
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810601.6290994
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2174.27,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810602.6298957
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810603.6301193
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810604.630266
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.49,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810605.6304626
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810606.6307278
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810607.6309125
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.7,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810608.6310499
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.95,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810609.6311684
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810610.631272
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6511.16,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810611.6314013
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.34,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810612.6315706
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 6539.12,
+     "bps": 3140235.24,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810613.6317046
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 46152.3,
+     "bps": 22155536.46,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810614.6318064
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 69175.93,
+     "bps": 33205901.7,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810615.6319375
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 24516.31,
+     "bps": 11769349.23,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810616.6320472
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.97,
+     "bps": 102498.0,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810617.6321838
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 99905.52,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810618.6323287
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 101141.15,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810619.632436
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.98,
+     "bps": 100821.54,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810620.6325397
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.98,
+     "bps": 100804.75,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810621.6326513
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 203.97,
+     "bps": 99427.34,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810622.6327786
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.96,
+     "bps": 102494.23,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810623.632952
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.96,
+     "bps": 99900.42,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810624.633148
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 155.98,
+     "bps": 76020.62,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810625.6332977
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 7.0,
+     "bps": 6095.13,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810626.6334405
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 6.0,
+     "bps": 4335.22,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810627.6336207
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.47,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810628.6337547
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810629.6339562
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.65,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810630.6341193
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810631.6342695
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810632.634446
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 4.0,
+     "bps": 2927.61,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810633.6345804
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810634.6346993
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810635.6349041
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.8,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810636.634995
+    }
+   ],
+   "hping_tail": "1266693 packets transmitted, 0 packets received, 100% packet loss\nround-trip min/avg/max = 0.0/0.0/0.0 ms\nHPING 10.0.0.3 (ens4 10.0.0.3): S set, 40 headers + 0 data bytes\n"
+  },
+  {
+   "index": 3,
+   "attacker": "h4",
+   "probe": "h1",
+   "kind": "udp-flood",
+   "nominal_pps": "max",
+   "attack_start": 1793810651.2595208,
+   "attack_end": 1793810663.3007412,
+   "peak_pps": 119573.27,
+   "detected": true,
+   "detection_s": -73.183,
+   "decision_ms": 52.0,
+   "apply_ms": 203.0,
+   "effect_s": 2.294,
+   "start_to_mitigated_s": -70.634,
+   "action": "RATE_LIMIT",
+   "severity": "high",
+   "attributed": [
+    "fa:16:3e:1d:96:70"
+   ],
+   "attribution_ok": false,
+   "verified": {
+    "incident": "INC-0001",
+    "rates_before": {
+     "pps": 72184.33,
+     "bps": 61212041.21
+    },
+    "rates_after": {
+     "pps": 33639.36,
+     "bps": 28525703.88
+    },
+    "meets_objective": true
+   },
+   "probe_loss": "90 packets transmitted, 90 received, 0% packet loss, time 17871ms",
+   "probe_rtt": "rtt min/avg/max/mdev = 0.945/3.995/217.815/22.712 ms, pipe 2",
+   "recovery_after_apply_s": 106.0,
+   "chain": {
+    "AnomalyDetected": {
+     "event_id": "01a1a771-3a9d-7053-8121-11da28e226d9",
+     "type": "AnomalyDetected",
+     "sender": "detection",
+     "timestamp": "2026-11-04T16:42:58.077Z",
+     "payload": {
+      "type": "flood",
+      "target": {
+       "ip": "10.0.0.3",
+       "service": ""
+      },
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "rates": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "baseline": {
+       "mean": 1.25,
+       "sigma": 1.13
+      },
+      "deviation": 64136.35,
+      "proposed_severity": "high"
+     }
+    },
+    "IncidentOpened": {
+     "event_id": "01a1a771-3ab1-77c5-a9ce-81e78ef74ec6",
+     "type": "IncidentOpened",
+     "sender": "incidents",
+     "timestamp": "2026-11-04T16:42:58.097Z",
+     "payload": {
+      "incident": "INC-0001",
+      "type": "flood",
+      "target": "10.0.0.3",
+      "severity": "high",
+      "opened_at": "2026-11-04T16:42:58.097Z",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ]
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationRequired": {
+     "event_id": "01a1a771-3ad1-7733-9ab1-9bd786114a9e",
+     "type": "MitigationRequired",
+     "sender": "policies",
+     "timestamp": "2026-11-04T16:42:58.129Z",
+     "payload": {
+      "incident": "INC-0001",
+      "action": "RATE_LIMIT",
+      "target": "10.0.0.3",
+      "origins": [
+       {
+        "mac": "fa:16:3e:1d:96:70",
+        "switch": "of:00001a749039894a",
+        "port": "2"
+       }
+      ],
+      "parameters": {
+       "rate_pps": 200,
+       "ttl_s": 20
+      },
+      "ttl": 20
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationApplied": {
+     "event_id": "01a1a771-3b9c-7021-a60c-c7ef611bbfea",
+     "type": "MitigationApplied",
+     "sender": "controller_adapter",
+     "timestamp": "2026-11-04T16:42:58.332Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rules": [
+       "of:00001a749039894a:1000:144115188075855875"
+      ],
+      "switches": [
+       "of:00001a749039894a"
+      ],
+      "applied_at": "2026-11-04T16:42:58.332Z"
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    },
+    "MitigationVerified": {
+     "event_id": "01a1a771-4686-779a-9efa-01369ca9ca88",
+     "type": "MitigationVerified",
+     "sender": "monitor",
+     "timestamp": "2026-11-04T16:43:01.126Z",
+     "payload": {
+      "incident": "INC-0001",
+      "rates_before": {
+       "pps": 72184.33,
+       "bps": 61212041.21
+      },
+      "rates_after": {
+       "pps": 33639.36,
+       "bps": 28525703.88
+      },
+      "meets_objective": true
+     },
+     "correlation": {
+      "incident": "INC-0001"
+     }
+    }
+   },
+   "metrics": [
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810560.6214705
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.51,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810561.6216588
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810562.6219096
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810563.6221244
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.68,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810564.6222727
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810565.6224694
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810566.6226463
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810567.6227953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.48,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810568.623034
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.63,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810569.6239233
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810570.6240644
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.65,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810571.6241982
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810572.6243486
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810573.6245134
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.6,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810574.6246953
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 1983.73,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810575.6248317
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 37014.32,
+     "bps": 31387823.04,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810576.6250122
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 72184.33,
+     "bps": 61212041.21,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810577.6251738
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 76994.86,
+     "bps": 65291318.27,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810578.6253445
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 23715.25,
+     "bps": 20109781.85,
+     "new_flows": 0,
+     "distinct_sources": 3,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810579.6254604
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176011.52,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810580.6255767
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.97,
+     "bps": 173460.5,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810581.6257353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173490.59,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810582.6259048
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 176092.06,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810583.626018
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173496.13,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810584.6261556
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.98,
+     "bps": 174764.75,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810585.6262658
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 174037.44,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810586.6264184
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.98,
+     "bps": 173915.14,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810587.6265383
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 69.99,
+     "bps": 59031.99,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "at": 1793810588.626674
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6510.85,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810589.6268506
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.03,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810590.6270978
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3551.28,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810591.6273003
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 7.0,
+     "bps": 6094.83,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810592.627492
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 4.0,
+     "bps": 2767.66,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810593.627614
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810594.6277966
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.5,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810595.6279907
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810596.6281497
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810597.628353
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810598.6285503
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.57,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810599.6287165
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810600.628917
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810601.6290994
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2174.27,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810602.6298957
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810603.6301193
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810604.630266
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.49,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810605.6304626
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810606.6307278
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810607.6309125
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.7,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810608.6310499
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.95,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810609.6311684
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810610.631272
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6511.16,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810611.6314013
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.34,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810612.6315706
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 6539.12,
+     "bps": 3140235.24,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810613.6317046
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 46152.3,
+     "bps": 22155536.46,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810614.6318064
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 69175.93,
+     "bps": 33205901.7,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810615.6319375
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 24516.31,
+     "bps": 11769349.23,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810616.6320472
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.97,
+     "bps": 102498.0,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810617.6321838
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 99905.52,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810618.6323287
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.98,
+     "bps": 101141.15,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810619.632436
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.98,
+     "bps": 100821.54,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810620.6325397
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.98,
+     "bps": 100804.75,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810621.6326513
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 203.97,
+     "bps": 99427.34,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810622.6327786
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 207.96,
+     "bps": 102494.23,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810623.632952
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.96,
+     "bps": 99900.42,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810624.633148
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 155.98,
+     "bps": 76020.62,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "at": 1793810625.6332977
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 7.0,
+     "bps": 6095.13,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810626.6334405
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 6.0,
+     "bps": 4335.22,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810627.6336207
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.47,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810628.6337547
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810629.6339562
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.65,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810630.6341193
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810631.6342695
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810632.634446
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 4.0,
+     "bps": 2927.61,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810633.6345804
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810634.6346993
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.91,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810635.6349041
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.8,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810636.634995
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.6,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810637.6359472
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810638.6361675
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2590.96,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810639.6365707
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810640.6367104
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.94,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810641.6368518
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.61,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810642.63703
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810643.6371908
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810644.637337
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.73,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810645.637441
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810646.6376238
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.95,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810647.6377466
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.62,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810648.637923
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810649.6381247
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 1567.71,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810650.638308
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6511.12,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810651.6384435
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 32646.94,
+     "bps": 27684282.25,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810652.6386292
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 94506.04,
+     "bps": 80140370.73,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810653.6387346
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 119573.27,
+     "bps": 101398296.6,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810654.638908
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 49636.04,
+     "bps": 42090611.31,
+     "new_flows": 0,
+     "distinct_sources": 3,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810655.639048
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.96,
+     "bps": 173823.88,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810656.6392329
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.97,
+     "bps": 175241.98,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810657.6393585
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.98,
+     "bps": 174348.67,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810658.6394694
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173066.01,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810659.6395965
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.97,
+     "bps": 174345.39,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810660.6397262
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 206.97,
+     "bps": 175242.06,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810661.6398513
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 205.96,
+     "bps": 174336.91,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810662.6400297
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 204.97,
+     "bps": 173064.19,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810663.6401672
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 44.99,
+     "bps": 38312.74,
+     "new_flows": 0,
+     "distinct_sources": 2,
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "at": 1793810664.6403568
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 6.0,
+     "bps": 4335.22,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810665.6405358
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 5.0,
+     "bps": 3919.21,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810666.640737
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 8.0,
+     "bps": 6510.77,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810667.6409261
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2351.57,
+     "new_flows": 0,
+     "distinct_sources": 1,
+     "origins": [],
+     "at": 1793810668.6411085
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.92,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810669.641307
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.68,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810670.6414542
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810671.6416266
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810672.6417766
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 3.0,
+     "bps": 2591.61,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810673.6419263
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 0.0,
+     "bps": 0.0,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810674.6421292
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 1.0,
+     "bps": 415.93,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810675.642308
+    },
+    {
+     "destination": "10.0.0.3",
+     "window": "1.0s",
+     "pps": 2.0,
+     "bps": 2175.68,
+     "new_flows": 0,
+     "distinct_sources": 0,
+     "origins": [],
+     "at": 1793810676.6424532
+    }
+   ],
+   "hping_tail": "1303813 packets transmitted, 0 packets received, 100% packet loss\nround-trip min/avg/max = 0.0/0.0/0.0 ms\nHPING 10.0.0.3 (ens4 10.0.0.3): udp mode set, 28 headers + 64 data bytes\n"
+  }
+ ],
+ "legit": {
+  "duration_s": 60,
+  "alerts": [
+   {
+    "event_id": "01a1a771-3a9d-7053-8121-11da28e226d9",
+    "type": "AnomalyDetected",
+    "sender": "detection",
+    "timestamp": "2026-11-04T16:42:58.077Z",
+    "payload": {
+     "type": "flood",
+     "target": {
+      "ip": "10.0.0.3",
+      "service": ""
+     },
+     "origins": [
+      {
+       "mac": "fa:16:3e:1d:96:70",
+       "switch": "of:00001a749039894a",
+       "port": "2"
+      }
+     ],
+     "rates": {
+      "pps": 72184.33,
+      "bps": 61212041.21
+     },
+     "baseline": {
+      "mean": 1.25,
+      "sigma": 1.13
+     },
+     "deviation": 64136.35,
+     "proposed_severity": "high"
+    }
+   },
+   {
+    "event_id": "01a1a771-cb05-700e-b041-7beec7235f1b",
+    "type": "AnomalyDetected",
+    "sender": "detection",
+    "timestamp": "2026-11-04T16:43:35.045Z",
+    "payload": {
+     "type": "flood",
+     "target": {
+      "ip": "10.0.0.3",
+      "service": ""
+     },
+     "origins": [
+      {
+       "mac": "fa:16:3e:db:27:f7",
+       "switch": "of:00001a749039894a",
+       "port": "3"
+      }
+     ],
+     "rates": {
+      "pps": 46152.3,
+      "bps": 22155536.46
+     },
+     "baseline": {
+      "mean": 17.45,
+      "sigma": 52.64
+     },
+     "deviation": 876.5,
+     "proposed_severity": "high"
+    }
+   },
+   {
+    "event_id": "01a1a772-63bf-7f7e-a010-f01cc6c5eaf4",
+    "type": "AnomalyDetected",
+    "sender": "detection",
+    "timestamp": "2026-11-04T16:44:14.143Z",
+    "payload": {
+     "type": "flood",
+     "target": {
+      "ip": "10.0.0.3",
+      "service": ""
+     },
+     "origins": [
+      {
+       "mac": "fa:16:3e:56:84:ae",
+       "switch": "of:0000ca272d265744",
+       "port": "1"
+      }
+     ],
+     "rates": {
+      "pps": 94506.04,
+      "bps": 80140370.73
+     },
+     "baseline": {
+      "mean": 21.55,
+      "sigma": 58.47
+     },
+     "deviation": 1615.88,
+     "proposed_severity": "high"
+    }
+   }
+  ],
+  "false_positives": 3,
+  "client_output": [
+   "http=0\n",
+   "120 packets transmitted, 120 received, 0% packet loss, time 59639ms\nrtt min/avg/max/mdev = 0.912/1.507/7.679/0.606 ms\n",
+   ""
+  ],
+  "pps_mean": 3393.7,
+  "pps_max": 119573.27,
+  "samples": 194
+ },
+ "resources": {
+  "samples": {
+   "controller": [
+    "1793810757.364136 {'org.apache.karaf': [8.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [59.0, 78]}",
+    "1793810758.3659658 {'org.apache.karaf': [9.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [60.0, 78]}",
+    "1793810759.367304 {'org.apache.karaf': [8.0, 874], 'beam.smp': [1.0, 125], 'run_services.py': [56.0, 78]}",
+    "1793810760.3687963 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [49.0, 78]}",
+    "1793810761.3702807 {'org.apache.karaf': [7.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [59.0, 78]}",
+    "1793810762.3715982 {'org.apache.karaf': [5.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [61.0, 78]}",
+    "1793810763.3731148 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [61.0, 78]}",
+    "1793810764.3745012 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [58.0, 78]}",
+    "1793810765.3759227 {'org.apache.karaf': [8.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [62.0, 78]}",
+    "1793810766.3768516 {'org.apache.karaf': [7.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [45.0, 78]}",
+    "1793810767.3781004 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [44.0, 78]}",
+    "1793810768.3795505 {'org.apache.karaf': [17.0, 874], 'beam.smp': [5.0, 125], 'run_services.py': [60.0, 78]}",
+    "1793810769.3808084 {'org.apache.karaf': [11.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [49.0, 78]}",
+    "1793810770.382088 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [55.0, 78]}",
+    "1793810771.3832855 {'org.apache.karaf': [8.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [64.0, 78]}",
+    "1793810772.3845954 {'org.apache.karaf': [7.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [50.0, 78]}",
+    "1793810773.385947 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [53.0, 78]}",
+    "1793810774.3872294 {'org.apache.karaf': [8.0, 874], 'beam.smp': [1.0, 125], 'run_services.py': [68.0, 78]}",
+    "1793810775.3886807 {'org.apache.karaf': [7.0, 874], 'beam.smp': [5.0, 125], 'run_services.py': [54.0, 79]}",
+    "1793810776.389975 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [59.0, 80]}",
+    "1793810777.391218 {'org.apache.karaf': [6.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [58.0, 80]}",
+    "1793810778.3924794 {'org.apache.karaf': [9.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [43.0, 80]}",
+    "1793810779.393771 {'org.apache.karaf': [7.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [59.0, 81]}",
+    "1793810780.39514 {'org.apache.karaf': [8.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [61.0, 82]}",
+    "1793810781.3965683 {'org.apache.karaf': [8.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [46.0, 82]}",
+    "1793810782.3979983 {'org.apache.karaf': [13.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [61.0, 82]}",
+    "1793810783.3994536 {'org.apache.karaf': [13.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [60.0, 82]}",
+    "1793810784.400845 {'org.apache.karaf': [6.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [63.0, 82]}",
+    "1793810785.402308 {'org.apache.karaf': [8.0, 874], 'beam.smp': [2.0, 125], 'run_services.py': [59.0, 82]}",
+    "1793810786.4036806 {'org.apache.karaf': [8.0, 874], 'beam.smp': [3.0, 125], 'run_services.py': [60.0, 82]}"
+   ],
+   "sw2": [
+    "1793810758.3476717 {'ovs-vswitchd': [0.0, 41]}",
+    "1793810759.3487122 {'ovs-vswitchd': [1.0, 41]}",
+    "1793810760.3496726 {'ovs-vswitchd': [1.0, 41]}",
+    "1793810761.3506851 {'ovs-vswitchd': [0.0, 41]}",
+    "1793810762.351666 {'ovs-vswitchd': [1.0, 41]}",
+    "1793810763.3524623 {'ovs-vswitchd': [1.0, 41]}",
+    "1793810764.353214 {'ovs-vswitchd': [0.0, 41]}",
+    "1793810765.3592112 {'ovs-vswitchd': [5.0, 41]}",
+    "1793810766.3616924 {'ovs-vswitchd': [7.0, 42]}",
+    "1793810767.3649397 {'ovs-vswitchd': [3.0, 42]}",
+    "1793810768.3679824 {'ovs-vswitchd': [4.0, 42]}",
+    "1793810769.3689435 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810770.3695316 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810771.3701484 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810772.370792 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810773.371517 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810774.3722534 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810775.3729062 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810776.373604 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810777.3743093 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810778.3749254 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810779.375557 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810780.3762438 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810781.3770728 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810782.3777788 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810783.3785183 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810784.3792562 {'ovs-vswitchd': [1.0, 42]}",
+    "1793810785.3800669 {'ovs-vswitchd': [0.0, 42]}",
+    "1793810786.3809872 {'ovs-vswitchd': [2.0, 42]}",
+    "1793810787.3818212 {'ovs-vswitchd': [0.0, 42]}"
+   ],
+   "sw3": [
+    "1793810758.2173564 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810759.2185445 {'ovs-vswitchd': [2.0, 53]}",
+    "1793810760.2196956 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810761.22071 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810762.2217047 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810763.222508 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810764.2233214 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810765.2241805 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810766.2257535 {'ovs-vswitchd': [9.0, 53]}",
+    "1793810767.2268746 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810768.2320828 {'ovs-vswitchd': [4.0, 53]}",
+    "1793810769.2460773 {'ovs-vswitchd': [3.0, 53]}",
+    "1793810770.2470298 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810771.2477634 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810772.2485292 {'ovs-vswitchd': [2.0, 53]}",
+    "1793810773.2493029 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810774.2500544 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810775.2508185 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810776.2515397 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810777.2522612 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810778.2530043 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810779.2537384 {'ovs-vswitchd': [2.0, 53]}",
+    "1793810780.2549524 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810781.2560415 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810782.2569087 {'ovs-vswitchd': [1.0, 53]}",
+    "1793810783.2580683 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810784.2589653 {'ovs-vswitchd': [2.0, 53]}",
+    "1793810785.2600117 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810786.260875 {'ovs-vswitchd': [0.0, 53]}",
+    "1793810787.261573 {'ovs-vswitchd': [1.0, 53]}"
+   ]
+  },
+  "flows_per_switch": {
+   "sw1": 10,
+   "sw2": 12,
+   "sw3": 11
+  }
+ }
+}

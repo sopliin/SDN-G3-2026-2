@@ -1,0 +1,474 @@
+{
+ "latency": {
+  "verify_ms": {
+   "n": 200,
+   "mean": 29.65,
+   "p50": 28.4,
+   "p95": 41.36,
+   "p99": 88.18,
+   "min": 20.61,
+   "max": 103.17
+  },
+  "errors": 0,
+  "login_to_dataplane": [
+   {
+    "login_ms": 107.4,
+    "request_to_first_reply_ms": 114.0
+   },
+   {
+    "login_ms": 128.4,
+    "request_to_first_reply_ms": 127.8
+   },
+   {
+    "login_ms": 121.3,
+    "request_to_first_reply_ms": 121.0
+   },
+   {
+    "login_ms": 146.4,
+    "request_to_first_reply_ms": 148.8
+   },
+   {
+    "login_ms": 84.5,
+    "request_to_first_reply_ms": 86.6
+   },
+   {
+    "login_ms": 111.6,
+    "request_to_first_reply_ms": 122.3
+   },
+   {
+    "login_ms": 93.4,
+    "request_to_first_reply_ms": 98.5
+   },
+   {
+    "login_ms": 104.1,
+    "request_to_first_reply_ms": 106.7
+   },
+   {
+    "login_ms": 134.0,
+    "request_to_first_reply_ms": 148.6
+   },
+   {
+    "login_ms": 337.5,
+    "request_to_first_reply_ms": 337.2
+   }
+  ],
+  "login_to_dataplane_ms": {
+   "n": 10,
+   "mean": 141.15,
+   "p50": 122.3,
+   "p95": 337.2,
+   "p99": 337.2,
+   "min": 86.6,
+   "max": 337.2
+  }
+ },
+ "block": {
+  "identity": {
+   "contraseña incorrecta": {
+    "attempts": 40,
+    "rejected": 40
+   },
+   "usuario inexistente": {
+    "attempts": 20,
+    "rejected": 20
+   },
+   "contraseña vacía": {
+    "attempts": 10,
+    "rejected": 10
+   },
+   "operador inexistente": {
+    "attempts": 10,
+    "rejected": 10
+   },
+   "operador TOTP incorrecto": {
+    "attempts": 10,
+    "rejected": 10
+   },
+   "invitado inexistente": {
+    "attempts": 10,
+    "rejected": 10
+   },
+   "operador sin TOTP (solo 1er paso)": {
+    "attempts": 10,
+    "rejected": 10
+   }
+  },
+  "identity_block_rate": 100.0,
+  "dataplane": {
+   "h2→h1 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h1 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h1 udp": {
+    "sent": 200,
+    "delivered": 199
+   },
+   "h2→h3 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h3 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h3 udp": {
+    "sent": 200,
+    "delivered": 199
+   },
+   "h2→h4 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h4 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h4 udp": {
+    "sent": 200,
+    "delivered": 199
+   }
+  },
+  "dataplane_block_rate": 66.83
+ },
+ "concurrency": [
+  {
+   "threads": 1,
+   "requests": 350,
+   "ok": 350,
+   "errors": 0,
+   "logins_per_s": 35.0,
+   "latency_ms": {
+    "n": 350,
+    "mean": 28.44,
+    "p50": 23.62,
+    "p95": 51.3,
+    "p99": 74.23,
+    "min": 16.17,
+    "max": 131.83
+   }
+  },
+  {
+   "threads": 5,
+   "requests": 797,
+   "ok": 794,
+   "errors": 3,
+   "logins_per_s": 79.4,
+   "latency_ms": {
+    "n": 794,
+    "mean": 59.08,
+    "p50": 54.0,
+    "p95": 101.93,
+    "p99": 186.15,
+    "min": 22.72,
+    "max": 385.25
+   }
+  },
+  {
+   "threads": 10,
+   "requests": 1172,
+   "ok": 1165,
+   "errors": 7,
+   "logins_per_s": 116.5,
+   "latency_ms": {
+    "n": 1165,
+    "mean": 79.47,
+    "p50": 68.31,
+    "p95": 148.15,
+    "p99": 281.56,
+    "min": 25.51,
+    "max": 618.0
+   }
+  },
+  {
+   "threads": 20,
+   "requests": 1383,
+   "ok": 1368,
+   "errors": 15,
+   "logins_per_s": 136.8,
+   "latency_ms": {
+    "n": 1368,
+    "mean": 134.85,
+    "p50": 120.62,
+    "p95": 206.19,
+    "p99": 824.09,
+    "min": 29.82,
+    "max": 970.32
+   }
+  },
+  {
+   "threads": 40,
+   "requests": 1391,
+   "ok": 1389,
+   "errors": 2,
+   "logins_per_s": 138.9,
+   "latency_ms": {
+    "n": 1389,
+    "mean": 285.55,
+    "p50": 247.52,
+    "p95": 384.81,
+    "p99": 1509.11,
+    "min": 75.57,
+    "max": 1655.64
+   }
+  }
+ ],
+ "granularity": {
+  "roles": [
+   "academic",
+   "it_specialist",
+   "network_admin",
+   "super_admin"
+  ],
+  "profiles": [
+   "base",
+   "academic",
+   "it_operator",
+   "admin_operator",
+   "sa_operator",
+   "elevation"
+  ],
+  "permissions": 37,
+  "conditions": 11,
+  "assignments": 78,
+  "resource_types": 57,
+  "delegations": 1
+ },
+ "precision": {
+  "tests": [
+   {
+    "source": "h1",
+    "target": "h4",
+    "proto": "icmp",
+    "expect": "blocked",
+    "sent": 100,
+    "delivered": 0
+   },
+   {
+    "source": "h1",
+    "target": "h4",
+    "proto": "tcp-22",
+    "expect": "blocked",
+    "sent": 100,
+    "delivered": 0
+   },
+   {
+    "source": "h1",
+    "target": "h4",
+    "proto": "tcp-80",
+    "expect": "blocked",
+    "sent": 100,
+    "delivered": 0
+   },
+   {
+    "source": "h1",
+    "target": "h4",
+    "proto": "tcp-443",
+    "expect": "blocked",
+    "sent": 100,
+    "delivered": 0
+   },
+   {
+    "source": "h1",
+    "target": "h4",
+    "proto": "udp-161",
+    "expect": "blocked",
+    "sent": 100,
+    "delivered": 0
+   },
+   {
+    "source": "h1",
+    "target": "h3",
+    "proto": "icmp",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h1",
+    "target": "h3",
+    "proto": "tcp-22",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 100
+   },
+   {
+    "source": "h1",
+    "target": "h3",
+    "proto": "tcp-80",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h1",
+    "target": "h3",
+    "proto": "tcp-443",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h1",
+    "target": "h3",
+    "proto": "udp-161",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h2",
+    "target": "h4",
+    "proto": "icmp",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h2",
+    "target": "h4",
+    "proto": "tcp-22",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 100
+   },
+   {
+    "source": "h2",
+    "target": "h4",
+    "proto": "tcp-80",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 100
+   },
+   {
+    "source": "h2",
+    "target": "h4",
+    "proto": "tcp-443",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   },
+   {
+    "source": "h2",
+    "target": "h4",
+    "proto": "udp-161",
+    "expect": "allowed",
+    "sent": 100,
+    "delivered": 99
+   }
+  ],
+  "restriction_precision": 100.0,
+  "authorized_delivery": 99.3
+ },
+ "api": {
+  "sin sesión → Políticas PUT /profiles (P17)": 401,
+  "sin sesión → Políticas PUT /thresholds (P33)": 401,
+  "sin sesión → IAM GET /operators": 401,
+  "sin sesión → IAM POST /operators (P24)": 401,
+  "académico → Políticas PUT /profiles (P17)": 403,
+  "académico → Políticas PUT /thresholds (P33)": 403,
+  "académico → IAM GET /operators": 403,
+  "académico → IAM POST /operators (P24)": 403,
+  "network_admin → Políticas PUT /profiles (P17)": 200,
+  "network_admin → Políticas PUT /thresholds (P33)": 200,
+  "network_admin → IAM GET /operators": 200,
+  "network_admin → IAM POST /operators (P24)": 403
+ },
+ "sessions": [
+  {
+   "sessions": 50,
+   "install_ms": {
+    "n": 50,
+    "mean": 9.38,
+    "p50": 7.57,
+    "p95": 20.37,
+    "p99": 55.79,
+    "min": 5.49,
+    "max": 55.79
+   },
+   "orders_per_s": 49.1,
+   "sw2_flows_before": 11,
+   "sw2_flows_after": 61,
+   "sw2_added": 61,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=1047645 byte_count=86899398 flow_count=61",
+   "ovs_rss_mb": [
+    43,
+    43
+   ],
+   "onos_rss_mb": 882,
+   "removed": 50
+  },
+  {
+   "sessions": 100,
+   "install_ms": {
+    "n": 100,
+    "mean": 7.88,
+    "p50": 7.12,
+    "p95": 11.75,
+    "p99": 56.82,
+    "min": 4.77,
+    "max": 56.82
+   },
+   "orders_per_s": 78.3,
+   "sw2_flows_before": 11,
+   "sw2_flows_after": 111,
+   "sw2_added": 50,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=1047649 byte_count=86899942 flow_count=111",
+   "ovs_rss_mb": [
+    43,
+    43
+   ],
+   "onos_rss_mb": 882,
+   "removed": 100
+  },
+  {
+   "sessions": 200,
+   "install_ms": {
+    "n": 200,
+    "mean": 7.98,
+    "p50": 6.44,
+    "p95": 12.18,
+    "p99": 57.73,
+    "min": 4.34,
+    "max": 72.72
+   },
+   "orders_per_s": 95.3,
+   "sw2_flows_before": 11,
+   "sw2_flows_after": 211,
+   "sw2_added": 11,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=1047654 byte_count=86900622 flow_count=211",
+   "ovs_rss_mb": [
+    43,
+    43
+   ],
+   "onos_rss_mb": 884,
+   "removed": 200
+  },
+  {
+   "sessions": 500,
+   "install_ms": {
+    "n": 500,
+    "mean": 7.58,
+    "p50": 6.15,
+    "p95": 12.81,
+    "p99": 26.01,
+    "min": 4.63,
+    "max": 70.61
+   },
+   "orders_per_s": 115.4,
+   "sw2_flows_before": 11,
+   "sw2_flows_after": 511,
+   "sw2_added": 11,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=1047659 byte_count=86901302 flow_count=511",
+   "ovs_rss_mb": [
+    43,
+    43
+   ],
+   "onos_rss_mb": 898,
+   "removed": 500
+  }
+ ]
+}

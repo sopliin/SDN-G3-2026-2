@@ -1,0 +1,55 @@
+(durante el ataque, h1 → h3)
+$ sudo ovs-ofctl -O OpenFlow13 dump-flows sw2 | grep priority=1000
+ duration=4.258s, n_packets=360972, n_bytes=38263032, send_flow_rem priority=1000,ip,in_port=2,dl_src=fa:16:3e:1d:96:70,nw_dst=10.0.0.3 actions=meter:17,NORMAL
+
+OFPST_METER reply (OF1.3) (xid=0x2):
+meter:8 flow_count:0 packet_in_count:747582 byte_in_count:79243692 duration:1498.620s bands:
+0: packet_count:745339 byte_count:79005934
+
+meter:10 flow_count:0 packet_in_count:1125016 byte_in_count:119251696 duration:1385.613s bands:
+0: packet_count:1122751 byte_count:119011606
+
+meter:14 flow_count:0 packet_in_count:664389 byte_in_count:825171138 duration:1158.531s bands:
+0: packet_count:662310 byte_count:822589020
+
+meter:17 flow_count:1 packet_in_count:374260 byte_in_count:39671560 duration:4.268s bands:
+0: packet_count:373208 byte_count:39560048
+
+meter:11 flow_count:0 packet_in_count:42083 byte_in_count:4460798 duration:1347.534s bands:
+0: packet_count:39937 byte_count:4233322
+
+meter:13 flow_count:0 packet_in_count:1001754 byte_in_count:106185924 duration:1234.575s bands:
+0: packet_count:999688 byte_count:105966928
+
+meter:16 flow_count:0 packet_in_count:1788 byte_in_count:22689764 duration:598.399s bands:
+0: packet_count:395 byte_count:5825310
+
+meter:5 flow_count:0 packet_in_count:630583 byte_in_count:66841798 duration:2232.786s bands:
+0: packet_count:628646 byte_count:66636476
+
+meter:9 flow_count:0 packet_in_count:1151163 byte_in_count:69069780 duration:1459.596s bands:
+0: packet_count:1149030 byte_count:68941800
+
+meter:12 flow_count:0 packet_in_count:15664 byte_in_count:1660384 duration:1271.493s bands:
+0: packet_count:13629 byte_count:1444674
+
+meter:15 flow_count:0 packet_in_count:950662 byte_in_count:100770172 duration:897.455s bands:
+0: packet_count:948156 byte_count:100504536
+
+meter:7 flow_count:0 packet_in_count:827808 byte_in_count:87747648 duration:2043.733s bands:
+0: packet_count:825304 byte_count:87482224
+
+meter:6 flow_count:0 packet_in_count:1129329 byte_in_count:67759740 duration:2195.772s bands:
+0: packet_count:1127330 byte_count:67639800
+
+meter:4 flow_count:0 packet_in_count:1005665 byte_in_count:106600490 duration:2357.852s bands:
+0: packet_count:1003281 byte_count:106347786
+
+meter:1 flow_count:0 packet_in_count:536188 byte_in_count:56835928 duration:2796.246s bands:
+0: packet_count:534469 byte_count:56653714
+
+meter:2 flow_count:0 packet_in_count:591601 byte_in_count:62709706 duration:2547.887s bands:
+0: packet_count:589587 byte_count:62496222
+
+meter:3 flow_count:0 packet_in_count:1108560 byte_in_count:66513600 duration:2510.894s bands:
+0: packet_count:1106465 byte_count:66387900

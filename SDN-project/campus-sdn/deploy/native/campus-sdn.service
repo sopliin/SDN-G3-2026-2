@@ -1,0 +1,18 @@
+[Unit]
+Description=campus-sdn: servicios propios en un proceso (corte nativo)
+After=network-online.target rabbitmq-server.service freeradius.service slapd.service docker.service
+Wants=rabbitmq-server.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/campus-sdn
+EnvironmentFile=/etc/campus-sdn/env
+EnvironmentFile=-/etc/campus-sdn/services.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/bin/bash -c 'export BUS_URL="amqp://$RABBITMQ_USER:$RABBITMQ_PASSWORD@127.0.0.1:5672"; exec /opt/campus-sdn/.venv/bin/python deploy/native/run_services.py'
+Restart=on-failure
+RestartSec=5
+MemoryMax=400M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+CLAUDE.md
+.claude/
+*.pptx
+*.png
+
+# PDF externos a SDN-project/ (sílabo, enunciado, exportaciones)
+/*.[pP][dD][fF]
+
+# Secretos y configuración real del slice (por si se copian aquí)
+.env
+*.env
+!*.env.example
+deploy/env/.env
+**/inventory/slice.yml
+**/vault/
+*.pem
+*.key
+
+# Python y herramientas
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Sistema
+.DS_Store
+._*

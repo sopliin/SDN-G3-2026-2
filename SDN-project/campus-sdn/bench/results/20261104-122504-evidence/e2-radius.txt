@@ -1,0 +1,7 @@
+$ radclient 127.0.0.1 auth (USR-0001 / contraseña correcta)
+Sent Access-Request Id 6 from 0.0.0.0:47890 to 127.0.0.1:1812 length 66
+Received Access-Accept Id 6 from 127.0.0.1:1812 to 127.0.0.1:47890 length 38
+
+$ radclient 127.0.0.1 auth (USR-0001 / contraseña incorrecta)
+Sent Access-Request Id 187 from 0.0.0.0:55586 to 127.0.0.1:1812 length 66
+Received Access-Reject Id 187 from 127.0.0.1:1812 to 127.0.0.1:55586 length 38

@@ -1,0 +1,7 @@
+inicio del ataque (reloj de h1): 2026-11-04T17:25:19.735Z
+$ curl ':8007/events?since=…'  (cadena R4)
+2026-11-04T17:25:21.797Z  detection          AnomalyDetected     pps=83629 origen=['fa:16:3e:1d:96:70'] desv=1388.7σ
+2026-11-04T17:25:21.809Z  incidents          IncidentOpened      INC-0014 severidad=high
+2026-11-04T17:25:21.819Z  policies           MitigationRequired  RATE_LIMIT rate=200 pps ttl=20 s
+2026-11-04T17:25:21.917Z  controller_adapter MitigationApplied   reglas=1 switch=['of:00001a749039894a']
+2026-11-04T17:25:26.872Z  monitor            MitigationVerified  antes=83629 pps después=201 pps cumple=True

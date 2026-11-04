@@ -1,0 +1,10 @@
+h1 (académico) $ ping -c 5 10.0.0.4   # h4 privilegiado
+5 packets transmitted, 0 received, 100% packet loss, time 4113ms
+
+
+h1 (académico) $ ping -c 5 10.0.0.3   # h3 general
+5 packets transmitted, 5 received, 0% packet loss, time 4052ms
+rtt min/avg/max/mdev = 0.901/2.005/5.283/1.647 ms
+
+$ curl -X POST :8001/operators -d '{username:ATK, role:network_admin}'   # sin sesión
+{"detail":"session required"} HTTP 401

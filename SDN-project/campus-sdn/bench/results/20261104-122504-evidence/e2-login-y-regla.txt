@@ -1,0 +1,9 @@
+$ curl -X POST 192.168.0.10:8001/verify -d '{population:university, username:USR-0001, password:***, device:FA:16:3E:1D:96:70}'
+{"session": "04dfafd3-50bb-4f1b-b774-8059e4e92c8a", "profile_or_role": "academic", "device": "FA:16:3E:1D:96:70", "network": {"status": "applied", "rules": ["of:00001a749039894a:200:72057594037928484"]}}
+
+$ sudo ovs-ofctl -O OpenFlow13 dump-flows sw2   (escalera)
+ duration=1.119s, n_packets=0, n_bytes=0, send_flow_rem priority=200,ip,in_port=2,dl_src=fa:16:3e:1d:96:70,nw_dst=10.0.0.3 actions=NORMAL
+ duration=75.688s, n_packets=0, n_bytes=0, send_flow_rem priority=150,ip,nw_dst=192.168.0.10 actions=NORMAL
+ duration=75.685s, n_packets=0, n_bytes=0, send_flow_rem priority=150,ip,nw_src=192.168.0.10 actions=NORMAL
+ duration=75.678s, n_packets=0, n_bytes=0, send_flow_rem priority=100,ip,nw_dst=192.168.0.0/24 actions=drop
+ duration=75.675s, n_packets=915001, n_bytes=69003074, send_flow_rem priority=60,in_port=1 actions=NORMAL

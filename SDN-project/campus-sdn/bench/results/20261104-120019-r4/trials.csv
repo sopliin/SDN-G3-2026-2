@@ -1,0 +1,12 @@
+index,attacker,kind,nominal_pps,peak_pps,detected,detection_s,decision_ms,apply_ms,effect_s,start_to_mitigated_s,action,severity,attribution_ok,probe_loss,recovery_after_apply_s
+1,"h1","udp-flood","max",48029.9,true,1.638,22.0,108.0,1.827,3.595,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17815ms",33.5
+2,"h2","syn-flood","max",90820.82,true,2.227,6.0,101.0,1.804,4.139,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17820ms",31.8
+3,"h4","udp-flood","max",126542.15,true,2.146,8.0,125.0,1.793,4.072,"RATE_LIMIT","high",true,"90 packets transmitted, 90 received, 0% packet loss, time 17872ms",32.6
+4,"h1","icmp-flood","max",46335.73,true,1.564,8.0,92.0,1.835,3.499,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17827ms",32.8
+5,"h2","udp-5k","5000",4483.43,true,2.11,5.0,152.0,1.757,4.025,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17862ms",33.0
+6,"h4","syn-flood","max",74150.89,true,2.18,9.0,118.0,1.791,4.098,"RATE_LIMIT","high",true,"90 packets transmitted, 90 received, 0% packet loss, time 17870ms",32.6
+7,"h1","udp-2k","2000",1718.73,true,2.683,12.0,125.0,1.749,4.569,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17846ms",31.0
+8,"h2","icmp-flood","max",93732.99,true,2.441,5.0,92.0,1.863,4.401,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17855ms",32.5
+9,"h4","udp-5k","5000",4506.28,true,2.343,9.0,132.0,1.793,4.277,"RATE_LIMIT","high",true,"90 packets transmitted, 90 received, 0% packet loss, time 17884ms",32.8
+10,"h1","udp-flood-1200B","max",63092.23,true,2.46,9.0,136.0,1.793,4.398,"RATE_LIMIT","high",true,"87 packets transmitted, 87 received, 0% packet loss, time 17858ms",31.9
+11,"h2","udp-500 (bajo umbral)","500",484.92,false,null,null,null,null,null,null,null,false,"87 packets transmitted, 87 received, 0% packet loss, time 17872ms",null

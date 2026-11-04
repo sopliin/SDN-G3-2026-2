@@ -1,0 +1,53 @@
+{
+ "dataplane": {
+  "h2→h1 icmp": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h1 tcp-syn": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h1 udp-53": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h1 udp-9999": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h3 icmp": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h3 tcp-syn": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h3 udp-53": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h3 udp-9999": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h4 icmp": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h4 tcp-syn": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h4 udp-53": {
+   "sent": 200,
+   "delivered": 0
+  },
+  "h2→h4 udp-9999": {
+   "sent": 200,
+   "delivered": 0
+  }
+ },
+ "dataplane_block_rate": 100.0
+}
