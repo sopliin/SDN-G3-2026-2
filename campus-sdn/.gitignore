@@ -19,3 +19,6 @@ __pycache__/
 # Ansible
 *.retry
 *.egg-info/
+
+# Entregables del curso: se mantienen locales, no se publican en GitHub.
+docs/informe-previo/

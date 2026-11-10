@@ -63,13 +63,16 @@ Lo esperado (además de los punteos ARP/LLDP de ONOS a prioridad 40000):
 
 | Prioridad | Entrada | Match | Acción | Qué garantiza |
 |---|---|---|---|---|
-| 150 | al Portal | `ip,nw_dst=192.168.0.10` | NORMAL | el único destino fuera del plano de datos |
-| 150 | del Portal | `ip,nw_src=192.168.0.10` | NORMAL | la respuesta del Portal vuelve |
+| 150 | al Portal | `ip,nw_dst=<portal>` | NORMAL | el único destino fuera del plano de datos |
+| 150 | del Portal | `ip,nw_src=<portal>` | NORMAL | la respuesta del Portal vuelve |
 | 100 | denegación a gestión | `ip,nw_dst=192.168.0.0/24` | drop | la gestión jamás se abre desde datos (salvo el Portal) |
-| 10 | DHCP | `udp,tp_dst=67` | NORMAL | el dispositivo obtiene dirección |
-| 10 | DNS | `udp,tp_dst=53` | NORMAL | resuelve nombres sin sesión |
+| 60 | confianza | troncales LLDP y servidores declarados | NORMAL | la política se aplica en el borde: lo que llega por un troncal ya pasó la regla de ingreso de su switch |
+| 10 | DHCP | `udp 67` **hacia su servidor** (`SKELETON_DHCP`) | NORMAL | el dispositivo obtiene dirección — solo del servidor declarado |
+| 10 | DNS | `udp 53` **hacia su servidor** (`SKELETON_DNS`) | NORMAL | resuelve nombres — solo del servidor declarado |
 
-Criterio: las 5 entradas presentes en los 3 switches, con los contadores a cero antes de la prueba.
+Sin `SKELETON_DHCP`/`SKELETON_DNS` definidos, esas entradas no se abren (el script lo avisa). Medido en el slice: con «UDP 53 a cualquier destino», un host sin sesión entregaba 199 de 200 paquetes a otro host por el puerto 53 — por eso el destino es el servidor declarado, no cualquiera.
+
+Criterio: las entradas presentes en los 3 switches (con su aviso si falta algún servidor), con los contadores a cero antes de la prueba.
 
 ## 5. Probar el perfil base
 
@@ -94,17 +97,16 @@ Criterio: las 5 entradas presentes en los 3 switches, con los contadores a cero 
 
 3. **El Portal**: en este slice, desde el plano de datos el Portal **no es alcanzable** (limitación de la VNRT, [`00-inventario`](00-inventario-del-slice-actual.md) §7). Se verifica entonces lo que sí se puede: la entrada 150 existe en los tres switches y el resto de la subred de gestión sigue cubierto por la 100. El alcance en banda del Portal se demuestra con el slice real.
 
-4. **DHCP y DNS — dónde se ven.** En este slice los hosts traen IP estática y **no hay servidores de DHCP ni DNS en el plano de datos** (llegan con el despliegue completo); las entradas 10 existen y se prueban por sus contadores. Desde h1, una consulta DNS a cualquier destino:
+4. **DHCP y DNS — dónde se ven.** Las entradas 10 se abren **solo hacia el servidor declarado** (`SKELETON_DHCP`, `SKELETON_DNS`): sin servidor en el plano de datos (en este slice no hay), el script las omite con un aviso. Con el slice real, se declara el servidor y se prueban por sus contadores:
 
    ```bash
-   dig @10.0.0.2 +time=1 +tries=1 10.0.0.1     # expira: no hay servidor DNS
+   dig @<servidor-dns> +time=1 +tries=1 10.0.0.1   # consulta real
    sudo ovs-ofctl -O OpenFlow13 dump-flows sw2 | grep 'tp_dst=53'
-   # n_packets=1, n_bytes=91 — la entrada DNS dejó pasar la consulta
-   # (el paquete murió en el destino porque no hay quien responda;
-   # la entrada actuó, que es lo que se verifica)
+   # n_packets>0 — la entrada dejó pasar la consulta hacia su servidor;
+   # a cualquier OTRO destino por el 53 no hay regla (sin sesión, cae)
    ```
 
-   DHCP: la entrada `tp_dst=67` queda a cero — sin servidor no hay tráfico DHCP. Con el slice real, un `dhclient` en el host sube ese contador y la IP asignada aparece en el host.
+   DHCP: igual — `dhclient` en un host sube el contador de la entrada 67 y la IP asignada aparece en el host.
 
 5. **Los contadores cuentan la historia**: tras las pruebas, en sw2:
 

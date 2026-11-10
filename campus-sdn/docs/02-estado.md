@@ -54,6 +54,7 @@
 | R4 de punta a punta con tráfico real: Monitor con contadores de puerto y de reglas por I2 (tasa por destino y atribución de orígenes), Detección con piso, ventanas consecutivas y supresión, meter/DROP por origen; `origins` opcional en `MetricSample` e `IncidentOpened`; marcas de tiempo en ms | [`../services/`](../services/), [`../contracts/events/`](../contracts/events/), [`../bench/`](../bench/) | 2026-11-04 |
 | Campañas R1/R2/R4 medidas en el slice (`bench/results/`): R1 29,7 ms y 100 % de bloqueo; R2 100 % de precisión; R4 10/10 detectados, 2,18 s de detección, 0 falsos positivos. DNS/DHCP del esqueleto restringidos a su servidor (antes, UDP/53 sin sesión llegaba a cualquier host) | [`../bench/`](../bench/), [`pruebas/05-corte-nativo-y-r4.md`](pruebas/05-corte-nativo-y-r4.md) | 2026-11-04 |
 | CPU de la plataforma en reposo de 52,8 % a 4,7 % de un núcleo (medido): cliente HTTP compartido, validadores de esquema compilados una vez y conexión AMQP por hilo | [`../services/common/`](../services/common/) | 2026-11-04 |
+| Consumo de recursos medido (slice en reposo + laptop): cada servicio propio ~40–53 MiB y ~0.2 % de CPU; módulos S1–S4 con sus agregados; ONOS 602 MiB (el 60 % del controlador); OVS ~42 MiB por switch; documento en `mediciones/` | [`mediciones/01-consumo-de-recursos.md`](mediciones/01-consumo-de-recursos.md) | 2026-11-05 |
 | VLAN canónica: 10 Usuarios, 20 Servidores, 30 Frontera, 100 Gestión | corpus | cerrado |
 
 ## 2. Pendientes

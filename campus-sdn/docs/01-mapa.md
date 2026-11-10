@@ -31,6 +31,7 @@ campus-sdn/
 ├── README.md                    # puerta de entrada: objetivos make, reglas y enlaces
 ├── Makefile                     # única puerta de operación: cada tarea es un objetivo
 ├── .gitignore                   # qué no se versiona: bundles, .env, slice.yml, vault
+├── bench/                       # campañas de medición R1/R2/R4 contra el slice y sus resultados
 │
 ├── contracts/                   # las promesas formales entre servicios, validables por máquina
 │   ├── api/
@@ -68,7 +69,12 @@ campus-sdn/
 │   │   ├── s4-governance.yml    # RabbitMQ, el bus de eventos
 │   │   └── minimal-slice.yml    # corte mínimo para el slice actual (bus, IAM, portal, registro, adaptador)
 │   ├── scripts/
-│   │   └── install_skeleton.py  # esqueleto BASE por la API REST de ONOS (los flujos ajenos los purga)
+│   │   └── install_skeleton.py  # esqueleto BASE + confianza 60 por la API REST de ONOS
+│   ├── native/                  # corte nativo (slice sin disco/RAM para imágenes propias)
+│   │   ├── install_controller.sh  # venv + servicios como systemd en el controller
+│   │   ├── run_services.py        # arranca los servicios propios sin Docker
+│   │   ├── campus-sdn.service     # unidad systemd del corte
+│   │   └── services.env.example   # plantilla del entorno (se copia a /etc/campus-sdn/)
 │   ├── radius/                  # el IdP simulado de la comunidad (F-03 §2): FreeRADIUS → OpenLDAP
 │   │   ├── clients.conf.tpl     # plantilla de clientes (la imagen no los genera por entorno)
 │   │   ├── mods-ldap.tpl        # plantilla del módulo LDAP (secreto del .env al desplegar)
@@ -90,12 +96,15 @@ campus-sdn/
 │   ├── 02-estado.md             # avances y pendientes, actualizado en cada cierre
 │   ├── 03-formatos.md           # tutorial: leer YAML, JSON, OpenAPI y Compose
 │   ├── adr/                     # decisiones de código; se llena al decidir
+│   ├── mediciones/              # cifras medidas: recursos, latencias, llenado (se llena al medir)
+│   │   └── 01-consumo-de-recursos.md       # CPU/RAM/disco por servicio, módulo, controlador y switch
 │   ├── pruebas/                 # manuales de prueba sobre el slice actual (se ejecutan en orden)
 │   │   ├── 00-inventario-del-slice-actual.md  # cada VM, interfaz, enlace, ruta y hallazgo verificado
 │   │   ├── 01-perfil-base.md                  # cómo verificar que el esqueleto BASE funciona
 │   │   ├── 02-lista-de-verificacion.md        # los 37 permisos, qué se verificó y qué falta
 │   │   ├── 03-el-controlador-sus-tareas.md    # descubrimiento, topología, rutas y adaptividad de ONOS
-│   │   └── 04-autenticacion-y-autorizacion.md # los tres reinos reales, TOTP en dos pasos, sesión y flujos
+│   │   ├── 04-autenticacion-y-autorizacion.md # los tres reinos reales, TOTP en dos pasos, sesión y flujos
+│   │   └── 05-corte-nativo-y-r4.md            # corte nativo en el slice del grupo y campañas de medición
 │   └── runbooks/                # procedimientos operativos; se llenan al operar
 │
 ├── policy/                      # la política de autorización: quién puede qué

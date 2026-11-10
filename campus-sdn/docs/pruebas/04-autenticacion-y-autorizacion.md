@@ -151,7 +151,7 @@ curl -s -X POST …/verify -d '{"population":"university","username":"USR-0001",
 #    "network":{"status":"applied","rules":["of:00001a749039894a:200:…","…"]}}
 ```
 
-- **Reglas en sw2** (el switch de h1): `dump-flows sw2 | grep priority=200` — ida con el alcance del académico (`nw_dst=10.0.0.0/24`) y vuelta.
+- **Reglas en sw2** (el switch de h1): `dump-flows sw2 | grep priority=200` — una regla de **ida por alcance del perfil** (`nw_dst=10.0.0.0/24`). No hay regla de «vuelta» por MAC de destino: abriría el dispositivo a cualquier vecino del mismo switch sin sesión (verificado en el slice); las respuestas legítimas entran por la confianza 60 del esqueleto (troncales y servidores declarados) o por la sesión del otro extremo.
 - **Una sola sesión por dispositivo**: un segundo login con la misma MAC cierra la sesión anterior (`reason: replaced`, sus reglas se retiran) antes de emitir la nueva — la red admite al usuario, no duplica su presencia. Verificado: la primera sesión responde 404.
 - **El Registry** queda con la asociación (`owner`, `role`) — es la observabilidad de «quién entró desde qué dispositivo», no concede confianza por sí misma.
 - **Cierre y expiración**: `POST /logout` retira las reglas por la orden que las instaló (selectores exactos; ONOS reemplaza las cookies, verificado en el slice). Si la sesión expira (tope o idle), las reglas mueren solas en el switch (`hard_timeout`/`idle_timeout`) y el barrido del IAM cierra la sesión con `SessionClosed` (`reason: hard-timeout`).
