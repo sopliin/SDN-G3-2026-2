@@ -1,48 +1,80 @@
-# Plantilla de inventario del slice.
-# Copiar a slice.yml (ignorado por git) y completar con las IPs reales de
-# gestión (ens3). Las credenciales nunca van aquí: Ansible Vault o
-# variables de entorno. Los nombres de NIC y puertos se ajustan en H0.
+# Plantilla de inventario del slice de 14 VMs.
+# Copiar a slice.yml (ignorado por git) y completar con los datos reales:
+# ansible_host/port del gateway (DNAT 58XX), las IP de gestión en
+# onos_cluster_ip y las IP de datos en las variables HA. Las credenciales
+# nunca van aquí: clave SSH distribuida y contraseña de sudo por
+# ANSIBLE_BECOME_PASS en tiempo de ejecución.
+#
+# Forma de la plataforma (informe previo §1.3): SRV-1 = ONOS-1, IdP
+# primario, bus, espejo y Redis; SRV-2/3 = módulos M1–M4 en activo-activo
+# con HAProxy/keepalived y la VIP 10.0.0.10. Las réplicas (PostgreSQL,
+# Sentinel, clúster RabbitMQ) llegan en la etapa de alta disponibilidad.
 all:
   hosts:
-    nc1:   {ansible_host: 192.168.0.101, install_docker: false, switch_ports: [ens4, ens5, ens6], switch_dpid: "0000000000000011"}
-    nc2:   {ansible_host: 192.168.0.102, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7, ens8], switch_dpid: "0000000000000012"}
-    a1:    {ansible_host: 192.168.0.103, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7, ens8], switch_dpid: "0000000000000021"}
-    a2:    {ansible_host: 192.168.0.104, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7, ens8], switch_dpid: "0000000000000022"}
-    onos1: {ansible_host: 192.168.0.111, images: [onos]}
-    onos2: {ansible_host: 192.168.0.112, images: [onos]}
-    onos3: {ansible_host: 192.168.0.113, images: [onos]}
-    s1:    {ansible_host: 192.168.0.121, images: [freeradius, openldap], compose_file: s1-identity.yml, health_endpoints: ["http://127.0.0.1:8080/health", "http://127.0.0.1:8001/health", "http://127.0.0.1:8002/health"]}
-    s2:    {ansible_host: 192.168.0.122, images: [prometheus, grafana, suricata], compose_file: s2-observability.yml, compose_extra_files: [prometheus.yml], health_endpoints: ["http://127.0.0.1:8003/health", "http://127.0.0.1:8004/health", "http://127.0.0.1:8009/health"]}
-    s3:    {ansible_host: 192.168.0.123, images: [postgres], compose_file: s3-response.yml, health_endpoints: ["http://127.0.0.1:8005/health", "http://127.0.0.1:8006/health", "http://127.0.0.1:8007/health"]}
-    s4:    {ansible_host: 192.168.0.124, images: [rabbitmq], compose_file: s4-governance.yml, install_dns: true, chrony_server: true, health_endpoints: ["http://127.0.0.1:8008/health"]}
-    h1:    {ansible_host: 192.168.0.131, install_docker: true}
-    h2:    {ansible_host: 192.168.0.132, install_docker: false}
-    h3:    {ansible_host: 192.168.0.133, install_docker: false}
+    # --- Servidores: ONOS x3 + plataforma ---
+    srv1: {ansible_host: 10.20.12.185, ansible_port: 5811, ansible_user: ubuntu, onos_cluster_ip: 192.168.0.11, install_docker: true,
+           atomix_node_id: atomix-1, atomix_address: "192.168.0.11:5679",
+           images: [onos, freeradius, openldap, rabbitmq, suricata, redis, atomix],
+           own_services: [sensor_adapter, controller_adapter],
+           compose_file: srv1-platform.yml, compose_extra_files: [idp.yml, rabbitmq.yml, mirror.yml, redis.yml, atomix.yml]}
+    srv2: {ansible_host: 10.20.12.185, ansible_port: 5812, ansible_user: ubuntu, onos_cluster_ip: 192.168.0.12, install_docker: true,
+           atomix_node_id: atomix-2, atomix_address: "192.168.0.12:5679",
+           images: [onos, freeradius, openldap, rabbitmq, suricata, prometheus, grafana, postgres, haproxy, keepalived, atomix],
+           own_services: [portal, iam, registry, monitor, detection, sensor_adapter, incidents, policies, audit, console, controller_adapter],
+           compose_file: srv2-platform.yml,
+           compose_extra_files: [s1-identity.yml, s2-observability.yml, s3-services.yml, postgres.yml, s4-services.yml, haproxy.yml, mirror.yml, prometheus.yml, atomix.yml],
+           ha_proxy_peer: 10.0.0.13, keepalived_peer: 10.0.0.13, unicast_src_ip: 10.0.0.12, keepalived_priority: 200, vrrp_iface: bond0}
+    srv3: {ansible_host: 10.20.12.185, ansible_port: 5813, ansible_user: ubuntu, onos_cluster_ip: 192.168.0.13, install_docker: true,
+           atomix_node_id: atomix-3, atomix_address: "192.168.0.13:5679",
+           images: [onos, freeradius, openldap, rabbitmq, suricata, prometheus, grafana, haproxy, keepalived, atomix],
+           own_services: [portal, iam, registry, monitor, detection, sensor_adapter, incidents, policies, audit, console, controller_adapter],
+           compose_file: srv3-platform.yml,
+           compose_extra_files: [s1-identity.yml, s2-observability.yml, s3-services.yml, s4-services.yml, haproxy.yml, mirror.yml, prometheus.yml, atomix.yml],
+           ha_proxy_peer: 10.0.0.12, keepalived_peer: 10.0.0.12, unicast_src_ip: 10.0.0.13, keepalived_priority: 100, vrrp_iface: bond0}
+    # --- Switches: NICs de datos reales (todo lo que no es ens3) ---
+    sw1: {ansible_host: 10.20.12.185, ansible_port: 5821, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7, ens8, ens9, ens10, ens11], switch_dpid: "0000000000000001"}
+    sw2: {ansible_host: 10.20.12.185, ansible_port: 5822, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7], switch_dpid: "0000000000000002"}
+    sw3: {ansible_host: 10.20.12.185, ansible_port: 5823, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7], switch_dpid: "0000000000000003"}
+    sw4: {ansible_host: 10.20.12.185, ansible_port: 5824, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7, ens8, ens9, ens10], switch_dpid: "0000000000000004"}
+    sw5: {ansible_host: 10.20.12.185, ansible_port: 5825, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7], switch_dpid: "0000000000000005"}
+    sw6: {ansible_host: 10.20.12.185, ansible_port: 5826, ansible_user: ubuntu, install_docker: false, switch_ports: [ens4, ens5, ens6, ens7], switch_dpid: "0000000000000006"}
+    # --- Hosts de prueba ---
+    h1:  {ansible_host: 10.20.12.185, ansible_port: 5801, ansible_user: ubuntu, install_docker: true}
+    h2:  {ansible_host: 10.20.12.185, ansible_port: 5802, ansible_user: ubuntu, install_docker: false}
+    h3:  {ansible_host: 10.20.12.185, ansible_port: 5803, ansible_user: ubuntu, install_docker: false}
+    h4:  {ansible_host: 10.20.12.185, ansible_port: 5804, ansible_user: ubuntu, install_docker: false}
+    # --- Gateway: NAT, DHCP, DNS y NTP ---
+    gw:  {ansible_host: 10.20.12.185, ansible_port: 22, ansible_user: ubuntu, install_docker: false, install_dns: true, chrony_server: true}
   children:
     switches:
       hosts:
-        nc1:
-        nc2:
-        a1:
-        a2:
+        sw1:
+        sw2:
+        sw3:
+        sw4:
+        sw5:
+        sw6:
       vars:
+        switch_bridge: br0
         controller_targets:
-          - tcp:192.168.0.111:6653
-          - tcp:192.168.0.112:6653
-          - tcp:192.168.0.113:6653
+          - tcp:192.168.0.11:6653
+          - tcp:192.168.0.12:6653
+          - tcp:192.168.0.13:6653
     onos:
       hosts:
-        onos1:
-        onos2:
-        onos3:
+        srv1:
+        srv2:
+        srv3:
+      vars:
+        images: [onos]
     platform:
       hosts:
-        s1:
-        s2:
-        s3:
-        s4:
+        srv1:
+        srv2:
+        srv3:
     endpoints:
       hosts:
         h1:
         h2:
         h3:
+        h4:

@@ -1,9 +1,9 @@
 """Acceso al slice para las campañas de medición (solo biblioteca estándar).
 
-Las VMs se alcanzan por los puertos reenviados del gateway de la VNRT
-(SLICE_GATEWAY, por defecto el del slice del integrante). Toda orden se
-ejecuta por SSH con clave; las que necesitan root reciben la contraseña de
-sudo por stdin (SLICE_SUDO_PASSWORD), nunca en la línea de comandos.
+Las VMs se alcanzan por los puertos DNAT del gateway (SLICE_GATEWAY, por
+defecto el del slice actual). Toda orden se ejecuta por SSH con clave; las
+que necesitan root reciben la contraseña de sudo por stdin
+(SLICE_SUDO_PASSWORD), nunca en la línea de comandos.
 """
 
 import json
@@ -13,22 +13,26 @@ import subprocess
 import time
 import urllib.parse
 
-GATEWAY = os.environ.get("SLICE_GATEWAY", "10.20.11.24")
+GATEWAY = os.environ.get("SLICE_GATEWAY", "10.20.12.185")
 USER = os.environ.get("SLICE_USER", "ubuntu")
 SUDO_PASSWORD = os.environ.get("SLICE_SUDO_PASSWORD", "")  # sin secretos en el repo
-PORTS = {"controller": 5800, "sw1": 5801, "sw2": 5802, "sw3": 5803,
-         "h1": 5811, "h2": 5812, "h3": 5813, "h4": 5814}
+PORTS = {"srv1": 5811, "srv2": 5812, "srv3": 5813,
+         "sw1": 5821, "sw2": 5822, "sw3": 5823,
+         "sw4": 5824, "sw5": 5825, "sw6": 5826,
+         "h1": 5801, "h2": 5802, "h3": 5803, "h4": 5804,
+         "gw": 22}
 
-# Plano de datos (ens4) y gestión (ens3) de los hosts, verificados en el
-# inventario del slice; las MAC son las de ens4.
+# Plano de datos (ens4/bond0) y gestión (ens3) de los hosts, verificados en
+# el inventario del slice; las MAC son las de ens3 (la gestión).
 HOSTS = {
-    "h1": {"ip": "10.0.0.1", "mac": "fa:16:3e:1d:96:70", "mgmt": "192.168.0.21"},
-    "h2": {"ip": "10.0.0.2", "mac": "fa:16:3e:db:27:f7", "mgmt": "192.168.0.22"},
-    "h3": {"ip": "10.0.0.3", "mac": "fa:16:3e:49:a8:ec", "mgmt": "192.168.0.23"},
-    "h4": {"ip": "10.0.0.4", "mac": "fa:16:3e:56:84:ae", "mgmt": "192.168.0.24"},
+    "h1": {"ip": "10.0.0.101", "mac": "fa:16:3e:fe:22:6e:c9", "mgmt": "192.168.0.101"},
+    "h2": {"ip": "10.0.0.102", "mac": "fa:16:3e:fe:1d:4d:62", "mgmt": "192.168.0.102"},
+    "h3": {"ip": "10.0.0.103", "mac": "fa:16:3e:fe:f2:dd:ba", "mgmt": "192.168.0.103"},
+    "h4": {"ip": "10.0.0.104", "mac": "fa:16:3e:fe:5f:ad:67", "mgmt": "192.168.0.104"},
 }
-DPIDS = {"sw1": "of:0000a223f2c04547", "sw2": "of:00001a749039894a",
-         "sw3": "of:0000ca272d265744"}
+DPIDS = {"sw1": "of:0000000000000001", "sw2": "of:0000000000000002",
+         "sw3": "of:0000000000000003", "sw4": "of:0000000000000004",
+         "sw5": "of:0000000000000005", "sw6": "of:0000000000000006"}
 
 
 def ssh(node, command, sudo=False, timeout=120, check=False):
@@ -60,17 +64,17 @@ def spawn(node, command, sudo=False):
 
 
 def api(path, method="GET", body=None, timeout=60):
-    """Llama a una API de la plataforma desde el controller (127.0.0.1)."""
+    """Llama a una API de la plataforma desde srv2 (127.0.0.1)."""
     command = f"curl -s -m 20 -X {method} " + shlex.quote(f"http://127.0.0.1{path}")
     if body is not None:
         command += (" -H content-type:application/json -d "
                     + shlex.quote(json.dumps(body)))
-    _, out = ssh("controller", command, timeout=timeout)
+    _, out = ssh("srv2", command, timeout=timeout)
     return json.loads(out) if out.strip() else {}
 
 
 def onos(path):
-    _, out = ssh("controller",
+    _, out = ssh("srv1",
                  f"curl -s -m 20 -u karaf:karaf http://127.0.0.1:8181/onos/v1{path}")
     return json.loads(out) if out.strip() else {}
 

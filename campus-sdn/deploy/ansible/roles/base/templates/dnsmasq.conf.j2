@@ -1,0 +1,18 @@
+# Red de datos del campus: DNS del dominio local y DHCP de invitados.
+# Escucha solo en la IP de datos para no chocar con el stub de
+# systemd-resolved (127.0.0.53:53).
+interface={{ data_iface }}
+bind-dynamic
+listen-address={{ data_ip.split('/')[0] }}
+no-resolv
+server=8.8.8.8
+server=1.1.1.1
+local=/campus.local/
+address=/portal.campus.local/10.0.0.10
+dhcp-authoritative
+dhcp-range=10.0.0.105,10.0.0.110,255.255.255.0,12h
+dhcp-option=option:router,10.0.0.1
+dhcp-option=option:dns-server,10.0.0.1
+{% for host in groups['endpoints'] | sort %}
+dhcp-host={{ hostvars[host].data_mac }},{{ hostvars[host].data_ip.split('/')[0] }},{{ host }}
+{% endfor %}

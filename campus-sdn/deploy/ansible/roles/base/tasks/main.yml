@@ -42,6 +42,37 @@
   notify: Restart dnsmasq
   tags: [base]
 
+# Ubuntu trae el conf-dir comentado: sin esta línea dnsmasq no lee
+# ningún fragmento de /etc/dnsmasq.d y arranca en 0.0.0.0:53, donde
+# choca con el stub de systemd-resolved.
+- name: dnsmasq lee los fragmentos de /etc/dnsmasq.d
+  when: install_dns | default(false) | bool
+  ansible.builtin.lineinfile:
+    path: /etc/dnsmasq.conf
+    regexp: '^#?conf-dir=/etc/dnsmasq\.d/,\*\.conf$'
+    line: 'conf-dir=/etc/dnsmasq.d/,*.conf'
+  notify: Restart dnsmasq
+  tags: [base]
+
+- name: DNS/DHCP del campus en el gateway
+  when: install_dns | default(false) | bool
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.d/campus-sdn.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart dnsmasq
+  tags: [base]
+
+- name: dnsmasq activo
+  when: install_dns | default(false) | bool
+  ansible.builtin.systemd:
+    name: dnsmasq
+    state: started
+    enabled: true
+  tags: [base]
+
 - name: Configuración de chrony
   ansible.builtin.template:
     src: chrony.conf.j2

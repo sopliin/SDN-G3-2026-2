@@ -1,0 +1,20 @@
+# S4 — servicio de gobierno: la Consola. El bus vive en rabbitmq.yml
+# (SRV-1) y se referencia por BUS_URL; la autenticación del operador
+# pasa por el IAM (IAM_URL).
+services:
+  console:
+    build:
+      context: ../..
+      dockerfile: services/console/Dockerfile
+    container_name: s4-console
+    restart: unless-stopped
+    environment:
+      BUS_URL: ${BUS_URL:-}
+      IAM_URL: ${IAM_URL:-}
+    ports:
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8008:8008"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8008/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5

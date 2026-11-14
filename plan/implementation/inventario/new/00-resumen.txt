@@ -1,0 +1,29 @@
+RESUMEN DEL INVENTARIO DEL SLICE DE 14 VMs
+Fecha del inventario: 2026-11-13
+Script: inventario_slice.sh (pasivo en las 14 VMs; sondas --probe en sw1-sw6)
+Detalle por VM: srv1.txt, srv2.txt, srv3.txt, sw1.txt...sw6.txt, h1.txt...h4.txt, gw.txt
+
+VMs          vCPU  RAM        Disco              NICs              ens3 gestion      SO
+srv1            4  3915 MiB   vda 20 GB (raiz 20 GB)  ens3-ens5 (3)   192.168.0.11   Ubuntu 24.04
+srv2            4  3915 MiB   vda 20 GB (raiz 20 GB)  ens3-ens5 (3)   192.168.0.12   Ubuntu 24.04
+srv3            4  3915 MiB   vda 20 GB (raiz 20 GB)  ens3-ens5 (3)   192.168.0.13   Ubuntu 24.04
+sw1             1   961 MiB   vda 7 GB              ens3-ens11 (9)   192.168.0.21   Ubuntu 24.04
+sw2             1   961 MiB   vda 7 GB              ens3-ens7 (5)    192.168.0.22   Ubuntu 24.04
+sw3             1   961 MiB   vda 7 GB              ens3-ens7 (5)    192.168.0.23   Ubuntu 24.04
+sw4             1   961 MiB   vda 7 GB              ens3-ens10 (8)   192.168.0.24   Ubuntu 24.04
+sw5             1   961 MiB   vda 7 GB              ens3-ens7 (5)    192.168.0.25   Ubuntu 24.04
+sw6             1   961 MiB   vda 7 GB              ens3-ens7 (5)    192.168.0.26   Ubuntu 24.04
+h1              1  1968 MiB   vda 10 GB             ens3-ens4 (2)    192.168.0.101  Ubuntu 24.04
+h2              1  1968 MiB   vda 10 GB             ens3-ens4 (2)    192.168.0.102  Ubuntu 24.04
+h3              1  1968 MiB   vda 10 GB             ens3-ens4 (2)    192.168.0.103  Ubuntu 24.04
+h4              1  1968 MiB   vda 10 GB             ens3-ens4 (2)    192.168.0.104  Ubuntu 24.04
+gw              1   961 MiB   vda 7 GB              ens3-ens5 (3)    10.20.12.185 (DHCP) / ens4 192.168.0.1
+
+Totales: 23 vCPU, ~27 GB de RAM, 149 GB de disco nominal. Raices ext4: 20 GB en
+srv1-srv3 (crecidas el 2026-11-13; 16-17 GB libres), 6 GB en switches/gw (discos de 7 GB)
+y 6 GB en hosts (discos de 10 GB); el resto del disco queda sin particion.
+
+Plataforma: sin Open vSwitch, Docker, Java ni chrony en ninguna VM.
+Sondas de capacidades (--probe): "Open vSwitch no disponible" en los seis switches,
+hasta que el rol switches instale OVS.
+Kernel: 6.8.0-38-generic; virtualizacion: KVM; sin swap en ninguna VM.

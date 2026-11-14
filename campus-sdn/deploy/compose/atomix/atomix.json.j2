@@ -1,0 +1,31 @@
+{
+  "cluster": {
+    "clusterId": "onos",
+    "node": {
+      "id": "{{ atomix_node_id }}",
+      "address": "{{ atomix_address }}"
+    },
+    "discovery": {
+      "type": "bootstrap",
+      "nodes": [
+{% for member in groups['onos'] %}
+        {"id": "{{ hostvars[member]['atomix_node_id'] }}", "address": "{{ hostvars[member]['atomix_address'] }}"}{% if not loop.last %},{% endif %}
+{% endfor %}
+      ]
+    }
+  },
+  "managementGroup": {
+    "type": "raft",
+    "partitions": 1,
+    "members": [{% for member in groups['onos'] %}"{{ hostvars[member]['atomix_node_id'] }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+    "storage": {"level": "disk", "directory": "/var/lib/atomix"}
+  },
+  "partitionGroups": {
+    "raft": {
+      "type": "raft",
+      "partitions": 3,
+      "members": [{% for member in groups['onos'] %}"{{ hostvars[member]['atomix_node_id'] }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+      "storage": {"level": "disk", "directory": "/var/lib/atomix"}
+    }
+  }
+}

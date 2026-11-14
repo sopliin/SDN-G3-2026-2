@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Campaña de R4 sobre el slice: ataques DDoS reales y cadena medida.
 
+AVISO (2026-11-13): los internals de esta campaña aún asumen el corte
+nativo del slice anterior (rutas /opt/campus-sdn/.venv, IAM en 192.168.0.10).
+El acceso (bench/slice.py) ya apunta al slice nuevo; la lógica interna
+se reescribe con la red de datos, según docs/05-secuencia-y-validacion.md.
+
 Por cada ensayo: un host con sesión inunda al servidor víctima (h3) con
 hping3 mientras otro host hace de cliente legítimo (ping cada 200 ms). Se
 mide, con las marcas de la auditoría (ms) y los contadores del monitor:

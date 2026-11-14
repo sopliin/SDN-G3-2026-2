@@ -11,7 +11,7 @@ Entradas (la escalera, una por switch):
   150  tráfico al portal / tráfico del portal
   100  denegación a la red de gestión (jamás se abre)
   60   confianza: troncales entre switches y servidores declarados
-  10   DHCP y DNS
+  10   DHCP y DNS (unicast al servidor y difusión de la concesión)
 
 El ARP no lleva entrada: es causa cerrada de PACKET_IN (LLD 06_reglas
 §2.1) y lo responde el controlador con la aplicación proxyarp de ONOS
@@ -91,6 +91,16 @@ def _infrastructure(device_id: str) -> list[tuple[str, dict]]:
              {"type": "UDP_DST", "udpPort": port},
              {"type": "IPV4_DST", "ip": f"{server}/32"}],
             NORMAL, label.lower())))
+    # La concesión inicial no va al servidor sino a la difusión
+    # (255.255.255.255:67): la entrada anterior solo cubre el unicast de
+    # renovación. Sin esta regla no hay DHCPOFFER.
+    if os.environ.get("SKELETON_DHCP", "").strip():
+        entries.append(("DHCP broadcast", _flow(
+            device_id, 8, 10,
+            [CRITERIA["ip"], {"type": "IP_PROTO", "protocol": 17},
+             {"type": "UDP_DST", "udpPort": 67},
+             {"type": "ETH_DST", "mac": "FF:FF:FF:FF:FF:FF"}],
+            NORMAL, "dhcp-broadcast")))
     return entries
 
 

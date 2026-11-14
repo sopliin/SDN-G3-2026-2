@@ -1,0 +1,12 @@
+# SRV-2 — módulos M1–M4 (activo-activo con SRV-3), PostgreSQL primario
+# y la pareja HAProxy/keepalived que sostiene la VIP 10.0.0.10.
+# ONOS-2 llega por onos.yml. El bus, el IdP primario y el espejo están
+# en SRV-1; los módulos los referencian por BUS_URL y RADIUS_HOST.
+include:
+  - s1-identity.yml
+  - s2-observability.yml
+  - s3-services.yml
+  - postgres.yml
+  - s4-services.yml
+  - haproxy.yml
+  - atomix.yml

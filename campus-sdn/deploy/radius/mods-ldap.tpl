@@ -1,12 +1,13 @@
 # Módulo LDAP de FreeRADIUS (plantilla): el IdP simulado del prototipo
 # (F-03 §2) — FreeRADIUS verifica contra OpenLDAP, como un eduroam real.
-# __LDAP_PASSWORD__ se reemplaza con el secreto del .env al desplegar;
-# el archivo generado (mods-ldap) está ignorado por git.
+# {{ ldap_admin_password }} se reemplaza con LDAP_ADMIN_PASSWORD del .env
+# al desplegar (rol platform); el archivo generado (mods-ldap) está
+# ignorado por git.
 ldap {
     server = 'openldap'
     port = 389
     identity = 'cn=admin,dc=campus,dc=local'
-    password = '__LDAP_PASSWORD__'
+    password = '{{ ldap_admin_password }}'
     base_dn = 'dc=campus,dc=local'
 
     update {
@@ -15,7 +16,7 @@ ldap {
 
     user {
         base_dn = 'ou=people,dc=campus,dc=local'
-        filter = "(uid=%{%{Stripped-User-Name}:-%{User-Name}})"
+        filter = "{% raw %}(uid=%{%{Stripped-User-Name}:-%{User-Name}}){% endraw %}"
         scope = 'sub'
     }
 

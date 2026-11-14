@@ -1,0 +1,11 @@
+# SRV-3 — módulos M1–M4 (activo-activo con SRV-2) y la pareja
+# HAProxy/keepalived de respaldo. Sin PostgreSQL propio: sus servicios
+# usarán el primario de SRV-2 cuando se conecten a la base (etapa
+# posterior). ONOS-3 llega por onos.yml.
+include:
+  - s1-identity.yml
+  - s2-observability.yml
+  - s3-services.yml
+  - s4-services.yml
+  - haproxy.yml
+  - atomix.yml

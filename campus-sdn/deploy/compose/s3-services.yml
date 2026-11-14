@@ -1,0 +1,55 @@
+# S3 — servicios de respuesta: Incidentes, Políticas y Auditoría.
+# Sin base de datos propia: PostgreSQL vive en postgres.yml (SRV-2) y
+# las réplicas se incorporan en una etapa posterior. El bus llega por
+# BUS_URL y las órdenes al controlador por I2_URL.
+services:
+  incidents:
+    build:
+      context: ../..
+      dockerfile: services/incidents/Dockerfile
+    container_name: s3-incidents
+    restart: unless-stopped
+    environment:
+      BUS_URL: ${BUS_URL:-}
+    ports:
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8005:8005"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8005/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  policies:
+    build:
+      context: ../..
+      dockerfile: services/policies/Dockerfile
+    container_name: s3-policies
+    restart: unless-stopped
+    environment:
+      BUS_URL: ${BUS_URL:-}
+      I2_URL: ${I2_URL:-}
+      RATE_LIMIT_PPS: "1000"
+      MITIGATION_TTL_S: "300"
+    ports:
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8006:8006"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8006/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  audit:
+    build:
+      context: ../..
+      dockerfile: services/audit/Dockerfile
+    container_name: s3-audit
+    restart: unless-stopped
+    environment:
+      BUS_URL: ${BUS_URL:-}
+    ports:
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8007:8007"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8007/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5

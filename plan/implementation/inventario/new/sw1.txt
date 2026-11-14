@@ -1,0 +1,380 @@
+
+== IDENTIDAD ==
+hostname=sw1
+fecha_utc=2026-11-13T08:58:58Z
+os=Ubuntu 24.04 LTS
+os_id=ubuntu 24.04
+kernel=6.8.0-38-generic
+arquitectura=x86_64
+virtualizacion=kvm
+uptime=up 2 hours, 37 minutes
+
+== CPU ==
+Architecture:                         x86_64
+CPU(s):                               1
+Model name:                           Intel Core Processor (Broadwell, IBRS)
+Thread(s) per core:                   1
+Core(s) per socket:                   1
+Socket(s):                            1
+Virtualization:                       VT-x
+Virtualization type:                  full
+flags_virtualizacion=vmx
+
+== MEMORIA ==
+MemTotal:         984728 kB
+MemAvailable:     476204 kB
+SwapTotal:             0 kB
+               total        used        free      shared  buff/cache   available
+Mem:           961Mi       496Mi        93Mi       5.0Mi       528Mi       465Mi
+Swap:             0B          0B          0B
+
+== DISCO ==
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/vda2      ext4  5.9G  3.4G  2.2G  61% /
+
+== RED — INTERFACES ==
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens3             UP             fa:16:3e:67:e5:86 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens4             DOWN           fa:16:3e:4a:62:32 <BROADCAST,MULTICAST> 
+ens5             DOWN           fa:16:3e:76:9e:62 <BROADCAST,MULTICAST> 
+ens6             DOWN           fa:16:3e:b7:30:35 <BROADCAST,MULTICAST> 
+ens7             DOWN           fa:16:3e:28:0f:c7 <BROADCAST,MULTICAST> 
+ens8             DOWN           fa:16:3e:1c:55:f2 <BROADCAST,MULTICAST> 
+ens9             DOWN           fa:16:3e:6e:04:5f <BROADCAST,MULTICAST> 
+ens10            DOWN           fa:16:3e:2b:58:73 <BROADCAST,MULTICAST> 
+ens11            DOWN           fa:16:3e:cb:d7:9b <BROADCAST,MULTICAST> 
+
+Direcciones:
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             192.168.0.21/24 fe80::f816:3eff:fe67:e586/64 
+ens4             DOWN           
+ens5             DOWN           
+ens6             DOWN           
+ens7             DOWN           
+ens8             DOWN           
+ens9             DOWN           
+ens10            DOWN           
+ens11            DOWN           
+
+== RED — DRIVER Y VELOCIDAD ==
+-- ens3 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:03.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens4 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:04.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens5 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:05.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens6 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:06.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens7 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:07.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens8 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:08.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens9 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:09.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens10 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:0a.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens11 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:0b.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+
+== RED — MÓDULOS Y REENVÍO ==
+openvswitch=no cargado
+8021q=no cargado
+br_netfilter=no cargado
+vhost_net=no cargado
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+== RED — PUENTES ==
+
+== OPEN VSWITCH ==
+ovs-vsctl no instalado
+
+== SWITCH FÍSICO / PICOS ==
+no se detecta PicOS en este nodo
+
+== CONTENEDORES ==
+docker no instalado
+
+== JAVA (controlador ONOS) ==
+java no instalado
+
+== VIRTUALIZACIÓN / KVM ==
+/dev/kvm=presente
+
+== TIEMPO ==
+Timezone=Etc/UTC
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+
+== ENCAMINADO Y FIREWALL ==
+net.ipv4.ip_forward = 0
+default via 192.168.0.1 dev ens3 
+192.168.0.0/24 dev ens3 proto kernel scope link src 192.168.0.21 
+
+== RESUMEN ==
+rol=host
+hostname=sw1
+vcpus=1
+mem_total_mb=961
+disco_libre_gb=2
+interfaces_fisicas=9
+openvswitch=no
+openflow=no-verificado
+tablas=no-verificado
+meters=no-verificado
+groups=no-verificado
+mirror=no-verificado
+queues=no-verificado
+vlan_trunk=no-verificado
+cookie_timeout=no-verificado
+sflow=no-verificado
+netflow=no-verificado
+docker=no
+docker_demonio=no
+compose=no
+java=no
+kvm=si
+chrony=no
+ip_forward=0
+ruta_por_defecto=192.168.0.1
+
+Fin del inventario.
+[sudo] password for ubuntu: [sudo] password for ubuntu: 
+== IDENTIDAD ==
+hostname=sw1
+fecha_utc=2026-11-13T09:00:09Z
+os=Ubuntu 24.04 LTS
+os_id=ubuntu 24.04
+kernel=6.8.0-38-generic
+arquitectura=x86_64
+virtualizacion=kvm
+uptime=up 2 hours, 38 minutes
+
+== CPU ==
+Architecture:                         x86_64
+CPU(s):                               1
+Model name:                           Intel Core Processor (Broadwell, IBRS)
+Thread(s) per core:                   1
+Core(s) per socket:                   1
+Socket(s):                            1
+Virtualization:                       VT-x
+Virtualization type:                  full
+flags_virtualizacion=vmx
+
+== MEMORIA ==
+MemTotal:         984728 kB
+MemAvailable:     500720 kB
+SwapTotal:             0 kB
+               total        used        free      shared  buff/cache   available
+Mem:           961Mi       472Mi       115Mi       5.0Mi       531Mi       488Mi
+Swap:             0B          0B          0B
+
+== DISCO ==
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/vda2      ext4  5.9G  3.4G  2.2G  61% /
+
+== RED — INTERFACES ==
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens3             UP             fa:16:3e:67:e5:86 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens4             DOWN           fa:16:3e:4a:62:32 <BROADCAST,MULTICAST> 
+ens5             DOWN           fa:16:3e:76:9e:62 <BROADCAST,MULTICAST> 
+ens6             DOWN           fa:16:3e:b7:30:35 <BROADCAST,MULTICAST> 
+ens7             DOWN           fa:16:3e:28:0f:c7 <BROADCAST,MULTICAST> 
+ens8             DOWN           fa:16:3e:1c:55:f2 <BROADCAST,MULTICAST> 
+ens9             DOWN           fa:16:3e:6e:04:5f <BROADCAST,MULTICAST> 
+ens10            DOWN           fa:16:3e:2b:58:73 <BROADCAST,MULTICAST> 
+ens11            DOWN           fa:16:3e:cb:d7:9b <BROADCAST,MULTICAST> 
+
+Direcciones:
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             192.168.0.21/24 fe80::f816:3eff:fe67:e586/64 
+ens4             DOWN           
+ens5             DOWN           
+ens6             DOWN           
+ens7             DOWN           
+ens8             DOWN           
+ens9             DOWN           
+ens10            DOWN           
+ens11            DOWN           
+
+== RED — DRIVER Y VELOCIDAD ==
+-- ens3 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:03.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens4 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:04.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens5 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:05.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens6 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:06.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens7 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:07.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens8 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:08.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens9 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:09.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens10 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:0a.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens11 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:0b.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+
+== RED — MÓDULOS Y REENVÍO ==
+openvswitch=no cargado
+8021q=no cargado
+br_netfilter=no cargado
+vhost_net=no cargado
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+== RED — PUENTES ==
+
+== OPEN VSWITCH ==
+ovs-vsctl no instalado
+
+== SWITCH FÍSICO / PICOS ==
+no se detecta PicOS en este nodo
+
+== SONDAS ACTIVAS (bridge temporal) ==
+Open vSwitch no disponible: no hay sondas
+
+== CONTENEDORES ==
+docker no instalado
+
+== JAVA (controlador ONOS) ==
+java no instalado
+
+== VIRTUALIZACIÓN / KVM ==
+/dev/kvm=presente
+
+== TIEMPO ==
+Timezone=Etc/UTC
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+
+== ENCAMINADO Y FIREWALL ==
+net.ipv4.ip_forward = 0
+default via 192.168.0.1 dev ens3 
+192.168.0.0/24 dev ens3 proto kernel scope link src 192.168.0.21 
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+
+== RESUMEN ==
+rol=host
+hostname=sw1
+vcpus=1
+mem_total_mb=961
+disco_libre_gb=2
+interfaces_fisicas=9
+openvswitch=no
+openflow=no-verificado
+tablas=no-verificado
+meters=no-verificado
+groups=no-verificado
+mirror=no-verificado
+queues=no-verificado
+vlan_trunk=no-verificado
+cookie_timeout=no-verificado
+sflow=no-verificado
+netflow=no-verificado
+docker=no
+docker_demonio=no
+compose=no
+java=no
+kvm=si
+chrony=no
+ip_forward=0
+ruta_por_defecto=192.168.0.1
+
+Fin del inventario.

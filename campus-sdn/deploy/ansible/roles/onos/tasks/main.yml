@@ -22,7 +22,7 @@
 
 - name: ONOS levantado
   ansible.builtin.command:
-    cmd: docker compose up -d
+    cmd: docker compose -p campus-sdn -f onos.yml up -d
     chdir: /opt/campus-sdn/onos
   tags: [onos]
 
@@ -32,8 +32,19 @@
     url_username: "{{ onos_rest_user }}"
     url_password: "{{ onos_rest_password }}"
     status_code: 200
-    retries: 30
-    delay: 5
+  register: onos_rest
+  until: onos_rest.status == 200
+  retries: 30
+  delay: 5
+  tags: [onos]
+
+- name: Desactivar fwd (reenvío reactivo; choca con la escalera)
+  ansible.builtin.uri:
+    url: http://127.0.0.1:8181/onos/v1/applications/org.onosproject.fwd/active
+    url_username: "{{ onos_rest_user }}"
+    url_password: "{{ onos_rest_password }}"
+    method: DELETE
+    status_code: [200, 204, 404]
   tags: [onos]
 
 - name: Resumen del clúster

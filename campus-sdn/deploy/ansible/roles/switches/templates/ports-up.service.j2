@@ -1,0 +1,12 @@
+[Unit]
+Description=campus-sdn: bridge y puertos de datos de OVS arriba
+After=openvswitch-switch.service
+Requires=openvswitch-switch.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'ip link set {{ switch_bridge }} up; {% for port in switch_ports %}ip link set {{ port }} up || true; {% endfor %}'
+
+[Install]
+WantedBy=multi-user.target

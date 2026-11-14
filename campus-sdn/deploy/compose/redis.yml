@@ -1,0 +1,23 @@
+# Redis — estado compartido de la plataforma (sesiones y cachés).
+# Maestro en SRV-1; las réplicas de SRV-2/3 con Sentinel llegan en la
+# etapa de alta disponibilidad.
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_BIND_IP:-127.0.0.1}:6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:

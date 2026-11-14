@@ -1,0 +1,40 @@
+# keepalived: VRRP por unicast sobre la interfaz de datos (bond0).
+# Renderizado por el rol platform; keepalived_priority decide el maestro
+# (SRV-2 = 200, SRV-3 = 100) y keepalived_peer es la IP de datos del par.
+#
+# El chequeo corre dentro del contenedor de keepalived, que comparte el
+# espacio de PID del host (pid: host en el Compose) para ver el proceso
+# de HAProxy. `script_user root` evita el usuario keepalived_script, que
+# no existe en la imagen y hacía fallar el script con estado 127.
+global_defs {
+    script_user root
+    enable_script_security
+}
+
+# El chequeo va en un archivo aparte: keepalived ejecuta el valor de
+# `script` como una ruta, sin intérprete, así que una cadena con
+# argumentos ("killall -0 haproxy") falla con estado 127.
+vrrp_script chk_haproxy {
+    script "/etc/keepalived/chk_haproxy.sh"
+    interval 5
+    fall 2
+    rise 2
+}
+
+vrrp_instance VI_DATOS {
+    state BACKUP
+    interface {{ vrrp_iface | default('bond0') }}
+    virtual_router_id 42
+    priority {{ keepalived_priority | default(100) }}
+    advert_int 1
+    unicast_src_ip {{ unicast_src_ip }}
+    unicast_peer {
+        {{ keepalived_peer }}
+    }
+    track_script {
+        chk_haproxy
+    }
+    virtual_ipaddress {
+        10.0.0.10/24
+    }
+}

@@ -1,5 +1,5 @@
 ---
-# Rol switches: Open vSwitch en NC1/NC2/A1/A2, listo para el controlador.
+# Rol switches: Open vSwitch en sw1–sw6, listo para el controlador.
 # Configura bridge, OpenFlow 1.3, fail_mode secure, puertos, trunks de
 # VLAN y controladores. Las entradas de política (esqueleto, sesión,
 # mitigación — LLD 06_reglas §3) las instala la app del controlador de
@@ -42,9 +42,49 @@
   changed_when: port_result.rc == 0
   tags: [switches]
 
-- name: Trunks de VLAN en los puertos de datos
-  ansible.builtin.command: ovs-vsctl set port {{ item }} trunks=10,20,30
+# Sin `tag`, un puerto con `trunks` no tiene VLAN nativa y OVS descarta
+# las tramas sin etiquetar — todo el tráfico de los equipos finales.
+# La VLAN 10 es la nativa del slice; 20 y 30 quedan disponibles para
+# tráfico etiquetado.
+- name: Trunks con VLAN 10 nativa en los puertos de datos
+  ansible.builtin.command: ovs-vsctl set port {{ item }} trunks=10,20,30 tag=10
   loop: "{{ switch_ports }}"
+  tags: [switches]
+
+# OVS esclaviza las NIC pero no las sube: sin esto los puertos quedan
+# administrativamente abajo tras cada arranque y no hay portadora.
+- name: Bridge y puertos de datos arriba
+  ansible.builtin.command: ip link set {{ item }} up
+  loop: "{{ [switch_bridge] + switch_ports }}"
+  changed_when: false
+  tags: [switches]
+
+- name: Persistencia del estado de los puertos al arrancar
+  ansible.builtin.template:
+    src: ports-up.service.j2
+    dest: /etc/systemd/system/campus-sdn-ports.service
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [switches]
+
+- name: Unidad de puertos habilitada
+  ansible.builtin.systemd:
+    name: campus-sdn-ports
+    enabled: true
+    state: started
+    daemon_reload: true
+  tags: [switches]
+
+# La red del proveedor filtra los BPDUs entre VMs (comprobado: sw1 los
+# emite y sw2 no los recibe), así que RSTP no puede converger. Mientras
+# el esqueleto del piloto reenvíe con la acción NORMAL, la VLAN 10 de
+# datos recorre solo un árbol y los enlaces redundantes quedan en la
+# VLAN 99 (solo LLDP): visibles para ONOS, fuera del plano de datos.
+# Al activar los caminos calculados en ONOS, vuelven a la VLAN 10.
+- name: Enlaces redundantes fuera de la VLAN de datos
+  ansible.builtin.command: ovs-vsctl set port {{ item }} tag=99 trunks=99
+  loop: "{{ switch_redundant_ports | default([]) }}"
   tags: [switches]
 
 - name: Controladores del bridge

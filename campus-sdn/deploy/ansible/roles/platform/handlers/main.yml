@@ -1,0 +1,15 @@
+---
+# El archivo de configuración va montado en el contenedor y no forma
+# parte de la definición del servicio: Compose no recrea el contenedor
+# cuando cambia su contenido. El reinicio explícito aplica lo renderizado.
+- name: Reiniciar haproxy
+  ansible.builtin.command:
+    cmd: docker compose -p campus-sdn -f {{ compose_file }} restart haproxy
+    chdir: /opt/campus-sdn/deploy/compose
+  tags: [platform]
+
+- name: Reiniciar keepalived
+  ansible.builtin.command:
+    cmd: docker compose -p campus-sdn -f {{ compose_file }} restart keepalived
+    chdir: /opt/campus-sdn/deploy/compose
+  tags: [platform]

@@ -146,10 +146,10 @@ Reglas de uso:
 |---|---|---|---|---|---|---|
 | OpenFlow 1.3 | Sí | Sí | 2026-10-30 | sw1 | `protocols: [OpenFlow13]` | — |
 | Tablas | ≥ 4 | Sí | 2026-10-30 | sw1 | `n_tables:254` (0–253) | — |
-| Prioridades | Sí | | | | | |
-| Cookies | Sí | | | | | |
-| Timeouts | Sí | | | | | |
-| Packet-in/out | Sí | | | | | |
+| Prioridades | Sí | Sí | 2026-11-13 | sw1–sw6 | reglas con prioridad aceptadas en los flujos de la sonda | — |
+| Cookies | Sí | Parcial | 2026-11-13 | sw1–sw6 | `add-flow` con cookie aceptado; `cookie_timeout=no`: la sonda no encontró la cookie tras el reintento | usar retiro por selectores (como ya hace el adaptador) |
+| Timeouts | Sí | Parcial | 2026-11-13 | sw1–sw6 | `idle_timeout` aceptado; la verificación de persistencia dio `no` junto con la cookie | medir en la campaña |
+| Packet-in/out | Sí | Sí | 2026-11-13 | sw1–sw6 | el plano responde por OpenFlow 1.3 con los controladores | — |
 | VLAN trunk | Sí | Sí | 2026-10-31 | sw1 | `trunks=10,20,100` aceptado en puerto interno | — |
 | Meters | Sí | Sí | 2026-10-31 | sw1 | `add-meter` kbps/drop aceptado | — |
 | Groups | Sí | Sí | 2026-10-31 | sw1 | `GROUP_MOD` tipo `ALL` aceptado | — |
@@ -157,11 +157,11 @@ Reglas de uso:
 | Colas/DSCP | Tal vez | Parcial | 2026-10-31 | sw1 | QoS `linux-htb` y cola aceptados; DSCP sin medir | — |
 | Varias NIC | Sí | Sí | 2026-10-30 | sw1, controller, h1 | 4, 2 y 2 NIC virtio | — |
 | Docker | Sí | No | 2026-10-30 | controller | cliente 29.1.3; demonio sin respuesta; sin Compose | Pendiente: arrancar Docker e instalar Compose |
-| LACP/STP | Tal vez | | | | | |
-| sFlow/NetFlow | Tal vez | | | | | |
+| LACP/STP | Tal vez | No | 2026-11-13 | sw1–sw6 | sin medir LACP; el diseño no lo usa (los switches no forman MLAG) | — |
+| sFlow/NetFlow | Tal vez | No | 2026-11-13 | sw1–sw6 | `create sFlow` y `create NetFlow` rechazados (`sflow=no`, `netflow=no`) | sin reemplazo: el espejo cubre la observación |
 | Modo de fallo | `secure` | Sí | 2026-10-30 | sw1 | `fail_mode: secure` | — |
 
-El inventario de [`08`](08_inventario_del_slice.md) llena las columnas **Verificado** y **Fecha** de esta tabla; el contraste con la columna **Esperado** decide si se aplica el reemplazo. La primera pasada es sobre el slice actual (2026-10-30): Ubuntu 24.04 con Open vSwitch 3.3.9. La pasada del 2026-10-31 con `--probe` confirmó meters, groups, trunk, espejo y colas. Cookie/timeouts y sFlow/NetFlow quedan pendientes: la sonda anterior no separaba el fallo del switch del fallo del propio test; la versión corregida imprime el detalle.
+El inventario de [`08`](08_inventario_del_slice.md) llena las columnas **Verificado** y **Fecha** de esta tabla; el contraste con la columna **Esperado** decide si se aplica el reemplazo. La primera pasada fue sobre el slice anterior (2026-10-30): Ubuntu 24.04 con Open vSwitch 3.3.9. La pasada del 2026-10-31 con `--probe` confirmó meters, groups, trunk, espejo y colas. La re-sonda del **2026-11-13** corrió en los seis switches del slice nuevo con OVS 3.3.9 desplegado (salidas en `implementation/inventario/new/sw1-probe.txt` … `sw6-probe.txt`): meters, groups, espejo, colas y VLAN trunk confirmados en los seis; cookie/timeouts y sFlow/NetFlow dan `no` en los seis (detalle en la tabla).
 
 ## 8. Límite de flujos y TCAM
 

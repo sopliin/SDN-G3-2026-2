@@ -1,0 +1,139 @@
+
+== IDENTIDAD ==
+hostname=gw
+fecha_utc=2026-11-13T08:59:12Z
+os=Ubuntu 24.04 LTS
+os_id=ubuntu 24.04
+kernel=6.8.0-38-generic
+arquitectura=x86_64
+virtualizacion=kvm
+uptime=up 2 hours, 37 minutes
+
+== CPU ==
+Architecture:                         x86_64
+CPU(s):                               1
+Model name:                           Intel Core Processor (Broadwell, IBRS)
+Thread(s) per core:                   1
+Core(s) per socket:                   1
+Socket(s):                            1
+Virtualization:                       VT-x
+Virtualization type:                  full
+flags_virtualizacion=vmx
+
+== MEMORIA ==
+MemTotal:         984728 kB
+MemAvailable:     652300 kB
+SwapTotal:             0 kB
+               total        used        free      shared  buff/cache   available
+Mem:           961Mi       324Mi       195Mi       4.9Mi       597Mi       637Mi
+Swap:             0B          0B          0B
+
+== DISCO ==
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/vda2      ext4  5.9G  3.3G  2.3G  59% /
+
+== RED — INTERFACES ==
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens3             UP             fa:16:3e:15:90:20 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens4             UP             fa:16:3e:f7:eb:12 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens5             DOWN           fa:16:3e:91:bb:a5 <BROADCAST,MULTICAST> 
+
+Direcciones:
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             10.20.12.185/24 metric 100 fe80::f816:3eff:fe15:9020/64 
+ens4             UP             192.168.0.1/24 fe80::f816:3eff:fef7:eb12/64 
+ens5             DOWN           
+
+== RED — DRIVER Y VELOCIDAD ==
+-- ens3 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:03.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens4 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:04.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens5 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:05.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+
+== RED — MÓDULOS Y REENVÍO ==
+openvswitch=no cargado
+8021q=no cargado
+br_netfilter=no cargado
+vhost_net=no cargado
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 0
+
+== RED — PUENTES ==
+
+== OPEN VSWITCH ==
+ovs-vsctl no instalado
+
+== SWITCH FÍSICO / PICOS ==
+no se detecta PicOS en este nodo
+
+== CONTENEDORES ==
+docker no instalado
+
+== JAVA (controlador ONOS) ==
+java no instalado
+
+== VIRTUALIZACIÓN / KVM ==
+/dev/kvm=presente
+
+== TIEMPO ==
+Timezone=Etc/UTC
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+
+== ENCAMINADO Y FIREWALL ==
+net.ipv4.ip_forward = 1
+default via 10.20.12.1 dev ens3 proto dhcp src 10.20.12.185 metric 100 
+8.8.4.4 via 10.20.12.1 dev ens3 proto dhcp src 10.20.12.185 metric 100 
+10.20.12.0/24 dev ens3 proto kernel scope link src 10.20.12.185 metric 100 
+10.20.12.1 dev ens3 proto dhcp scope link src 10.20.12.185 metric 100 
+10.20.12.2 dev ens3 proto dhcp scope link src 10.20.12.185 metric 100 
+169.254.169.254 via 10.20.12.2 dev ens3 proto dhcp src 10.20.12.185 metric 100 
+192.168.0.0/24 dev ens4 proto kernel scope link src 192.168.0.1 
+192.168.3.31 via 10.20.12.1 dev ens3 proto dhcp src 10.20.12.185 metric 100 
+
+== RESUMEN ==
+rol=host
+hostname=gw
+vcpus=1
+mem_total_mb=961
+disco_libre_gb=2
+interfaces_fisicas=3
+openvswitch=no
+openflow=no-verificado
+tablas=no-verificado
+meters=no-verificado
+groups=no-verificado
+mirror=no-verificado
+queues=no-verificado
+vlan_trunk=no-verificado
+cookie_timeout=no-verificado
+sflow=no-verificado
+netflow=no-verificado
+docker=no
+docker_demonio=no
+compose=no
+java=no
+kvm=si
+chrony=no
+ip_forward=1
+ruta_por_defecto=10.20.12.1
+
+Fin del inventario.

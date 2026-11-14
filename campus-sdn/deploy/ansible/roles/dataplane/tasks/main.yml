@@ -1,0 +1,29 @@
+---
+# Rol dataplane: fija la red de datos (10.0.0.0/24) en servidores,
+# hosts y gateway. En los servidores el bond toma como MAC la
+# permanente de su NIC primaria: systemd-udev deriva la MAC del
+# machine-id y las VMs clonadas comparten machine-id, de modo que los
+# tres bonds nacerían con la misma MAC y ONOS los vería como un solo
+# host. El resto de equipos usa su NIC de datos directa.
+- name: MAC permanente de la NIC primaria del bond
+  ansible.builtin.command: "ethtool -P {{ data_primary }}"
+  register: data_perm_mac
+  changed_when: false
+  when: data_bond is defined
+  tags: [dataplane]
+
+- name: MAC del bond (la permanente de la primaria)
+  ansible.builtin.set_fact:
+    data_bond_mac: "{{ data_perm_mac.stdout | regex_search('(?<=Permanent address: )[0-9a-fA-F:]{17}') }}"
+  when: data_bond is defined
+  tags: [dataplane]
+
+- name: Netplan de la red de datos
+  ansible.builtin.template:
+    src: 02-datos.yaml.j2
+    dest: /etc/netplan/02-datos.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Aplicar netplan
+  tags: [dataplane]

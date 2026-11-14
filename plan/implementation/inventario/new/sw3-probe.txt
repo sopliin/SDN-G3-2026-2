@@ -1,0 +1,254 @@
+[sudo] password for ubuntu: 
+== IDENTIDAD ==
+hostname=sw3
+fecha_utc=2026-11-13T18:57:24Z
+os=Ubuntu 24.04 LTS
+os_id=ubuntu 24.04
+kernel=6.8.0-38-generic
+arquitectura=x86_64
+virtualizacion=kvm
+uptime=up 12 hours, 35 minutes
+
+== CPU ==
+Architecture:                         x86_64
+CPU(s):                               1
+Model name:                           Intel Core Processor (Broadwell, IBRS)
+Thread(s) per core:                   1
+Core(s) per socket:                   1
+Socket(s):                            1
+Virtualization:                       VT-x
+Virtualization type:                  full
+flags_virtualizacion=vmx
+
+== MEMORIA ==
+MemTotal:         984728 kB
+MemAvailable:     608412 kB
+SwapTotal:             0 kB
+               total        used        free      shared  buff/cache   available
+Mem:           961Mi       367Mi       239Mi       5.0Mi       524Mi       594Mi
+Swap:             0B          0B          0B
+
+== DISCO ==
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/vda2      ext4  5.9G  3.4G  2.2G  62% /
+
+== RED — INTERFACES ==
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens3             UP             fa:16:3e:5a:b8:b2 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens4             DOWN           fa:16:3e:56:6b:dd <BROADCAST,MULTICAST> 
+ens5             DOWN           fa:16:3e:58:0e:c4 <BROADCAST,MULTICAST> 
+ens6             DOWN           fa:16:3e:97:ad:be <BROADCAST,MULTICAST> 
+ens7             DOWN           fa:16:3e:14:b6:e5 <BROADCAST,MULTICAST> 
+ovs-system       DOWN           7a:0f:a4:25:78:7a <BROADCAST,MULTICAST> 
+br0              DOWN           86:73:a9:89:6d:45 <BROADCAST,MULTICAST> 
+
+Direcciones:
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             192.168.0.23/24 fe80::f816:3eff:fe5a:b8b2/64 
+ens4             DOWN           
+ens5             DOWN           
+ens6             DOWN           
+ens7             DOWN           
+ovs-system       DOWN           
+br0              DOWN           
+
+== RED — DRIVER Y VELOCIDAD ==
+-- ens3 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:03.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens4 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:04.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens5 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:05.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens6 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:06.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- ens7 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:07.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+-- br0 --
+driver: openvswitch
+version: 6.8.0-38-generic
+bus-info: 
+	Link detected: no
+
+== RED — MÓDULOS Y REENVÍO ==
+openvswitch=cargado
+8021q=no cargado
+br_netfilter=no cargado
+vhost_net=no cargado
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+== RED — PUENTES ==
+
+== OPEN VSWITCH ==
+ovs-vsctl (Open vSwitch) 3.3.9
+DB Schema 8.5.1
+
+Bridges: br0
+
+-- ovs-vsctl show --
+6f3b5252-713c-4ceb-b34f-c8c1bd5d50bf
+    Bridge br0
+        Controller "tcp:192.168.0.11:6653"
+            is_connected: true
+        Controller "tcp:192.168.0.13:6653"
+            is_connected: true
+        Controller "tcp:192.168.0.12:6653"
+            is_connected: true
+        fail_mode: secure
+        Port ens4
+            trunks: [10, 20, 30]
+            Interface ens4
+        Port ens6
+            trunks: [10, 20, 30]
+            Interface ens6
+        Port ens5
+            trunks: [10, 20, 30]
+            Interface ens5
+        Port ens7
+            trunks: [10, 20, 30]
+            Interface ens7
+        Port br0
+            Interface br0
+                type: internal
+    ovs_version: "3.3.9"
+
+-- datapath --
+system@ovs-system: hit:0 missed:0
+  br0:
+    br0 65534/1: (internal)
+    ens4 1/2: (system)
+    ens5 2/3: (system)
+    ens6 3/4: (system)
+    ens7 4/5: (system)
+
+-- bridge br0 --
+protocols: [OpenFlow13]
+fail_mode: secure
+tablas: 
+flujos_instalados: 4
+
+== SWITCH FÍSICO / PICOS ==
+no se detecta PicOS en este nodo
+
+== SONDAS ACTIVAS (bridge temporal) ==
+bridge_temporal=br-inv-23877
+El bridge se elimina al terminar; ningún bridge existente se toca.
+
+-- tablas --
+OFPST_TABLE reply (OF1.3) (xid=0x2):
+  table 0:
+    active=1, lookup=0, matched=0
+
+  table 1:
+    active=0, lookup=0, matched=0
+
+  tables 2...253: ditto
+
+-- meter --
+meters=si
+
+-- group --
+groups=si
+
+-- cookie y timeouts --
+detalle: ovs-ofctl: unknown action idle_timeout
+cookie_timeout=no
+
+-- VLAN trunk --
+vlan_trunk=si
+
+-- espejo --
+mirror=si
+
+-- colas --
+queues=si
+
+-- muestreo --
+detalle sFlow: 2026-11-13T18:57:24Z|00002|db_ctl_base|WARN|applying "create" command to table sFlow without --id option will have no effect
+ovs-vsctl: 127.0.0.1:6343: unexpected ":" parsing set of 1 or more strings
+detalle NetFlow: 2026-11-13T18:57:24Z|00002|db_ctl_base|WARN|applying "create" command to table NetFlow without --id option will have no effect
+ovs-vsctl: 127.0.0.1:2055: unexpected ":" parsing set of 1 or more strings
+sflow=no netflow=no
+
+== CONTENEDORES ==
+docker no instalado
+
+== JAVA (controlador ONOS) ==
+java no instalado
+
+== VIRTUALIZACIÓN / KVM ==
+/dev/kvm=presente
+
+== TIEMPO ==
+Timezone=Etc/UTC
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+Reference ID    : B33CF7FC (mrtg.wisp.net.ec)
+Stratum         : 3
+Ref time (UTC)  : Fri Nov 13 18:47:34 2026
+System time     : 0.001325652 seconds slow of NTP time
+Last offset     : -0.000459715 seconds
+RMS offset      : 0.000274216 seconds
+
+== ENCAMINADO Y FIREWALL ==
+net.ipv4.ip_forward = 0
+default via 192.168.0.1 dev ens3 proto static 
+192.168.0.0/24 dev ens3 proto kernel scope link src 192.168.0.23 
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+
+== RESUMEN ==
+rol=switch
+hostname=sw3
+vcpus=1
+mem_total_mb=961
+disco_libre_gb=2
+interfaces_fisicas=8
+openvswitch=si
+openflow=[OpenFlow13]
+tablas=254
+meters=si
+groups=si
+mirror=si
+queues=si
+vlan_trunk=si
+cookie_timeout=no
+sflow=no
+netflow=no
+docker=no
+docker_demonio=no
+compose=no
+java=no
+kvm=si
+chrony=si
+ip_forward=0
+ruta_por_defecto=192.168.0.1
+
+Fin del inventario.

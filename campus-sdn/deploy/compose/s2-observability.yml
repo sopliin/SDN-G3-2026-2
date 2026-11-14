@@ -1,6 +1,10 @@
-# S2 — Observabilidad: Monitor, Detección, Adaptador y sus dependencias.
-# Prometheus, Grafana y Suricata son imágenes del lock; Monitor y
-# Detección se construyen. El bus (S4) llega por BUS_URL.
+# S2 — Observabilidad: Monitor, Detección, Prometheus y Grafana.
+# El espejo (Suricata + sensor_adapter) se incluye desde mirror.yml:
+# en SRV-2/3 queda inactivo hasta que el espejo se distribuya; en SRV-1
+# el archivo mirror.yml se incluye directamente con la NIC real.
+include:
+  - mirror.yml
+
 services:
   monitor:
     build:
@@ -12,7 +16,7 @@ services:
       BUS_URL: ${BUS_URL:-}
       SAMPLE_INTERVAL_S: "5"
     ports:
-      - "8003:8003"
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8003:8003"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8003/health')\""]
       interval: 10s
@@ -29,28 +33,9 @@ services:
       BUS_URL: ${BUS_URL:-}
       DETECTION_SIGMA: "5"
     ports:
-      - "8004:8004"
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8004:8004"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8004/health')\""]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  sensor_adapter:
-    build:
-      context: ../..
-      dockerfile: services/sensor_adapter/Dockerfile
-    container_name: s2-sensor-adapter
-    restart: unless-stopped
-    environment:
-      BUS_URL: ${BUS_URL:-}
-      SENSOR_WINDOW_S: "10"
-    volumes:
-      - suricata_logs:/var/log/suricata
-    ports:
-      - "8009:8009"
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8009/health')\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,7 +48,7 @@ services:
       - prometheus_data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:9090/-/healthy"]
       interval: 15s
@@ -79,28 +64,9 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/api/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-
-  suricata:
-    image: jasonish/suricata:7.0
-    container_name: s2-suricata
-    restart: unless-stopped
-    # La NIC del espejo es una interfaz del host: red host y privilegios
-    # de red. La interfaz real se confirma en H0 (MIRROR_IFACE).
-    network_mode: host
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    command: -i ${MIRROR_IFACE:-ens5} -c /etc/suricata/suricata.yaml
-    volumes:
-      - suricata_logs:/var/log/suricata
-    healthcheck:
-      test: ["CMD-SHELL", "ps -ef | grep -v grep | grep -q suricata"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -108,4 +74,3 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
-  suricata_logs:

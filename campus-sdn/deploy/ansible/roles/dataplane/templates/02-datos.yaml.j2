@@ -1,0 +1,27 @@
+# Generado por el rol dataplane — no editar a mano.
+network:
+  version: 2
+{% if data_bond is defined %}
+  ethernets:
+{% for iface in data_ifaces %}
+    {{ iface }}:
+      dhcp4: false
+{% endfor %}
+  bonds:
+    {{ data_bond }}:
+      interfaces: [{{ data_ifaces | join(', ') }}]
+      dhcp4: false
+      addresses:
+        - {{ data_ip }}
+      macaddress: "{{ data_bond_mac }}"
+      parameters:
+        mode: active-backup
+        primary: {{ data_primary }}
+        mii-monitor-interval: 100
+{% else %}
+  ethernets:
+    {{ data_iface }}:
+      dhcp4: false
+      addresses:
+        - {{ data_ip }}
+{% endif %}

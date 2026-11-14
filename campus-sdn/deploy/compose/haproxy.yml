@@ -1,0 +1,45 @@
+# HAProxy + keepalived — la VIP 10.0.0.10 reparte las solicitudes entre
+# las instancias de SRV-2 y SRV-3 (activo-activo). Ambos corren en red
+# host: HAProxy escucha en la VIP (ip_nonlocal_bind permite que también
+# el respaldo la tenga abierta) y keepalived decide quién es el maestro
+# VRRP. Los archivos haproxy.cfg y keepalived.conf los renderiza el rol
+# platform desde las plantillas (IP del par y prioridad por VM).
+services:
+  haproxy:
+    image: haproxy:2.9-alpine
+    container_name: haproxy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ps -ef | grep -v grep | grep -q 'haproxy'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  keepalived:
+    image: osixia/keepalived:2.0.20
+    container_name: keepalived
+    restart: unless-stopped
+    network_mode: host
+    # El entrypoint de la imagen reescribe su config montada (falla con
+    # un bind :ro); se arranca keepalived directo con la config en la
+    # ruta estándar del binario.
+    entrypoint: ["keepalived"]
+    command: ["--dont-fork", "--log-console", "--vrrp"]
+    # El script de seguimiento comprueba el proceso de HAProxy del host
+    # con killall; sin el espacio de PID del host no lo vería.
+    pid: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - NET_BROADCAST
+    volumes:
+      - ./keepalived/keepalived.conf:/etc/keepalived/keepalived.conf:ro
+      - ./keepalived/chk_haproxy.sh:/etc/keepalived/chk_haproxy.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ps -ef | grep -v grep | grep -q 'keepalived'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5

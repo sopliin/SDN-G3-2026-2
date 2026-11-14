@@ -6,14 +6,13 @@ services:
     build:
       context: ../..
       dockerfile: services/controller_adapter/Dockerfile
-    image: campus-sdn-controller-adapter
     container_name: onos-adapter
     restart: unless-stopped
     network_mode: host
     environment:
       ONOS_URL: http://127.0.0.1:8181
       BUS_URL: ${BUS_URL:-}
-      SWITCH_DPIDS: '{"NC1": "of:0000000000000011", "NC2": "of:0000000000000012", "A1": "of:0000000000000021", "A2": "of:0000000000000022"}'
+      SWITCH_DPIDS: '{"sw1": "of:0000000000000001", "sw2": "of:0000000000000002", "sw3": "of:0000000000000003", "sw4": "of:0000000000000004", "sw5": "of:0000000000000005", "sw6": "of:0000000000000006"}'
     ports:
       - "8090:8090"
     healthcheck:
@@ -26,11 +25,16 @@ services:
     image: onosproject/onos:2.7.0
     container_name: onos
     restart: unless-stopped
+    # apps-clean: arranca sin apps heredadas de la imagen (fwd incluida)
+    # y activa exactamente las de ONOS_APPS.
+    command: ["apps-clean"]
     network_mode: host
     environment:
-      # fwd (reenvío reactivo) da conectividad base hasta que exista la
-      # app propia del pipeline; hostprovider alimenta a fwd.
-      ONOS_APPS: drivers,openflow,fwd,hostprovider
+      # Sin fwd: el reenvío reactivo instalaría flujos que chocan con la
+      # escalera del LLD (G-06). hostprovider y lldpprovider alimentan el
+      # descubrimiento de hosts y enlaces; proxyarp responde el ARP de la
+      # escalera (verificado en el slice anterior).
+      ONOS_APPS: drivers,openflow,hostprovider,lldpprovider,proxyarp
       JAVA_OPTS: -Xmx2g
     volumes:
       - /opt/campus-sdn/onos/config/cluster.json:/root/onos/config/cluster.json

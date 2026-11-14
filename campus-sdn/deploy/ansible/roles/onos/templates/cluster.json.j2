@@ -1,9 +1,9 @@
 {
   "name": "onos",
-  "node": {"id": "{{ onos_node_id }}", "ip": "{{ ansible_host }}", "port": {{ onos_node_port }}},
+  "node": {"id": "{{ onos_node_id }}", "ip": "{{ onos_cluster_ip | default(ansible_host) }}", "port": {{ onos_node_port }}},
   "storage": [
 {% for member in groups['onos'] %}
-    {"id": "atomix-{{ loop.index }}", "ip": "{{ hostvars[member]['ansible_host'] }}", "port": {{ atomix_port }}}{% if not loop.last %},{% endif %}
+    {"id": "atomix-{{ loop.index }}", "ip": "{{ hostvars[member]['onos_cluster_ip'] | default(hostvars[member]['ansible_host']) }}", "port": {{ atomix_port }}}{% if not loop.last %},{% endif %}
 {% endfor %}
   ]
 }

@@ -66,6 +66,42 @@
       "used_by": [
         "s2"
       ]
+    },
+    {
+      "name": "redis",
+      "ref": "redis:7-alpine",
+      "digest": "sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe",
+      "used_by": [
+        "srv1"
+      ]
+    },
+    {
+      "name": "haproxy",
+      "ref": "haproxy:2.9-alpine",
+      "digest": "sha256:3e29449a6beed63262e36104adf531b4e41b359f61937303f5ea8607987b3748",
+      "used_by": [
+        "srv2",
+        "srv3"
+      ]
+    },
+    {
+      "name": "keepalived",
+      "ref": "osixia/keepalived:2.0.20",
+      "digest": "sha256:ba2a6419532cef068afc3586a6c597fd3b9fd8472592520c2f011d23c4672deb",
+      "used_by": [
+        "srv2",
+        "srv3"
+      ]
+    },
+    {
+      "name": "atomix",
+      "ref": "atomix/atomix:3.1.9",
+      "digest": "sha256:3014524ea08eceb4b909e1edcd8196e10336be9669c49e7c19e2ba2808481ea5",
+      "used_by": [
+        "srv1",
+        "srv2",
+        "srv3"
+      ]
     }
   ]
 }

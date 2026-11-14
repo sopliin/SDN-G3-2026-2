@@ -1,0 +1,124 @@
+
+== IDENTIDAD ==
+hostname=h4
+fecha_utc=2026-11-13T08:59:10Z
+os=Ubuntu 24.04 LTS
+os_id=ubuntu 24.04
+kernel=6.8.0-38-generic
+arquitectura=x86_64
+virtualizacion=kvm
+uptime=up 2 hours, 37 minutes
+
+== CPU ==
+Architecture:                         x86_64
+CPU(s):                               1
+Model name:                           Intel Core Processor (Broadwell, IBRS)
+Thread(s) per core:                   1
+Core(s) per socket:                   1
+Socket(s):                            1
+Virtualization:                       VT-x
+Virtualization type:                  full
+flags_virtualizacion=vmx
+
+== MEMORIA ==
+MemTotal:        2015380 kB
+MemAvailable:    1522720 kB
+SwapTotal:             0 kB
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       481Mi       1.0Gi       4.9Mi       583Mi       1.5Gi
+Swap:             0B          0B          0B
+
+== DISCO ==
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/vda2      ext4  5.9G  2.5G  3.1G  45% /
+
+== RED — INTERFACES ==
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens3             UP             fa:16:3e:5f:ad:67 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+ens4             DOWN           fa:16:3e:2c:c9:01 <BROADCAST,MULTICAST> 
+
+Direcciones:
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+ens3             UP             192.168.0.104/24 fe80::f816:3eff:fe5f:ad67/64 
+ens4             DOWN           
+
+== RED — DRIVER Y VELOCIDAD ==
+-- ens3 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:03.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: yes
+-- ens4 --
+driver: virtio_net
+version: 1.0.0
+bus-info: 0000:00:04.0
+	Speed: Unknown!
+	Duplex: Unknown! (255)
+	Link detected: no
+
+== RED — MÓDULOS Y REENVÍO ==
+openvswitch=no cargado
+8021q=no cargado
+br_netfilter=no cargado
+vhost_net=no cargado
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+
+== RED — PUENTES ==
+
+== OPEN VSWITCH ==
+ovs-vsctl no instalado
+
+== SWITCH FÍSICO / PICOS ==
+no se detecta PicOS en este nodo
+
+== CONTENEDORES ==
+docker no instalado
+
+== JAVA (controlador ONOS) ==
+java no instalado
+
+== VIRTUALIZACIÓN / KVM ==
+/dev/kvm=presente
+
+== TIEMPO ==
+Timezone=Etc/UTC
+CanNTP=yes
+NTP=yes
+NTPSynchronized=yes
+
+== ENCAMINADO Y FIREWALL ==
+net.ipv4.ip_forward = 0
+default via 192.168.0.1 dev ens3 
+192.168.0.0/24 dev ens3 proto kernel scope link src 192.168.0.104 
+
+== RESUMEN ==
+rol=host
+hostname=h4
+vcpus=1
+mem_total_mb=1968
+disco_libre_gb=3
+interfaces_fisicas=2
+openvswitch=no
+openflow=no-verificado
+tablas=no-verificado
+meters=no-verificado
+groups=no-verificado
+mirror=no-verificado
+queues=no-verificado
+vlan_trunk=no-verificado
+cookie_timeout=no-verificado
+sflow=no-verificado
+netflow=no-verificado
+docker=no
+docker_demonio=no
+compose=no
+java=no
+kvm=si
+chrony=no
+ip_forward=0
+ruta_por_defecto=192.168.0.1
+
+Fin del inventario.

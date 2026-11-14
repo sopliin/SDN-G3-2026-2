@@ -1,0 +1,17 @@
+# Atomix — el almacenamiento Raft externo que el clúster ONOS 2.7
+# necesita (cluster.json apunta a estos nodos por el puerto 5679).
+# Un contenedor por servidor, en red host; atomix.json lo renderiza el
+# rol platform desde la plantilla (id y dirección por VM).
+services:
+  atomix:
+    image: atomix/atomix:3.1.9
+    container_name: atomix
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./atomix/atomix.json:/opt/atomix/atomix.json:ro
+      - atomix_data:/var/lib/atomix
+    command: ["--config", "/opt/atomix/atomix.json"]
+
+volumes:
+  atomix_data:

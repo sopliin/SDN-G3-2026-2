@@ -1,0 +1,46 @@
+# HAProxy: reparto de solicitudes entre las instancias de SRV-2 y SRV-3.
+# Renderizado por el rol platform; ha_proxy_peer es la IP de datos del par.
+# La VIP 10.0.0.10 expone el Portal (8080), la Consola (8008) y los
+# servicios propios (8001–8007, 8009); cada backend balancea entre la
+# instancia local y la del par con chequeo /health.
+global
+  maxconn 4096
+
+defaults
+  mode http
+  timeout connect 5s
+  timeout client 30s
+  timeout server 30s
+
+frontend portal
+  bind 10.0.0.10:8080
+  default_backend portal_be
+
+backend portal_be
+  balance roundrobin
+  option httpchk GET /health
+  server local {{ unicast_src_ip }}:8080 check inter 5s fall 3 rise 2
+  server par {{ ha_proxy_peer }}:8080 check inter 5s fall 3 rise 2
+
+frontend consola
+  bind 10.0.0.10:8008
+  default_backend consola_be
+
+backend consola_be
+  balance roundrobin
+  option httpchk GET /health
+  server local {{ unicast_src_ip }}:8008 check inter 5s fall 3 rise 2
+  server par {{ ha_proxy_peer }}:8008 check inter 5s fall 3 rise 2
+
+{% for port in [8001, 8002, 8003, 8004, 8005, 8006, 8007, 8009] %}
+frontend svc_{{ port }}
+  bind 10.0.0.10:{{ port }}
+  default_backend svc_{{ port }}_be
+
+backend svc_{{ port }}_be
+  balance roundrobin
+  option httpchk GET /health
+  server local {{ unicast_src_ip }}:{{ port }} check inter 5s fall 3 rise 2
+  server par {{ ha_proxy_peer }}:{{ port }} check inter 5s fall 3 rise 2
+
+{% endfor %}

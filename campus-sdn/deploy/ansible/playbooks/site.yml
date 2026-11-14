@@ -39,8 +39,13 @@
   roles:
     - switches
 
-- name: Corte vertical de identidad
-  hosts: s1
+- name: Red de datos de los equipos finales
+  hosts: platform:endpoints:gw
+  roles:
+    - dataplane
+
+- name: Imágenes propias (construcción en la laptop y carga por VM)
+  hosts: platform
   roles:
     - identity
 

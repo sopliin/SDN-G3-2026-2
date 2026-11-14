@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Campaña de R1 y R2 sobre el slice: autenticación y restricción medidas.
 
+AVISO (2026-11-13): los internals de esta campaña aún asumen el corte
+nativo del slice anterior (rutas /opt/campus-sdn/.venv, IAM en 192.168.0.10).
+El acceso (bench/slice.py) ya apunta al slice nuevo; la lógica interna
+se reescribe con la red de datos, según docs/05-secuencia-y-validacion.md.
+
 R1 — control de acceso por rol
   latency      : 200 logins válidos (RADIUS→LDAP) desde h4 por la red de
                  gestión hacia el IAM; y login → primer paquete entregado

@@ -16,31 +16,25 @@ Procedimiento completo para llevar campus-sdn a las 14 VMs del slice: desde las 
 | Ansible en la laptop (`ansible-playbook`) | `ansible-playbook --version` |
 | Bundles de imágenes listos | `make images-verify` en verde |
 | `.venv` del repositorio | `make test` en verde |
-| Inventario real `slice.yml` con las IPs de `ens3` | fase 2 |
+| Inventario real `slice.yml` con los puertos del gateway | fase 2 (ya preparado, 2026-11-13) |
 | Secretos en Ansible Vault o en el entorno | fase 2 |
 
 ## 2. Fase H0 — inventario y capacidades
 
 Con las 14 VMs entregadas, antes de tocar nada:
 
-1. **Inventario por nodo.** Copiar y ejecutar [`inventario_slice.sh`](../../implementation/inventario/inventario_slice.sh) en cada VM y cada switch (en switches, con `sudo`), como indica [`08_inventario_del_slice.md`](../../implementation/08_inventario_del_slice.md) §3. Guardar cada salida.
-2. **Re-sonda del switch** (`sw1` u OVS del slice): `sudo ./inventario_slice.sh --probe` — cierra las pendientes de cookie/timeouts y sFlow/NetFlow de [`04_capacidades_del_switch.md`](../../implementation/04_capacidades_del_switch.md) §7.
-3. **NIC del espejo.** Confirmar qué interfaz de S2 recibe el tráfico del espejo (L09, NC2 → S2). Si el hipervisor no la expone, aplicar el orden de reemplazo de [`04_capacidades_del_switch.md`](../../implementation/04_capacidades_del_switch.md) §4.3.
+1. **Inventario por nodo.** Ejecutar [`inventario_slice.sh`](../../../plan/implementation/inventario/inventario_slice.sh) en cada VM y cada switch (en switches, con `sudo`), como indica [`08_inventario_del_slice.md`](../../../plan/implementation/08_inventario_del_slice.md) §3. Guardar cada salida en `implementation/inventario/new/`. **Hecho el 2026-11-13:** las catorce salidas están guardadas y el resumen en [`00-resumen.txt`](../../../plan/implementation/inventario/new/00-resumen.txt).
+2. **Re-sonda del switch** (OVS ya instalado por el rol `switches`): `sudo ./inventario_slice.sh --probe` en los seis — cierra las pendientes de cookie/timeouts y sFlow/NetFlow de [`04_capacidades_del_switch.md`](../../../plan/implementation/04_capacidades_del_switch.md) §7.
+3. **NIC del espejo.** Confirmar la entrega de `ens6` en SRV-1 (pendiente con la nube): el espejo de SW1 llega a Suricata por esa NIC (`MIRROR_IFACE=ens6`). Si el hipervisor no la entrega, aplicar el orden de reemplazo de [`04_capacidades_del_switch.md`](../../../plan/implementation/04_capacidades_del_switch.md) §4.3.
 4. **Registro.** Volcar los resultados en la tabla de verificación de `04` §7 (columna Verificado y Fecha) y en [`02-estado.md`](../02-estado.md).
 
 **Sale de H0:** inventario completo y las capacidades críticas confirmadas (OpenFlow 1.3, tablas, VLAN trunk, Docker).
 
 ## 3. Fase 2 — inventario y secretos
 
-1. Copiar la plantilla y completar con los datos reales:
-
-   ```bash
-   cp deploy/ansible/inventory/slice.example.yml deploy/ansible/inventory/slice.yml
-   ```
-
-   - `ansible_host` de cada una de las 14 VMs (IP de `ens3`).
+1. El inventario real ya existe (`deploy/ansible/inventory/slice.yml`, ignorado por git): las 14 VMs entran por el gateway `10.20.12.185` con los puertos DNAT (5811–5813 servidores, 5821–5826 switches, 5801–5804 hosts, 22 el gateway), con `switch_ports` reales, DPIDs, el clúster ONOS en srv1–srv3 y el mapeo de plataforma (Compose por VM). Si algo cambia en el slice, se ajusta ahí; la plantilla `slice.example.yml` es el espejo versionado.
    - `switch_ports` con las NIC de datos reales (todo lo que no sea `ens3`).
-   - `MIRROR_IFACE` en `.env` con la interfaz del espejo (fase H0).
+   - `MIRROR_IFACE` en `.env` con la interfaz del espejo (fase H0, `ens6`).
 2. Crear `.env` desde `.env.example` con los secretos reales (jamás por git) o dejarlos en Ansible Vault. **`STUB_VERIFY` debe quedar vacío.**
 3. Conectividad:
 
@@ -48,41 +42,48 @@ Con las 14 VMs entregadas, antes de tocar nada:
    make ping
    ```
 
-**Sale de la fase 2:** `make ping` responde en las 14 VMs.
+**Sale de la fase 2:** `make ping` responde en las 14 VMs. **Hecho el 2026-11-13.**
 
 ## 4. Fase 3 — base, imágenes y plataforma
+
+> El sudo de las VMs exige contraseña: cada `make deploy` lleva el prefijo
+> `ANSIBLE_BECOME_PASS=<clave>` (sin él, Ansible falla con «Missing sudo
+> password»). La clave jamás se escribe en el repositorio.
 
 ```bash
 make deploy TAGS=base
 make deploy TAGS=images
-make deploy TAGS=platform
+make deploy TAGS=identity    # construye y carga los 11 servicios propios
+make deploy TAGS=platform    # levanta los Compose por VM (incluye los propios)
+make deploy TAGS=onos        # clúster ONOS (necesita el adaptador de identity)
 make status
 ```
 
-- `base` instala Docker, Compose, chrony y DNS; **no** instala Docker en switches ni h2/h3.
+- `base` instala Docker, Compose, chrony y DNS; **no** instala Docker en switches ni h2/h3. **Hecho el 2026-11-13.**
 - `images` copia, verifica, carga y limpia los bundles (el disco es la restricción).
-- `platform` levanta S1–S4 con sus Compose; los servicios propios de S1 llegan con la fase 5.
+- `identity` construye en la laptop las imágenes propias y las carga en cada VM de plataforma según `own_services` — **va antes de `platform` y `onos`**, que las usan.
+- `platform` levanta los Compose por VM (SRV-1 infra; SRV-2/3 M1–M4 con HAProxy/keepalived).
+- `onos` levanta el clúster de tres nodos con su `cluster.json`.
 
-**Sale de la fase 3:** `make status` muestra S3 (PostgreSQL) y S4 (RabbitMQ) sanos.
+**Sale de la fase 3:** `make status` muestra S3 (PostgreSQL) y S4 (RabbitMQ) sanos y los servicios propios en verde. **Hecho el 2026-11-13.**
 
 ## 5. Fase 4 — plano de control y datos
 
 ```bash
 make deploy TAGS=onos
-make deploy TAGS=switches
 make status
 ```
 
-1. **Quórum ONOS:** en onos1, `curl -u karaf:karaf http://127.0.0.1:8181/onos/v1/cluster` — tres nodos y maestro elegido. Si no hay quórum: revisar `cluster.json` y que las tres IPs de `ens3` se alcancen entre sí.
-2. **Switches:** `make status` debe mostrar `is_connected: true` en el `ovs-ofctl show` de NC1/NC2/A1/A2 y ONOS viendo **4 dispositivos**.
+(`switches` ya se desplegó con la fase 3 del 2026-11-13: OVS 3.3.9 con `br0` en los seis.)
 
-**Sale de la fase 4:** quórum de 3 y 4 switches conectados — el criterio H3.
+1. **Quórum ONOS:** en srv1, `curl -u karaf:karaf http://127.0.0.1:8181/onos/v1/cluster` — tres nodos y maestro elegido. Si no hay quórum: revisar `cluster.json` (usa `onos_cluster_ip`, las IP de gestión) y que las tres IPs de `ens3` se alcancen entre sí.
+2. **Switches:** `make status` debe mostrar `is_connected: true` en el `ovs-ofctl show` de sw1–sw6 y ONOS viendo **6 dispositivos**.
 
-## 6. Fase 5 — identidad
+**Sale de la fase 4:** quórum de 3 y 6 switches conectados — el criterio H3. **Hecho el 2026-11-13:** clúster ONOS sobre Atomix con quórum y los seis dispositivos en ONOS.
+
+## 6. Fase 5 — verificación de la plataforma
 
 ```bash
-make build          # construye las once imágenes propias
-make deploy TAGS=identity
 make status
 ```
 
@@ -103,7 +104,7 @@ make status            # los once servicios propios en verde
 
 Con el espejo confirmado (H0), la cadena completa queda operativa: tráfico del espejo → `MetricSample` → `AnomalyDetected` → `IncidentOpened` → decisión → **I2 → flujos ONOS** → `MitigationApplied` → `MitigationVerified`, con la Auditoría viéndolo todo.
 
-**Sale de la fase 6:** entorno completo verificado — es el punto de partida de la campaña de la etapa 3 ([`07_plan_de_trabajo_etapa_3.md`](../../implementation/07_plan_de_trabajo_etapa_3.md)).
+**Sale de la fase 6:** entorno completo verificado — es el punto de partida de la campaña de la etapa 3 ([`07_plan_de_trabajo_etapa_3.md`](../../../plan/implementation/07_plan_de_trabajo_etapa_3.md)).
 
 ## 8. Contingencias
 

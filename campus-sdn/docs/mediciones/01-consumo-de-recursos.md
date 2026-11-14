@@ -41,7 +41,7 @@ Los módulos son los Compose de despliegue: en el slice de 14 VMs cada uno vive 
 
 Los terceros, medidos en el slice donde existen (FreeRADIUS 46.0 MiB, OpenLDAP 14.8 MiB, RabbitMQ 114.8 MiB) o por su imagen (Prometheus 380 MB, Grafana 604 MB, Suricata 610 MB, PostgreSQL 642 MB — su RAM depende de la carga: Suricata crece con el tráfico del espejo; PostgreSQL con `bd_politicas`). Un módulo completo cabe con holgura en una VM de 1 vCPU / 1 GiB; S2 es el más exigente por Suricata.
 
-## 3. El controlador (slice actual)
+## 3. El controlador (slice anterior)
 
 - **VM**: 2 vCPU · **1967 MiB de RAM** (331 MiB disponibles con todo corriendo) · disco 9.8 GB (**1.7 GB libres, 83 % usado**).
 - **Contenedores en reposo** (medido el 2026-11-05):

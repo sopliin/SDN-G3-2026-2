@@ -1,9 +1,14 @@
 ---
-# Rol platform: Compose por VM y salud de los contenedores.
-# Espera la variable de inventario `compose_file` (deploy/compose/); los
-# hosts sin Compose (s1/s2 hasta sus pasos) se omiten con aviso.
-# El .env real nunca viaja por git: se copia el de deploy/env/ si existe
-# y, si no, la plantilla — que Compose rechaza hasta definir los secretos.
+# Rol platform: Compose por VM, entorno por VM y salud de los
+# contenedores.
+# - compose_file: el Compose raíz de la VM (deploy/compose/srv*-platform.yml).
+# - compose_extra_files: los archivos que el raíz incluye (include de
+#   Compose) y los de configuración (prometheus.yml); se copian juntos.
+# - El .env viaja por host si existe (env/.env.<host>) y, si no, el
+#   común; la plantilla queda como último recurso que Compose rechaza
+#   hasta definir los secretos.
+# - Si el host declara ha_proxy_peer, se renderizan haproxy.cfg y
+#   keepalived.conf desde las plantillas (VIP 10.0.0.10 en SRV-2/3).
 - name: Host sin Compose declarado
   ansible.builtin.debug:
     msg: "{{ inventory_hostname }}: sin 'compose_file'; se omite la plataforma"
@@ -19,43 +24,153 @@
         state: directory
       tags: [platform]
 
-    - name: Archivo Compose
+    - name: Directorio de configuración HA
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /opt/campus-sdn/deploy/compose/haproxy
+        - /opt/campus-sdn/deploy/compose/keepalived
+        - /opt/campus-sdn/deploy/compose/atomix
+        - /opt/campus-sdn/deploy/compose/radius
+      tags: [platform]
+
+    - name: Archivo Compose raíz
       ansible.builtin.copy:
         src: "../../compose/{{ compose_file }}"
         dest: "/opt/campus-sdn/deploy/compose/{{ compose_file }}"
       tags: [platform]
 
-    - name: Archivos extra del Compose
+    - name: Archivos incluidos y de configuración
       ansible.builtin.copy:
         src: "../../compose/{{ item }}"
         dest: "/opt/campus-sdn/deploy/compose/{{ item }}"
       loop: "{{ compose_extra_files | default([]) }}"
       tags: [platform]
 
-    - name: Entorno (.env)
+    - name: Leer el .env (nodo de control)
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/../../env/.env"
+      delegate_to: localhost
+      become: false
+      register: env_slurp
+      tags: [platform]
+
+    - name: Valores del .env
+      ansible.builtin.set_fact:
+        env_radius_secret: "{{ (env_slurp.content | b64decode) | regex_search('(?<=RADIUS_SECRET=)\\S+') }}"
+        env_ldap_admin: "{{ (env_slurp.content | b64decode) | regex_search('(?<=LDAP_ADMIN_PASSWORD=)\\S+') }}"
+      delegate_to: localhost
+      become: false
+      tags: [platform]
+
+    - name: Configuración de RADIUS
+      ansible.builtin.template:
+        src: "../../radius/{{ item.src }}"
+        dest: "/opt/campus-sdn/deploy/compose/radius/{{ item.dest }}"
+        mode: "0644"
+      loop:
+        - {src: clients.conf.tpl, dest: clients.conf}
+        - {src: mods-ldap.tpl, dest: mods-ldap}
+      vars:
+        radius_secret: "{{ hostvars[inventory_hostname].env_radius_secret | default('testing123', true) }}"
+        ldap_admin_password: "{{ hostvars[inventory_hostname].env_ldap_admin | default('', true) }}"
+      tags: [platform]
+
+    - name: Sitio default de FreeRADIUS
       ansible.builtin.copy:
-        src: "{{ item }}"
+        src: "../../radius/site-default"
+        dest: "/opt/campus-sdn/deploy/compose/radius/site-default"
+        mode: "0644"
+      tags: [platform]
+
+    - name: ¿Existe el .env del host? (nodo de control)
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../../env/.env.{{ inventory_hostname }}"
+      delegate_to: localhost
+      become: false
+      register: host_env_stat
+      tags: [platform]
+
+    - name: Leer el .env del host (nodo de control)
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/../../env/.env.{{ inventory_hostname }}"
+      delegate_to: localhost
+      become: false
+      register: host_env
+      when: host_env_stat.stat.exists
+      tags: [platform]
+
+    - name: Entorno por host (.env fusionado)
+      ansible.builtin.copy:
+        content: "{{ (env_slurp.content | b64decode) }}{% if host_env_stat.stat.exists %}{{ (host_env.content | b64decode) }}{% endif %}"
         dest: /opt/campus-sdn/deploy/compose/.env
-      with_first_found:
-        - "../../env/.env"
-        - "../../env/.env.example"
+        mode: "0600"
+      tags: [platform]
+
+    - name: haproxy.cfg renderizado
+      ansible.builtin.template:
+        src: "../../compose/haproxy/haproxy.cfg.j2"
+        dest: /opt/campus-sdn/deploy/compose/haproxy/haproxy.cfg
+      when: ha_proxy_peer is defined
+      notify: Reiniciar haproxy
+      tags: [platform]
+
+    - name: keepalived.conf renderizado
+      ansible.builtin.template:
+        src: "../../compose/keepalived/keepalived.conf.j2"
+        dest: /opt/campus-sdn/deploy/compose/keepalived/keepalived.conf
+      when: ha_proxy_peer is defined
+      notify: Reiniciar keepalived
+      tags: [platform]
+
+    # Keepalived ejecuta el valor de `script` como una ruta sin
+    # intérprete: el chequeo va en este archivo, montado en el
+    # contenedor junto a la configuración.
+    - name: Script de chequeo de HAProxy
+      ansible.builtin.copy:
+        src: "../../compose/keepalived/chk_haproxy.sh"
+        dest: /opt/campus-sdn/deploy/compose/keepalived/chk_haproxy.sh
+        mode: "0755"
+      when: ha_proxy_peer is defined
+      notify: Reiniciar keepalived
+      tags: [platform]
+
+    - name: ip_nonlocal_bind para la VIP (host)
+      ansible.builtin.copy:
+        content: "net.ipv4.ip_nonlocal_bind=1\n"
+        dest: /etc/sysctl.d/99-vip.conf
+        mode: "0644"
+      when: ha_proxy_peer is defined
+      tags: [platform]
+
+    - name: Aplicar sysctl de la VIP
+      ansible.builtin.command: sysctl -p /etc/sysctl.d/99-vip.conf
+      when: ha_proxy_peer is defined
+      tags: [platform]
+
+    - name: atomix.json renderizado
+      ansible.builtin.template:
+        src: "../../compose/atomix/atomix.json.j2"
+        dest: /opt/campus-sdn/deploy/compose/atomix/atomix.json
+      when: atomix_node_id is defined
       tags: [platform]
 
     - name: Servicios levantados
       ansible.builtin.command:
-        cmd: docker compose up -d
+        cmd: docker compose -p campus-sdn -f {{ compose_file }} up -d
         chdir: /opt/campus-sdn/deploy/compose
       tags: [platform]
 
     - name: Servicios detenidos
       ansible.builtin.command:
-        cmd: docker compose down
+        cmd: docker compose -p campus-sdn -f {{ compose_file }} down
         chdir: /opt/campus-sdn/deploy/compose
       tags: [down]
 
     - name: Estado de los contenedores
-      ansible.builtin.command: docker compose ps
-      args:
+      ansible.builtin.command:
+        cmd: docker compose -p campus-sdn -f {{ compose_file }} ps
         chdir: /opt/campus-sdn/deploy/compose
       register: compose_ps
       changed_when: false

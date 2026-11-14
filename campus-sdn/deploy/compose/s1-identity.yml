@@ -14,7 +14,7 @@ services:
       BUS_URL: ${BUS_URL:-}
       I2_URL: ${I2_URL:-}
     ports:
-      - "8080:8080"
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8080:8080"
     depends_on:
       iam:
         condition: service_healthy
@@ -34,13 +34,13 @@ services:
       # Comunidad → RADIUS contra FreeRADIUS (IdP simulado, F-03 §2);
       # operadores → repositorio propio (bcrypt + TOTP); invitados →
       # registro efímero con TTL.
-      RADIUS_HOST: freeradius
+      RADIUS_HOST: ${RADIUS_HOST:-freeradius}
       RADIUS_SECRET: ${RADIUS_SECRET:-}
       GUEST_TTL_S: "86400"
       STUB_VERIFY: ${STUB_VERIFY:-}
       BUS_URL: ${BUS_URL:-}
     ports:
-      - "8001:8001"
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8001:8001"
     depends_on:
       openldap:
         condition: service_healthy
@@ -59,7 +59,7 @@ services:
     environment:
       BUS_URL: ${BUS_URL:-}
     ports:
-      - "8002:8002"
+      - "${SERVICE_BIND_IP:-0.0.0.0}:8002:8002"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8002/health')\""]
       interval: 10s
@@ -77,8 +77,8 @@ services:
       - ./radius/mods-ldap:/etc/freeradius/mods-enabled/ldap:ro
       - ./radius/site-default:/etc/freeradius/sites-enabled/default:ro
     ports:
-      - "1812:1812/udp"
-      - "1813:1813/udp"
+      - "${RADIUS_BIND_IP:-0.0.0.0}:1812:1812/udp"
+      - "${RADIUS_BIND_IP:-0.0.0.0}:1813:1813/udp"
     healthcheck:
       test: ["CMD-SHELL", "ps -ef | grep -v grep | grep -q freeradius"]
       interval: 15s
@@ -95,11 +95,18 @@ services:
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:?definir LDAP_ADMIN_PASSWORD en .env}
       LDAP_READONLY_USER: "true"
       LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_PASSWORD:?definir LDAP_READONLY_PASSWORD en .env}
+    volumes:
+      - openldap_data:/var/lib/ldap
+      - openldap_config:/etc/ldap/slapd.d
     ports:
-      - "389:389"
-      - "636:636"
+      - "127.0.0.1:389:389"
+      - "127.0.0.1:636:636"
     healthcheck:
       test: ["CMD-SHELL", "ldapsearch -x -H ldap://127.0.0.1 -s base namingContexts >/dev/null"]
       interval: 15s
       timeout: 5s
       retries: 5
+
+volumes:
+  openldap_data:
+  openldap_config:

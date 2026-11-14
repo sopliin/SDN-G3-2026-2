@@ -1,0 +1,26 @@
+# RabbitMQ — el bus de eventos (exchange `plataforma`). Vive en SRV-1
+# y se publica en su IP de datos para que los servicios de SRV-2/3 lo
+# consuman (BUS_URL). El clúster de tres nodos con colas de quórum
+# llega en la etapa de alta disponibilidad.
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: s4-rabbitmq
+    restart: unless-stopped
+    hostname: rabbit-s4
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plataforma}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?definir RABBITMQ_PASSWORD en .env}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "${RABBITMQ_BIND_IP:-0.0.0.0}:5672:5672"
+      - "127.0.0.1:15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  rabbitmq_data:

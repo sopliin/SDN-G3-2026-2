@@ -2,7 +2,8 @@
 
 **Proyecto:** Solución de seguridad para una red de campus académico
 **Fase:** Implementación — Pruebas sobre el slice del laboratorio
-**Estado:** Borrador formal para revisión
+**Estado:** Slice anterior (2026-10/11) — conservado como registro; se re-ejecuta sobre el slice nuevo con la red de datos ([05-secuencia-y-validacion.md](../05-secuencia-y-validacion.md) §3).
+**Estado original:** Borrador formal para revisión
 
 ---
 

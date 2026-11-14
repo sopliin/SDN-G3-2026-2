@@ -58,16 +58,24 @@ campus-sdn/
 │   │       ├── platform/        # Compose por VM: levantar, detener y salud
 │   │       ├── onos/            # contenedor ONOS por VM y cluster.json del clúster
 │   │       ├── switches/        # OVS: bridge, VLANs y controladores (la escalera la instala ONOS)
-│   │       ├── identity/        # corte vertical a S1: construye en la laptop y carga los bundles propios
+│   │       ├── identity/        # construye en la laptop y carga los bundles propios según `own_services`
 │   │       └── verify/          # salud de los servicios propios y conteo de switches desde onos1
-│   ├── compose/                 # un archivo por VM de plataforma y ONOS
+│   ├── compose/                 # un Compose raíz por VM de plataforma más los stacks que incluye
 │   │   ├── onos.yml             # ONOS y el adaptador I2 por VM, red host
+│   │   ├── srv1-platform.yml    # SRV-1: IdP primario, bus, espejo y Redis (include)
+│   │   ├── srv2-platform.yml    # SRV-2: M1–M4, PostgreSQL primario y HAProxy/keepalived (VIP 10.0.0.10)
+│   │   ├── srv3-platform.yml    # SRV-3: M1–M4 y HAProxy/keepalived de respaldo
 │   │   ├── s1-identity.yml      # S1 completo: Portal, IAM, Registry (build) + FreeRADIUS y OpenLDAP
-│   │   ├── s2-observability.yml # Prometheus, Grafana y Suricata (espejo) de S2
-│   │   ├── prometheus.yml       # configuración de rastreo de Prometheus
-│   │   ├── s3-response.yml      # S3 completo: Incidentes, Políticas (build) + PostgreSQL
-│   │   ├── s4-governance.yml    # RabbitMQ, el bus de eventos
-│   │   └── minimal-slice.yml    # corte mínimo para el slice actual (bus, IAM, portal, registro, adaptador)
+│   │   ├── s2-observability.yml # S2: Monitor, Detección, Prometheus y Grafana + espejo (mirror.yml)
+│   │   ├── s3-response.yml      # S3 completo: Incidentes, Políticas, Auditoría + PostgreSQL (wrappers s3-services/postgres)
+│   │   ├── s4-governance.yml    # S4 completo: Consola + bus (wrappers s4-services/rabbitmq)
+│   │   ├── idp.yml · mirror.yml · rabbitmq.yml · postgres.yml · redis.yml  # piezas sueltas de SRV-1/2
+│   │   ├── s3-services.yml · s4-services.yml  # los servicios sin su dato (activo-activo en SRV-2/3)
+│   │   ├── haproxy.yml          # HAProxy + keepalived (red host, VIP 10.0.0.10)
+│   │   ├── haproxy/ · keepalived/  # plantillas haproxy.cfg.j2 y keepalived.conf.j2 del rol platform
+│   │   ├── atomix.yml           # almacenamiento Raft del clúster ONOS (atomix/atomix:3.1.9, puerto 5679)
+│   │   ├── atomix/              # plantilla atomix.json.j2 (grupos system y raft) del rol platform
+│   │   └── prometheus.yml       # configuración de rastreo de Prometheus
 │   ├── scripts/
 │   │   └── install_skeleton.py  # esqueleto BASE + confianza 60 por la API REST de ONOS
 │   ├── native/                  # corte nativo (slice sin disco/RAM para imágenes propias)
@@ -95,6 +103,8 @@ campus-sdn/
 │   ├── 01-mapa.md               # este documento: estructura y sus hilos
 │   ├── 02-estado.md             # avances y pendientes, actualizado en cada cierre
 │   ├── 03-formatos.md           # tutorial: leer YAML, JSON, OpenAPI y Compose
+│   ├── 04-alta-disponibilidad.md  # clúster ONOS/Atomix y activo-activo HAProxy/keepalived: cómo se comportan
+│   ├── 05-secuencia-y-validacion.md  # lo desplegado, lo pendiente y cómo se valida cada hito
 │   ├── adr/                     # decisiones de código; se llena al decidir
 │   ├── mediciones/              # cifras medidas: recursos, latencias, llenado (se llena al medir)
 │   │   └── 01-consumo-de-recursos.md       # CPU/RAM/disco por servicio, módulo, controlador y switch
@@ -106,6 +116,10 @@ campus-sdn/
 │   │   ├── 04-autenticacion-y-autorizacion.md # los tres reinos reales, TOTP en dos pasos, sesión y flujos
 │   │   └── 05-corte-nativo-y-r4.md            # corte nativo en el slice del grupo y campañas de medición
 │   └── runbooks/                # procedimientos operativos; se llenan al operar
+│       ├── 01-despliegue-del-slice.md            # el día-D, de las VMs entregadas al entorno verificado
+│       ├── 03-verificacion-del-plano-de-control.md  # clúster ONOS/Atomix, apps, switches y failover: verificable hoy
+│       ├── 04-perfil-base.md                     # el esqueleto BASE: lo permitido y denegado sin sesión (con la red de datos)
+│       └── 05-r1-control-de-acceso.md            # R1: tres reinos, sesión con alcance, elevación y matriz P03–P36
 │
 ├── policy/                      # la política de autorización: quién puede qué
 │   ├── permissions.yaml         # roles, perfiles, permisos, condiciones, asignaciones
@@ -161,6 +175,8 @@ Y una tabla de respuesta rápida para ubicarse sin leer todo:
 | Dónde vivirá el código de cada servicio | [`services/`](../services/) |
 | Cómo se demuestra que algo funciona | [`tests/`](../tests/) |
 | Cómo se prueba en el slice actual (inventario, perfil base, verificación) | [`docs/pruebas/`](pruebas/) |
+| Cómo está montada la alta disponibilidad (ONOS/Atomix, HAProxy/keepalived) | [`docs/04-alta-disponibilidad.md`](04-alta-disponibilidad.md) |
+| Qué está desplegado, qué falta y cómo se valida | [`docs/05-secuencia-y-validacion.md`](05-secuencia-y-validacion.md) |
 | Qué está hecho y qué falta | [`docs/02-estado.md`](02-estado.md) |
 
 ## 5. Las capas, a fondo
@@ -270,8 +286,10 @@ Y una tabla de respuesta rápida para ubicarse sin leer todo:
 | [01-mapa.md](01-mapa.md) | Este documento: la estructura y sus hilos |
 | [02-estado.md](02-estado.md) | Avances y pendientes, con fechas — se actualiza en cada cierre |
 | [03-formatos.md](03-formatos.md) | Tutorial de YAML, JSON, OpenAPI y Compose para quien nunca los vio |
+| [04-alta-disponibilidad.md](04-alta-disponibilidad.md) | Cómo está montada y se comporta la alta disponibilidad: clúster ONOS sobre Atomix y activo-activo HAProxy/keepalived con la VIP 10.0.0.10; declara la etapa 2 (datos replicados) sin desplegar |
+| [05-secuencia-y-validacion.md](05-secuencia-y-validacion.md) | La ruta completa: lo desplegado, lo pendiente (red de datos, `ens6`, etapa 2) y el criterio de validación de cada hito |
 | [adr/](adr/) | Decisiones de código que no se deducen del código (se llenan al decidir) |
-| [runbooks/](runbooks/) | Procedimientos operativos paso a paso: [01-despliegue-del-slice.md](runbooks/01-despliegue-del-slice.md) — el día-D, de las VMs recién entregadas al entorno verificado |
+| [runbooks/](runbooks/) | Procedimientos operativos paso a paso: [01-despliegue-del-slice.md](runbooks/01-despliegue-del-slice.md) — el día-D; [03-verificacion-del-plano-de-control.md](runbooks/03-verificacion-del-plano-de-control.md) — controlador y switches; [04-perfil-base.md](runbooks/04-perfil-base.md) — esqueleto BASE; [05-r1-control-de-acceso.md](runbooks/05-r1-control-de-acceso.md) — R1 y la matriz de permisos (el 02 es el registro del slice anterior) |
 
 El corpus de arquitectura **no** está aquí: vive en [`../../docs/fases/`](../../docs/fases/) y se enlaza, no se copia. Los nombres de estos archivos sí están en español y numerados por orden de lectura — es la excepción deliberada a la regla de idioma, documentada en [`../CLAUDE.md`](../CLAUDE.md).
 

@@ -1,0 +1,26 @@
+# PostgreSQL — base de datos de S3. Primario en SRV-2; la réplica en
+# SRV-3 y el respaldo lógico en SRV-1 llegan en la etapa de alta
+# disponibilidad (la promoción forma parte de la campaña de medición).
+# Los servicios aún no lo consumen: la conexión llega con el paso del
+# plan que persiste políticas e incidentes.
+services:
+  postgres:
+    image: postgres:16
+    container_name: s3-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definir POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: bd_politicas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d bd_politicas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

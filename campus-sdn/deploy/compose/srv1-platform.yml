@@ -1,0 +1,9 @@
+# SRV-1 — infraestructura compartida del plano de control y servicios:
+# ONOS-1 (por onos.yml), el IdP primario, el bus, el espejo y Redis.
+# Los módulos M1–M4 corren en SRV-2/3; aquí vive lo que comparten.
+include:
+  - idp.yml
+  - rabbitmq.yml
+  - mirror.yml
+  - redis.yml
+  - atomix.yml

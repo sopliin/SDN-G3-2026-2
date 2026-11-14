@@ -6,88 +6,79 @@
 
 ---
 
-Todo lo que aquí se afirma fue **verificado en el slice** (sesiones SSH, capturas de paquetes, contadores de puertos y flujos, API de ONOS), no asumido. Cuando el slice nuevo reemplace a este, el documento se actualiza entero; sirve además como catálogo de lo que se puede encontrar en una nube privada como la del curso (VNRT): NICs sin usar, restos de instalaciones, configuraciones de prácticas anteriores.
+Todo lo que aquí se afirma fue **verificado en el slice** (sesiones SSH del 2026-11-13). El slice de catorce VMs reemplaza al anterior de ocho (tres switches, un controlador, cuatro hosts y un gateway); aquel queda registrado en el historial de git y sus inventarios crudos en `implementation/inventario/old/`. Las salidas de este inventario están en `implementation/inventario/new/`, una por VM, generadas con `inventario_slice.sh` (pasivo en todas las VMs; sondas `--probe` en los switches).
 
 ## 1. Acceso
 
-| Puerta | Dirección | Puertos |
-|---|---|---|
-| Gateway | `10.20.11.147` | SSH puerto 22 |
-| controller | vía gateway | 5800 |
-| sw1 / sw2 / sw3 | vía gateway | 5801 / 5802 / 5803 |
-| h1 / h2 / h3 / h4 | vía gateway | 5811 / 5812 / 5813 / 5814 |
+La laptop entra por el gateway: `ssh ubuntu@10.20.12.185`. El resto de las VMs se alcanzan por DNAT del gateway, con el mismo usuario `ubuntu` y los puertos de la tabla. Las credenciales no se documentan.
 
-Credenciales: `ubuntu` / `ubuntu` en todas las VMs (también para `sudo`); ONOS: `karaf` / `karaf`; RabbitMQ del corte mínimo: `plataforma` / el secreto del `.env` (en `/tmp/campus/.env` del controller). La red 192.168.0.0/24 es interna del slice: se alcanza desde las VMs; desde la laptop, por túneles SSH.
+| VM | Vía | Puerto SSH |
+|---|---|---|
+| gw | directo | 22 |
+| srv1 / srv2 / srv3 | gateway | 5811 / 5812 / 5813 |
+| sw1–sw6 | gateway | 5821–5826 |
+| h1–h4 | gateway | 5801–5804 |
+
+Las reglas DNAT viven en `iptables -t nat` del gateway (puerto 58XX → `192.168.0.XX:22`): 5811–5813 a los servidores, 5821–5826 a los switches y 5801–5804 a los hosts, restringidas a `ens3`. Desde el 2026-11-13 son persistentes: `iptables-persistent` las restaura al arranque (`/etc/iptables/rules.v4`, unidad `netfilter-persistent` habilitada). La red 192.168.0.0/24 es la gestión interna; desde la laptop solo el gateway la alcanza.
 
 ## 2. Las redes
 
-| Red | Uso (según el LAB5 del curso) | Presente en el slice |
+| Red | Uso | Estado en el slice |
 |---|---|---|
-| Roja — ACCESS, 192.168.0.0/24 | Gestión: SSH de Ansible y canal OpenFlow (OOB) | ✓ `ens3` de todas las VMs |
-| Gris — SDN, 10.0.0.0/24 | Plano de datos: switches OVS y hosts | ✓ `ens4` de h1–h4 y los puertos de los bridges |
-| 172.16.0.0/24 | **No documentada en el curso** | ✓ en interfaces sueltas (ver §5) |
+| 10.20.12.0/24 | Red de la nube privada; `ens3` del gateway por DHCP | ✓ real |
+| 192.168.0.0/24 | Gestión OOB: `ens3` de las VMs y `ens4` del gateway | ✓ persistente: netplan estático en las catorce VMs (2026-11-13) |
+| 10.0.0.0/24 | Datos (plano SDN) | ✗ pendiente: las NIC de datos están abajo y sin dirección |
 
 ## 3. Las VMs
 
-| VM | vCPU | RAM | Disco | Interfaces (MAC) | Rol en la prueba |
+| VM | vCPU | RAM | Disco | NICs | `ens3` gestión | Rol |
+|---|---|---:|---:|---|---|---|
+| srv1 | 4 | 3915 MiB | vda 20 GB (raíz 20 GB, 16 G libres) | `ens3`–`ens5` | 192.168.0.11 | ONOS-1, IdP, bus, respaldos |
+| srv2 | 4 | 3915 MiB | vda 20 GB (raíz 20 GB, 16 G libres) | `ens3`–`ens5` | 192.168.0.12 | ONOS-2, módulos, plataforma |
+| srv3 | 4 | 3915 MiB | vda 20 GB (raíz 20 GB, 17 G libres) | `ens3`–`ens5` | 192.168.0.13 | ONOS-3, módulos, plataforma |
+| sw1 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens11` (9) | 192.168.0.21 | núcleo |
+| sw2 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens7` (5) | 192.168.0.22 | distribución |
+| sw3 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens7` (5) | 192.168.0.23 | acceso de h1 y h2 |
+| sw4 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens10` (8) | 192.168.0.24 | núcleo |
+| sw5 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens7` (5) | 192.168.0.25 | distribución |
+| sw6 | 1 | 961 MiB | vda 7 GB (raíz 6 GB) | `ens3`–`ens7` (5) | 192.168.0.26 | acceso de h3 y h4 |
+| h1 | 1 | 1968 MiB | vda 10 GB | `ens3`–`ens4` | 192.168.0.101 | cliente |
+| h2 | 1 | 1968 MiB | vda 10 GB | `ens3`–`ens4` | 192.168.0.102 | cliente y generador de tráfico |
+| h3 | 1 | 1968 MiB | vda 10 GB | `ens3`–`ens4` | 192.168.0.103 | cliente y generador de tráfico |
+| h4 | 1 | 1968 MiB | vda 10 GB | `ens3`–`ens4` | 192.168.0.104 | cliente |
+| gw | 1 | 961 MiB | vda 7 GB | `ens3`–`ens5` | 10.20.12.185 (DHCP) · `ens4` 192.168.0.1 | NAT, DHCP, DNS |
+
+Todas: Ubuntu 24.04 LTS (kernel 6.8.0-38), KVM, sin swap. La suma del slice es **23 vCPU, 27 GB de RAM y 149 GB de disco**. Las NIC de datos (`ens4` en adelante) están cableadas y con portadora en los catorce equipos (2026-11-13): los servidores con su bond activo-respaldo, los hosts y el gateway con su NIC de datos, y los seis switches con los puertos en `br0` (el rol `switches` los levanta y la unidad `campus-sdn-ports` los mantiene tras cada arranque).
+
+## 4. Plataforma
+
+Al cierre del 2026-11-13 el despliegue está completo (verificado en el slice): Open vSwitch 3.3.9 con `br0` (fail_mode secure, trunks 10/20/30, controladores `tcp:192.168.0.11–13:6653`) en sw1–sw6; Docker 29 en srv1–srv3 y h1; el clúster ONOS 2.7.0 formado en srv1–srv3 sobre el almacenamiento Atomix 3.1.9 (un contenedor por servidor, puerto 5679) con quórum y los seis switches conectados y disponibles; la plataforma desplegada por VM (SRV-1: IdP, bus, espejo y Redis; SRV-2/3: M1–M4 con HAProxy/keepalived) con `make status` en verde. El detalle del montaje de alta disponibilidad está en [`04-alta-disponibilidad.md`](../04-alta-disponibilidad.md) y la secuencia completa en [`05-secuencia-y-validacion.md`](../05-secuencia-y-validacion.md). Las sondas de capacidades (`--probe`: meters, groups, espejo, sFlow) se ejecutaron el 2026-11-13 y están en [`04_capacidades_del_switch.md`](../../../plan/implementation/04_capacidades_del_switch.md) §7. El plano de datos quedó descubierto el mismo día: ONOS ve los **10 enlaces físicos** entre los seis switches (20 dirigidos) y las ubicaciones de los equipos finales (§6).
+
+## 5. Hallazgos
+
+1. **La raíz de los servidores se creció a los 20 GB del disco (2026-11-13).** Llegó de 6 GB con el resto del disco sin asignar; tras crecer la partición quedan 16–17 GB libres por servidor. Sin ese paso, el límite de 10 GB se habría repetido en la práctica con 6. Los switches y el gateway conservan raíces de 6 GB sobre discos de 7 GB, y los hosts 6 GB sobre 10 GB; la ganancia de crecerlos es marginal.
+2. **`ens6` falta solo para el espejo de SRV-1.** Los servidores traen `ens3` (gestión), `ens4` y `ens5` (datos): el agregado activo-respaldo ya está montado entre SW1 y SW4. La cuarta NIC sería `ens6`, el espejo del plano de datos hacia Suricata; no la necesita el bond ni R1/R2, y R4 puede medirse con los contadores de puerto mientras no llegue.
+3. **Las IP de gestión y el DNAT se hicieron persistentes (2026-11-13).** El netplan de las catorce VMs es estático (`/etc/netplan/01-gestion.yaml`): `ens3` con su dirección fija, DNS `8.8.8.8`/`1.1.1.1` y ruta por defecto vía 192.168.0.1; el gateway conserva `ens3` por DHCP de la nube y `ens4` en 192.168.0.1/24. La configuración de red de cloud-init quedó deshabilitada (`99-disable-network-config.cfg`) y el DNAT del gateway guardado con `iptables-persistent`; `ip_forward` ya era persistente en `/etc/sysctl.conf`. Verificado con un reinicio real de h4: dirección, ruta, DNS, hostname e internet volvieron solos.
+4. **Hostnames estandarizados y protegidos.** Las VMs se renombraron a `srv1`–`srv3`, `sw1`–`sw6`, `h1`–`h4` y `gw` (los servidores estaban como `svr-1/2/3`), con la línea `127.0.1.1` coherente en `/etc/hosts` y `preserve_hostname: true` de cloud-init para que el nombre sobreviva reinicios.
+5. **Los bonds nacían con la misma MAC y sin monitoreo de enlace.** systemd-udev deriva la MAC de `bond0` del machine-id, compartido por las VMs clonadas: los tres bonds salían con `ee:f9:67:05:32:10` y ONOS veía un solo host con las IP `.12` y `.13`. Además, el bond se creó con `MII Polling Interval: 0`, de modo que el activo-respaldo nunca habría conmutado ante una caída. El rol `dataplane` fija la MAC del bond a la permanente de `ens4` (`fa:16:3e:71:21:0b`, `da:11:77`, `ce:9f:31`) y `mii-monitor-interval: 100`; verificado con una caída real de `ens4` en srv3: conmutó a `ens5`, ONOS la ubicó en SW4 y al volver recuperó el enlace primario.
+
+## 6. Topología
+
+Jerarquía 3×2: **SW1/SW4 núcleo, SW2/SW5 distribución, SW3/SW6 acceso**. ONOS descubrió por LLDP **20 enlaces dirigidos = 10 enlaces físicos** (2026-11-13): SW1↔SW4 doble (`ens7` y `ens8`), SW1↔SW2, SW1↔SW5, SW4↔SW2, SW4↔SW5, SW2↔SW3, SW2↔SW6, SW5↔SW3 y SW5↔SW6. Los servidores son dual-homed a SW1 (activo) y SW4 (respaldo); el gateway cuelga de SW1; h1/h2 de SW3 y h3/h4 de SW6.
+
+**El plano de datos usa un árbol, no el grafo completo (piloto).** La red de la nube filtra los BPDUs entre VMs, así que RSTP no converge; con el reenvío NORMAL del esqueleto, dos enlaces redundantes activos en la misma VLAN duplicarían cada trama y la inundarían en bucle. El rol `switches` deja los cinco enlaces redundantes (el segundo SW1↔SW4, SW1↔SW5, SW4↔SW2, SW2↔SW6 y SW5↔SW3) en la VLAN 99, donde solo viaja LLDP: ONOS los sigue viendo y la VLAN 10 de datos recorre el árbol SW1–SW4, SW1–SW2, SW2–SW3, SW4–SW5, SW5–SW6. La redundancia de datos vuelve cuando el controlador instale los caminos calculados; hasta entonces, la caída de un enlace del árbol parte el plano de datos.
+
+Ubicaciones aprendidas por ONOS (puerto OpenFlow; la interfaz del switch es `ens(n+3)`):
+
+| Equipo | IP de datos | MAC del enlace | Switch | Puerto OF | Interfaz del switch |
 |---|---|---|---|---|---|
-| controller | 2 | 1.9 GiB | 9.8 G (1.7 G libres) | `ens3` 192.168.0.10 (fa:16:3e:f6:07:ad) · `ens4` 172.16.0.1 (fa:16:3e:2a:ca:75) | ONOS, corte mínimo, consola |
-| sw1 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.11 · `ens4/5/6` al bridge · interno `sw1` 172.16.0.1 (a2:23:f2:c0:45:47) | raíz del plano de datos |
-| sw2 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.12 · `ens4/5/6` al bridge · interno `sw2` 172.16.0.2 (1a:74:90:39:89:4a) | acceso de h1 y h2 |
-| sw3 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.13 · `ens4/5/6` al bridge · interno `sw3` 172.16.0.3 (ca:27:2d:26:57:44) | acceso de h3 y h4 |
-| h1 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.21 · `ens4` 10.0.0.1 (fa:16:3e:88:05:79) | el usuario que entra |
-| h2 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.22 · `ens4` 10.0.0.2 (fa:16:3e:a6:2d:a9) | destino de la escalera |
-| h3 | 1 | 961 MiB | 5.9 G (2.3 G libres) | `ens3` 192.168.0.23 · `ens4` 10.0.0.3 (fa:16:3e:05:4c:50) | el «Servidor 3»: corre el Portal |
-| h4 | 1 | 961 MiB | 5.9 G (2.4 G libres) | `ens3` 192.168.0.24 · `ens4` 10.0.0.4 (fa:16:3e:41:9b:6d) | disponible |
+| srv1 | 10.0.0.11 | fa:16:3e:71:21:0b | sw1 | 1 | ens4 |
+| srv2 | 10.0.0.12 | fa:16:3e:da:11:77 | sw1 | 2 | ens5 |
+| srv3 | 10.0.0.13 | fa:16:3e:ce:9f:31 | sw1 | 3 | ens6 |
+| gw | 10.0.0.1 | fa:16:3e:91:bb:a5 | sw1 | 8 | ens11 |
+| h1 | 10.0.0.101 | fa:16:3e:79:48:f0 | sw3 | 3 | ens6 |
+| h2 | 10.0.0.102 | fa:16:3e:6e:90:ee | sw3 | 4 | ens7 |
+| h3 | 10.0.0.103 | fa:16:3e:0b:3a:f4 | sw6 | 3 | ens6 |
+| h4 | 10.0.0.104 | fa:16:3e:2c:c9:01 | sw6 | 4 | ens7 |
 
-El disco del controller está apretado (1.7 G libres): las capas de Docker de las imágenes que se han ido cargando ocupan la diferencia.
-
-## 4. Enlaces y topología (verificados)
-
-ONOS aprendió los enlaces por LLDP y las ubicaciones de los hosts por ARP:
-
-```text
-                 sw1 (raíz)
-        sw1:2 ↔ sw2:1        sw1:3 ↔ sw3:3
-       /          \          /           \
-h1 ── sw2:2   h2 ── sw2:3   h3 ── sw3:2   h4 ── sw3:1
-10.0.0.1    10.0.0.2      10.0.0.3     10.0.0.4
-```
-
-- Puertos OF de sw2: 1=`ens4` (hacia sw1), 2=`ens5` (h1), 3=`ens6` (h2).
-- Puertos OF de sw3: 1=`ens6` (h4), 2=`ens5` (h3), 3=`ens4` (hacia sw1).
-- sw1: puerto 1=`ens4` (el cable de datos del controller, ver §7), 2=`ens5` (hacia sw2), 3=`ens6` (hacia sw3).
-- El bridge OVS se llama como el switch (`sw1`, `sw2`, `sw3`), `fail_mode: secure`, OpenFlow 1.3, controlador `tcp:192.168.0.10:6653`. Los datapaths: sw1 `0000a223f2c04547`, sw2 `00001a749039894a`, sw3 `0000ca272d265744`.
-- El controller está aprendido por ONOS como anfitrión en sw1:1 (su ARP por `ens4` entra al plano de datos).
-
-## 5. Restos y cosas fuera de uso (con cuidado: no borrar sin confirmar)
-
-- **IP duplicada 172.16.0.1**: la tiene el `ens4` del controller y el puerto interno del bridge de sw1. No se ve tráfico que dependa de ninguna de las dos; el LAB5 no documenta la red 172.16.0.0/24 en absoluto. sw2 (172.16.0.2) y sw3 (172.16.0.3) completan el patrón: probablemente un esquema de los JPs para algo que no llegó a usarse.
-- **h2 tiene Open vSwitch instalado** con los bridges `sw1` y `sw2` **DOWN** (`ovs-vswitchd` corriendo): restos de una instalación anterior de h2 que ya no se usa. h1, h3 y h4 no tienen OVS.
-- **Imagen `ghcr.io/nohafeynman/tel354-onos:2026-2`** en el controller: es la imagen oficial del LAB5 (836 MB, derivada de `onosproject/onos:2.7.0`). El contenedor `onos` que corre usa la oficial; la del curso está descargada pero sin usar.
-- **`~/v1.2.zip` en el controller**: fuentes de Floodlight 1.2 (material del LAB4).
-- **`docker0` DOWN** en el controller: el bridge de Docker por defecto; los contenedores del corte mínimo viven en `br-9a8e0267c457` (172.18.0.0/16).
-- `multipathd` y `unattended-upgrades` en todas las VMs: paquetes normales de Ubuntu, no son restos.
-- Los hosts no corren ningún servicio salvo SSH (22) — en el LAB4 h3 era el «Servidor 3» conceptual; no hay servidor real levantado. En esta prueba, el Portal corre en h3 (uvicorn, puerto 8080) por decisión de la prueba.
-
-## 6. Rutas
-
-- **Hosts**: `default via 192.168.0.1 dev ens3` (puerta de enlace de gestión); `10.0.0.0/24 dev ens4`; `192.168.0.0/24 dev ens3`. **No** conocen 172.16.0.0/24 por `ens4` (en la prueba se añadió y se retiró; quedó como estaba).
-- **Switches**: solo la subred de gestión por `ens3` y la 172.16.0.0/24 por el puerto interno del bridge.
-- **Controller**: `default via 192.168.0.1 dev ens3`; `172.16.0.0/24 dev ens4`; las subredes de Docker (172.17/172.18).
-
-## 7. Comportamiento verificado de la nube privada (VNRT)
-
-Son hechos medidos en este slice y valen para interpretar cualquier falla rara:
-
-1. **ONOS purga los flujos que no instala él.** Una entrada puesta por `ovs-ofctl` vive segundos; todo flujo debe entrar por la API REST de ONOS (así lo hace [`install_skeleton.py`](../../deploy/scripts/install_skeleton.py) y el adaptador).
-2. **ONOS sustituye la cookie del JSON** por la suya (derivada del `appId`). El retiro exacto de lo instalado se hace por selectores, no por cookie (verificado en el adaptador).
-3. **El cable de datos del controller es asimétrico**: `ens4` del controller ↔ sw1:1 entrega broadcasts (su ARP llega y ONOS lo aprende) pero **no entrega unicast de retorno hacia la MAC de un host** (el SYN-ACK del portal moría en el camino, con capturas simultáneas en ambos extremos). El unicast hacia la MAC interna de un switch sí cruza (ping 3/3). Esto no afecta la arquitectura del curso (el controller nunca es punto final del plano de datos), pero descarta cualquier diseño que lo ponga en banda.
-4. **La VNRT filtra MACs no conocidas**: una MAC nueva en h1 ni siquiera entró a la fábrica. Cambios de MAC en los hosts requieren que la red virtual la conozca.
-5. El `rx_dropped` de `ens4` del controller descarta la gran mayoría de lo que recibe esa interfaz (conteo del kernel, no de la fábrica): otra señal de que ese enlace no está pensado para tráfico de datos.
-
-## 8. Estado actual de la plataforma en el slice
-
-- **controller**: ONOS 2.7.0 (contenedor `onos`, red host) con apps `hostprovider`, `lldpprovider`, `proxyarp`, `openflow`, `drivers` activas; corte mínimo de 8 contenedores (`mini-rabbitmq`, `mini-iam`, `mini-portal`, `mini-adapter`, `mini-registry`, `mini-console`, `mini-freeradius`, `mini-openldap`) sanos; `.env` en `/tmp/campus/` con los datapaths reales y los secretos de RADIUS/LDAP; `STUB_VERIFY=0` (autenticación real). El Portal (I3) corre en el `mini-portal` del controller (192.168.0.10:8080, gestión) — **no es alcanzable en banda** desde el plano de datos (limitación de la VNRT, §7).
-- **h1–h4**: hosts limpios, sin servicios (solo SSH). El portal que corrió en h3 durante la prueba del ciclo completo se retiró; h3 quedó como un host más.
-- **sw1/sw2/sw3**: solo las reglas de punteo de ONOS (ARP/LLDP) salvo cuando un manual instala el esqueleto. Las reglas de la plataforma se instalan y se retiran con los manuales de esta carpeta.
+Los enlaces de respaldo de los servidores (`ens5`) cuelgan de SW4 por sus puertos 1–3 y solo aparecen como ubicación cuando el bond conmuta (verificado en srv3: SW4 puerto 3).

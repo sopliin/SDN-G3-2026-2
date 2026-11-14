@@ -1,0 +1,46 @@
+# IdP — FreeRADIUS y OpenLDAP (primario en SRV-1; réplica en SRV-2/3
+# dentro de s1-identity.yml). El IAM apunta al primario por RADIUS_HOST.
+# RADIUS_BIND_IP: IP de datos en la que escucha (SRV-1: 10.0.0.11).
+services:
+  freeradius:
+    image: freeradius/freeradius-server:3.2.10
+    container_name: s1-freeradius
+    restart: unless-stopped
+    volumes:
+      - ./radius/clients.conf:/etc/freeradius/clients.conf:ro
+      - ./radius/mods-ldap:/etc/freeradius/mods-enabled/ldap:ro
+      - ./radius/site-default:/etc/freeradius/sites-enabled/default:ro
+    ports:
+      - "${RADIUS_BIND_IP:-0.0.0.0}:1812:1812/udp"
+      - "${RADIUS_BIND_IP:-0.0.0.0}:1813:1813/udp"
+    healthcheck:
+      test: ["CMD-SHELL", "ps -ef | grep -v grep | grep -q freeradius"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: s1-openldap
+    restart: unless-stopped
+    environment:
+      LDAP_ORGANISATION: campus-sdn
+      LDAP_DOMAIN: campus.local
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:?definir LDAP_ADMIN_PASSWORD en .env}
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_PASSWORD:?definir LDAP_READONLY_PASSWORD en .env}
+    volumes:
+      - openldap_data:/var/lib/ldap
+      - openldap_config:/etc/ldap/slapd.d
+    ports:
+      - "127.0.0.1:389:389"
+      - "127.0.0.1:636:636"
+    healthcheck:
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://127.0.0.1 -s base namingContexts >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  openldap_data:
+  openldap_config:
