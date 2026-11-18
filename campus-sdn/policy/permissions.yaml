@@ -362,7 +362,7 @@ permissions:
     name: Read resource
     plane: services
     verb: read
-    resource_types: [own_resource, security_resource, alert, incident, security_log, operational_log, metric, network_resource, switch, sdn_controller, access_policy]
+    resource_types: [own_resource, security_resource, alert, incident, security_log, operational_log, metric, network_resource, switch, sdn_controller, access_policy, academic_service, elevation_request]
     description: Leer el estado o el contenido de un recurso autorizado.
 
   P05:

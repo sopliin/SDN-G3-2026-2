@@ -360,7 +360,7 @@ permissions:
     name: Consultar recurso
     plane: servicios
     verb: read
-    resource_types: [recurso_propio, recurso_seguridad, alerta, incidente, log_seguridad, log_operativo, metrica, recurso_red, switch, controlador_sdn, politica_acceso]
+    resource_types: [recurso_propio, recurso_seguridad, alerta, incidente, log_seguridad, log_operativo, metrica, recurso_red, switch, controlador_sdn, politica_acceso, servicio_academico, solicitud_elevacion]
     description: Leer el estado o el contenido de un recurso autorizado.
 
   P05:
