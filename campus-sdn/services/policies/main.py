@@ -19,6 +19,7 @@ from sdn_common.app import create_app
 from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, utc_now, validate_event
+from services.policies import directory
 
 SERVICE = "policies"
 SCHEMAS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "events"
@@ -164,6 +165,7 @@ async def lifespan(_app):
 
 
 app = create_app(SERVICE, lifespan=lifespan)
+app.include_router(directory.router)
 
 
 @app.get("/elevations")
