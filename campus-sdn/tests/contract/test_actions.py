@@ -69,5 +69,5 @@ def test_elevation_actions_are_bound():
     assert actions["A19"]["permission"] == "P28"
     assert actions["A20"]["permission"] == "P29"
     assert actions["A21"]["permission"] == "P03"
-    assert all(actions[key]["state"] == "designed"
+    assert all(actions[key]["state"] == "implemented"
                for key in ("A19", "A20", "A21"))

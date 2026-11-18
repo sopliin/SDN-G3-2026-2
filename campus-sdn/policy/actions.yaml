@@ -193,7 +193,7 @@ actions:
   path: /elevations
   resource_types:
   - elevation_request
-  state: designed
+  state: implemented
   notes: El académico pide con sesión, recurso, TTL y justificación; la solicitud no
     concede nada.
 - id: A20
@@ -204,7 +204,7 @@ actions:
   path: /elevations/{id}/approve
   resource_types:
   - elevation_request
-  state: designed
+  state: implemented
   notes: Admin/SA; C4 impide aprobar la propia solicitud; la aprobación crea una
     concesión con TTL y aplica el perfil ELEVACIÓN.
 - id: A21
@@ -215,6 +215,6 @@ actions:
   path: /orders
   resource_types:
   - academic_service
-  state: designed
+  state: implemented
   notes: El motor decide P03 sobre la instancia restringida; la concesión instala
     una regla 200 con hard_timeout igual al TTL.

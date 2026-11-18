@@ -94,8 +94,8 @@ que el asignado por contexto, estado de seguridad o vigencia.
 | P25 | Audit operations | `audit` | super_admin: [audit] | — | audit | pendiente de endpoint |
 | P26 | Manage global configuration | `manage_global_config` | super_admin: [global_configuration] | C10 | audit, record_change | pendiente de endpoint |
 | P27 | Manage recovery | `manage_recovery` | super_admin: [platform, configuration] | C10 | audit, record_change | pendiente de endpoint |
-| P28 | Request elevation | `request_elevation` | academic: [elevation_request] | C9 | audit, ttl | pendiente de endpoint |
-| P29 | Approve elevation | `approve_elevation` | network_admin: [elevation_request]<br>super_admin: [elevation_request] | C4 | audit | pendiente de endpoint |
+| P28 | Request elevation | `request_elevation` | academic: [elevation_request] | C9 | audit, ttl | `POST /elevations` (Policies) |
+| P29 | Approve elevation | `approve_elevation` | network_admin: [elevation_request]<br>super_admin: [elevation_request] | C4 | audit | `POST /elevations/{id}/approve` (Policies) |
 | P30 | Register privileged device | `register_privileged_device` | network_admin: [privileged_it_device]<br>super_admin: [privileged_device] | C2 | audit, justify | A06–A08 (puestos) |
 | P31 | Manage sessions | `manage_session` | it_specialist: [session]<br>network_admin: [session]<br>super_admin: [session] | C1, C8 | audit | A14–A15 |
 | P32 | Approve high-impact action | `approve_high_impact` | network_admin: [critical_action_request]<br>super_admin: [critical_action_request] | C1, C4 | audit, link_approval | pendiente de endpoint |
@@ -217,4 +217,4 @@ El ejemplo completo está en [`09_condiciones.md`](../../docs/phases/A-Modelo_de
 | Estado | normal | 1; `comprometido`/`cuarentena` → 0 |
 | Vigencia | TTL de 1 día, 1 semana, 4 o 6 meses, dentro del rango aprobado | 1; expirada → 0 |
 
-El Admin/SA aprueba o concede (P29) con justificación y TTL; la elevación `ELEVATION(scope=nube privada, TTL)` abre el segmento restringido y expira sola. La recomendación usa los atributos del IdP y la sesión; la aprobación es discrecional, pero el estado y la vigencia son vetos duros. En el prototipo faltan los atributos del IdP y las acciones P28/P29; el catálogo las mantiene como **diseñadas, pendientes**.
+El Admin/SA aprueba o concede (P29) con justificación y TTL; la elevación `ELEVATION(scope=nube privada, TTL)` abre el segmento restringido y expira sola. La recomendación usa los atributos del IdP y la sesión; la aprobación es discrecional, pero el estado y la vigencia son vetos duros. Las acciones P28/P29 y la elevación están implementadas en el servicio de Políticas; el catálogo las marca como **implementadas**.

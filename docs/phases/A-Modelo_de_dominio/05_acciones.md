@@ -29,9 +29,9 @@ no se repite aquí.
 
 ## 2. Catálogo de acciones
 
-Las acciones A01–A18 son las que el prototipo expone hoy. A19–A21 son las
-acciones de **elevación** que el modelo exige y que aún no tienen endpoint;
-se incluyen para que el catálogo no oculte el caso de uso.
+Las acciones A01–A21 están implementadas. A19–A21 son las acciones de
+**elevación** (P28/P29/ELEVACIÓN) y se incluyen en el catálogo con su
+endpoint y su traza.
 
 | ID | Acción | Permiso | Sujeto | Recurso | Contexto | Estado | Vigencia |
 |---|---|---|---|---|---|---|---|
@@ -115,12 +115,16 @@ perfil de red y el alcance temporal del recurso.
 
 - **Implementado:** A01–A18, con los permisos y las restricciones de la
   matriz; la traza `iam_decisions`; los puestos y el alcance por rol.
-- **Diseñado, sin endpoint:** A19–A21 (P28/P29/ELEVACIÓN). El IdP del
-  prototipo solo expone `uid` y `cn`; para la recomendación del ejemplo
-  faltan `department`, `cycle`, `building` y `floor` en el directorio y en la
-  consola. La sesión actual no lleva pabellón/piso; el contexto se limita al
-  puesto y a la IP/dispositivo.
-- **Siguiente paso:** añadir esos atributos al IdP y al contexto, exponer
-  P28/P29 con el registro de elevación y TTL, y hacer que A21 instale el
-  perfil ELEVACIÓN. El catálogo de implementación marcará A19–A21 como
-  pendientes hasta entonces.
+- **Implementado:** A01–A21. A19/A20 usan el router de elevaciones del
+  servicio de Políticas (`POST /elevations`, aprobar/rechazar/revocar con
+  P28/P29 y C4); A21 materializa el perfil ELEVACIÓN con el CIDR del
+  recurso y un `hard_timeout_s` igual al TTL, y el motor registra la
+  decisión en `policy_decisions`. La traza de sesión sigue en
+  `iam_decisions`.
+- **Contexto:** el directorio académico (`dir_*`), el DSL, las reglas, el
+  motor y la CLI `policyctl` están implementados en el servicio de
+  Políticas; la consola administra reglas y elevaciones.
+- **Siguiente paso:** completar la operación en el slice (tokens de
+  sincronización/servicio, migraciones y prueba de extremo a extremo) y
+  los pendientes de la especificación 11 (conector real, alcance
+  departamental del Admin, DSL/UI definitivos).

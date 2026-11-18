@@ -2,7 +2,7 @@
 
 **Proyecto:** Solución de seguridad para una red de campus académico
 **Fase:** Implementación — Etapa 2
-**Estado:** Borrador para revisión
+**Estado:** Implementado en el prototipo (2026-11-18)
 
 ---
 
@@ -111,7 +111,7 @@ clave de conflicto es el identificador externo, no el interno.
 | `policy_rules` | `rule_id`, `name`, `effect` (permit/deny), `permission`, `action`, `priority`, `scope` (base/dynamic/grant), `dsl_text`, `subject_expr` (JSONB), `resource_expr`, `context_expr`, `state_expr`, `valid_from`, `valid_to`, `status`, `version`, `created_by` |
 | `policy_rule_versions` | `rule_id`, `version`, `snapshot` (JSONB), `dsl_text`, `created_by`, `created_at`, `reason` |
 | `policy_elevations` | `elevation_id`, `person_id`, `identity_id`, `resource_id`, `requested_by`, `approved_by`, `status`, `ttl_s`, `reason`, `created_at`, `decided_at`, `expires_at`, `grant_id`, `order_cookies` (JSONB) |
-| `policy_decisions` | `decision_id`, `ts`, `subject_id`, `population`, `action`, `permission`, `resource_id`, `context` (JSONB), `state` (JSONB), `validity` (JSONB), `matched_rule_id`, `matched_rule_version`, `matched_grant_id`, `result`, `reasons`, `trace` (JSONB) |
+| `policy_decisions` | `decision_id`, `ts`, `subject_id`, `population`, `action`, `permission`, `resource_id`, `context` (JSONB), `state` (JSONB), `validity` (JSONB), `matched_rule_id`, `matched_rule_version`, `matched_grant_id`, `priority`, `result`, `reasons`, `trace` (JSONB) |
 
 La elevación aprobada crea una fila en `dir_resource_grants` con
 `grant_type=elevation`, `valid_to = now + ttl_s`, y el motor la ve como
@@ -393,3 +393,25 @@ operador, que valida P17/P29/P04 contra el IAM.
   superar una concesión (hoy el SA puede crear un `deny` de prioridad 999).
 - Sincronización de `dir_*` con el IdP cuando la universidad cambie el
   identificador institucional.
+
+## 13. Implementación en el prototipo
+
+La especificación se implementó en el servicio de Políticas y sus
+clientes:
+
+| Pieza | Dónde | Prueba |
+|---|---|---|
+| Almacén y migraciones (`dir_*`, `attr_*`, `policy_*`) | `services/policies/storage.py`, `migrations/001-003` | `tests/unit/test_policy_store.py` |
+| Sync incremental, read model, frescura | `services/policies/directory.py` | `tests/integration/test_policies_directory.py` |
+| DSL, AST, render y validador | `services/policies/dsl.py` | `tests/unit/test_dsl.py` |
+| Catálogo y evaluador | `services/policies/catalog.py`, `evaluator.py` | `tests/unit/test_evaluator.py` |
+| Motor, prioridad, HC y entitlements | `services/policies/engine.py` | `tests/unit/test_engine.py` |
+| Reglas, versiones, preview e impacto | `services/policies/rules.py` | `tests/integration/test_policies_rules.py` |
+| Elevaciones P28/P29/ELEVACIÓN | `services/policies/elevations.py` | `tests/integration/test_policies_elevations.py` |
+| Portal, IAM y consola | `services/portal`, `services/iam`, `services/console` | `test_portal_service.py`, `test_iam_entitlements.py`, `test_console_policy.py` |
+| CLI | `tools/policyctl.py` | `tests/integration/test_policyctl.py` |
+
+La suite completa queda en **419 pruebas en verde y 1 skip** (la prueba
+real de PostgreSQL, que se ejecuta en el despliegue). Los pendientes de
+§12 siguen abiertos; el conector real y la prueba de extremo a extremo en
+el slice son el siguiente paso de operación.

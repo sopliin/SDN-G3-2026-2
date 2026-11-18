@@ -98,3 +98,17 @@
 - [`../tests/contract/test_actions.py`](../tests/contract/test_actions.py) verifica que cada acción referencia un permiso existente y que su recurso está cubierto por una asignación. Las acciones del IdP simulado están marcadas como **prototipo** y no se presentan como permisos de la matriz.
 
 Un cambio de rol, condición o recurso se hace en `permissions.yaml` (y en su gemelo del corpus); una operación nueva se declara en `actions.yaml` y se prueba. No se mezclan.
+
+## 3. Reglas dinámicas y lectura de TI
+
+- El TI puede **leer** reglas, solicitudes de elevación y decisiones
+  (`P04` sobre `access_policy`/`elevation_request`); crear o aprobar sigue
+  siendo `P17`/`P29` de Admin/SA. La asignación `T002` y la `R002` del
+  Admin incluyen esos tipos de lectura.
+- Las reglas se autorizan con el DSL de `services/policies/dsl.py` y se
+  evalúan con prioridad descendente y `deny` en empate; HC-01–HC-04 mandan
+  por encima. Una regla no concede un permiso que el rol no tiene.
+- La operación está en `tools/policyctl.py` y en la consola; el runbook es
+  [`docs/runbooks/07-motor-de-reglas.md`](../docs/runbooks/07-motor-de-reglas.md)
+  y la especificación
+  [`plan/implementation/11_modelo_de_datos_y_motor_de_reglas.md`](../../plan/implementation/11_modelo_de_datos_y_motor_de_reglas.md).

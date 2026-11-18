@@ -154,7 +154,7 @@ Implementaciones: `OvsSwitchClient` para el laboratorio con OVS y `PicosSwitchCl
 | TI intenta una acción de alto impacto | Step-up P32; sin aprobación, denegado. |
 | Administrador aprueba una cuarentena | Aprobación vinculada, ejecución, cierre, auditoría. |
 | Administrador intenta aprobar su propia solicitud | Denegado por C4. |
-| Académico solicita elevación de laboratorio | P28, aprobación P29, perfil ELEVACIÓN con TTL 30 min. |
+| Académico solicita elevación de laboratorio | P28, aprobación P29, perfil ELEVACIÓN con TTL de 1 día, 1 semana, 4 o 6 meses (la instancia `laboratory` del YAML conserva 1800 s como valor de demostración). |
 | Elevación expira | La regla se retira; el perfil vuelve a ACADÉMICO. |
 | Superadministrador configura el controlador | Permitido en ventana, cambio registrado. |
 | Superadministrador configura fuera de ventana | Denegado; emergencia declarada permite con auditoría reforzada. |

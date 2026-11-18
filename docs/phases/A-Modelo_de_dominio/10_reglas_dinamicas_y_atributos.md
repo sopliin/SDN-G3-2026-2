@@ -193,24 +193,19 @@ saltarse las restricciones duras (HC-01 a HC-04) ni la vigencia.
 
 ## 7. Estado en el prototipo
 
-Hoy la política es un YAML estático; la consola administra operadores,
-puestos e IdP, pero **no** reglas dinámicas ni elevaciones. El IdP solo
-expone `uid`/`cn`: faltan `employee_type`, `department`, `cycle`, `courses`
-y `postgraduate`. El puesto tiene `workstation_class`, pero no
-`building`/`floor`; la sesión registra IP, dispositivo y canal. La traza
-`iam_decisions` ya existe y es la base para mostrar la regla aplicada.
+La política base sigue en el YAML; las reglas dinámicas son datos en
+`policy_rules` y se evalúan con el AST. Están implementados:
 
-El siguiente paso, detallado en [`11_modelo_de_datos_y_motor_de_reglas.md`](../../../plan/implementation/11_modelo_de_datos_y_motor_de_reglas.md), es:
+- el read model académico (`dir_*`) y la sincronización incremental;
+- los atributos extensibles (`attr_defs`/`attr_values`) y el catálogo;
+- el DSL compilado, el validador, el preview de impacto y las versiones;
+- el motor con prioridad, `deny` en empate y HC-01–HC-04;
+- las elevaciones P28/P29 con TTL, C4 y perfil ELEVACIÓN;
+- la consola de reglas/elevaciones y la CLI `policyctl`;
+- `policy_decisions` con los ejes, la regla y la prioridad; `iam_decisions`
+  conserva la traza de sesión.
 
-1. añadir los atributos al IdP y al inventario, y sincronizarlos por
-   eventos con el read model académico;
-2. exponer P28/P29 con TTL y registro de elevación;
-3. implementar el DSL, el compilador y el repositorio de reglas (tabla y
-   API) con previsualización de impacto, versión y auditoría;
-4. mostrar reglas, candidatos y decisiones en la consola, y ofrecer la CLI
-   `policyctl` para la operación;
-5. aplicar la prioridad y el `deny` en el motor, con HC-01–HC-04 por
-   encima.
-
-Sin esos pasos, el contexto del ejemplo es **modelo**, no una capacidad
-desplegada; el catálogo de implementación lo marca como pendiente.
+Quedan como pendientes de operación/producción: el conector real con la
+secretaría académica, el alcance departamental del Admin, el lenguaje de
+expresión definitivo y la prueba de extremo a extremo en el slice. El
+detalle está en [`11_modelo_de_datos_y_motor_de_reglas.md`](../../../plan/implementation/11_modelo_de_datos_y_motor_de_reglas.md).
