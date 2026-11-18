@@ -483,16 +483,20 @@ def get_store() -> Store:
     if _store is not None:
         return _store
     store: Store | None = None
-    if _postgres_configured():
+    configured = _postgres_configured()
+    if configured:
         try:
             store = PostgresStore()
             STORE_MODE = "postgres"
         except Exception:
-            store = None
-    if store is None:
+            # PostgreSQL configurado pero inalcanzable: no se usa la
+            # semilla de demostración; el motor debe fallar cerrado.
+            store = MemoryStore()
+            STORE_MODE = "degraded"
+    else:
         store = MemoryStore()
         STORE_MODE = "memory"
-    if not store.rows("dir_people"):
+    if STORE_MODE in ("memory", "postgres") and not store.rows("dir_people"):
         seed_store(store)
     _store = store
     return _store

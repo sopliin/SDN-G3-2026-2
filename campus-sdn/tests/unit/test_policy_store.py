@@ -126,6 +126,23 @@ def test_get_store_is_singleton_and_seeded(monkeypatch):
         reset_store()
 
 
+def test_get_store_fails_closed_when_postgres_unreachable(monkeypatch):
+    from services.policies import storage
+
+    for name in ("PGHOST", "PGUSER", "PGPASSWORD", "PGDATABASE", "PGPORT"):
+        monkeypatch.setenv(name, "test")
+    monkeypatch.setattr(
+        storage, "PostgresStore",
+        lambda: (_ for _ in ()).throw(RuntimeError("postgres down")))
+    reset_store()
+    try:
+        store = get_store()
+        assert storage.STORE_MODE == "degraded"
+        assert store.rows("dir_people") == []
+    finally:
+        reset_store()
+
+
 class _RecordingConnection:
     """Conexión falsa: anota cada sentencia y finge que no hay migradas."""
 
