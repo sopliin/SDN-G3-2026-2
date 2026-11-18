@@ -28,8 +28,26 @@ services:
     environment:
       BUS_URL: ${BUS_URL:-}
       I2_URL: ${I2_URL:-}
+      # El IAM valida la sesión de las rutas de reglas y elevaciones
+      # (require_permission); sin IAM_URL quedarían en modo de pruebas.
+      IAM_URL: http://iam:8001
       RATE_LIMIT_PPS: "1000"
       MITIGATION_TTL_S: "300"
+      # Directorio académico y motor de reglas en bd_politicas (SRV-2),
+      # la misma base del IAM; sin estas variables el servicio usa el
+      # almacén en memoria.
+      PGHOST: 10.0.0.12
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-}
+      PGDATABASE: bd_politicas
+      # Tokens de sincronización y servicio: llegan del entorno, nunca
+      # del repositorio. La frescura del directorio y el umbral de
+      # impacto son parámetros del motor.
+      POLICY_SYNC_TOKEN: ${POLICY_SYNC_TOKEN:-}
+      POLICY_SERVICE_TOKEN: ${POLICY_SERVICE_TOKEN:-}
+      DIRECTORY_MAX_STALENESS_S: "300"
+      PREVIEW_IMPACT_THRESHOLD: "25"
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8006:8006"
     healthcheck:
