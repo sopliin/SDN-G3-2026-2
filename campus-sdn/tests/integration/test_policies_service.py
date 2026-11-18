@@ -17,7 +17,6 @@ def policies_client(monkeypatch):
         lambda url, event: published.append((url, event)),
     )
     policies_module.decisions.clear()
-    policies_module.elevations.clear()
     policies_module.profiles.clear()
     policies_module.thresholds.clear()
     return TestClient(policies_module.app), published
@@ -77,14 +76,11 @@ def test_verified_updates_decision(policies_client):
 
 def test_elevation_stays_pending(policies_client):
     client, _ = policies_client
-    policies_module.handle_event({
-        "type": "ElevationRequested",
-        "payload": {"requester": "a12345", "requested_profile": "laboratory",
-                    "scope": "laboratory", "duration": 1800},
-    })
-    elevations = client.get("/elevations").json()["elevations"]
-    assert len(elevations) == 1
-    assert elevations[0]["state"] == "pending"
+    response = client.post("/elevations", json={
+        "identity_id": "USR-0300", "resource_id": "lab-projects",
+        "ttl_s": 86400, "reason": "proyecto"})
+    assert response.status_code == 201
+    assert response.json()["elevation"]["status"] == "requested"
 
 
 def test_thresholds_put_and_get(policies_client):

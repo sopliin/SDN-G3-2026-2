@@ -20,6 +20,7 @@ from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, utc_now, validate_event
 from services.policies import directory
+from services.policies import elevations
 from services.policies import rules
 
 SERVICE = "policies"
@@ -29,7 +30,6 @@ BINDINGS = ["IncidentOpened", "MitigationVerified", "MitigationExpired",
             "ElevationRequested", "MAC_Moved"]
 
 decisions: dict[str, dict] = {}      # incidente → decisión y resultado
-elevations: dict[str, dict] = {}     # pendientes de elevación
 profiles: dict = {}                  # I7: perfiles (bd_politicas después)
 thresholds: dict = {}                # I7: umbrales
 
@@ -136,14 +136,8 @@ def handle_event(event: dict) -> bool:
         return True
 
     if event_type == "ElevationRequested":
-        elevations[payload["requester"]] = {
-            "requester": payload["requester"],
-            "requested_profile": payload["requested_profile"],
-            "scope": payload["scope"],
-            "duration": payload["duration"],
-            "requested_at": utc_now(),
-            "state": "pending",
-        }
+        # La solicitud real la crea el portal por P28 en el router de
+        # elevaciones; el eco del bus no se duplica en memoria.
         return True
 
     if event_type == "MAC_Moved":
@@ -168,12 +162,7 @@ async def lifespan(_app):
 app = create_app(SERVICE, lifespan=lifespan)
 app.include_router(directory.router)
 app.include_router(rules.router)
-
-
-@app.get("/elevations")
-def list_elevations():
-    """I7: elevaciones pendientes e históricas."""
-    return {"elevations": list(elevations.values())}
+app.include_router(elevations.router)
 
 
 @app.get("/profiles")
