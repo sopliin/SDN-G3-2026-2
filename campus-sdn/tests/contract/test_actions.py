@@ -62,3 +62,12 @@ def test_prototype_actions_are_marked():
     for action in load_actions():
         if action.get("prototype"):
             assert action["permission"] in load_policy()["permissions"]
+
+
+def test_elevation_actions_are_bound():
+    actions = {action["id"]: action for action in load_actions()}
+    assert actions["A19"]["permission"] == "P28"
+    assert actions["A20"]["permission"] == "P29"
+    assert actions["A21"]["permission"] == "P03"
+    assert all(actions[key]["state"] == "designed"
+               for key in ("A19", "A20", "A21"))

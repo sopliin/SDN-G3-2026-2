@@ -42,3 +42,12 @@ def test_threshold_adjustment():
 def test_unknown_role_or_permission_is_denied():
     assert not _allowed("nadie", "P09", "alert")
     assert not _allowed("academic", "P99", "alert")
+
+
+def test_it_specialist_reads_rules_and_elevations():
+    assert _allowed("it_specialist", "P04", "access_policy")
+    assert _allowed("it_specialist", "P04", "elevation_request")
+
+
+def test_academic_cannot_manage_rules():
+    assert not _allowed("academic", "P17", "access_policy")
