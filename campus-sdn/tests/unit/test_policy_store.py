@@ -48,6 +48,13 @@ def test_upsert_is_idempotent_by_primary_key():
     assert store.rows("dir_people")[-1]["display_name"] == "X2"
 
 
+def test_upsert_requires_primary_key():
+    store = MemoryStore()
+    with pytest.raises(ValueError):
+        store.upsert("dir_people", {"display_name": "sin clave"})
+    assert store.rows("dir_people") == []
+
+
 def test_meta_roundtrip():
     store = MemoryStore()
     store.meta_set("directory:last_sync_at:test", "2026-11-18T12:00:00Z")
@@ -74,6 +81,8 @@ def test_migrations_declare_core_and_rule_tables():
         assert f"CREATE TABLE IF NOT EXISTS {table}" in policy_sql
     # La tarea 8 retira las órdenes I2 con las cookies guardadas.
     assert "order_cookies JSONB NOT NULL DEFAULT '[]'" in policy_sql
+    priority_sql = (MIGRATIONS / "003_decision_priority.sql").read_text()
+    assert "ADD COLUMN IF NOT EXISTS priority" in priority_sql
 
 
 def test_append_assigns_serial_decision_ids():
@@ -82,8 +91,12 @@ def test_append_assigns_serial_decision_ids():
                          {"subject_id": "USR-1", "result": "permit"})
     second = store.append("policy_decisions",
                           {"subject_id": "USR-2", "result": "deny"})
+    third = store.append("policy_decisions",
+                         {"decision_id": None, "subject_id": "USR-3",
+                          "result": "permit"})
     assert first["decision_id"] == 1
     assert second["decision_id"] == 2
+    assert third["decision_id"] == 3
 
 
 def test_sessions_for_filters_academic_only():
@@ -98,10 +111,10 @@ def test_sessions_for_filters_academic_only():
          "profile_or_role": "academic"},
     ]
     sessions = store.sessions_for(["USR-0056"])
-    assert {row["token"] for row in sessions} == {"S1", "S2"}
+    # Fail-closed: la sesión sin rol (S2) no recibe la concesión.
+    assert {row["token"] for row in sessions} == {"S1"}
     assert all(row["identity"] == "USR-0056" for row in sessions)
-    assert {row["token"] for row in sessions
-            if row["profile_or_role"] == "academic"} == {"S1", "S2"}
+    assert all(row["profile_or_role"] == "academic" for row in sessions)
 
 
 def test_seed_is_idempotent():
@@ -169,19 +182,27 @@ def test_apply_migrations_executes_each_statement_in_order():
     assert all(";" not in query for query in queries)
     versions = [params[0] for query, params in conn.executed
                 if "INSERT INTO schema_migrations" in query]
-    assert versions == ["001_directory.sql", "002_policy.sql"]
+    assert versions == ["001_directory.sql", "002_policy.sql",
+                        "003_decision_priority.sql"]
 
     def first_index(needle):
         return next(i for i, query in enumerate(queries) if needle in query)
 
+    def version_index(version):
+        return next(i for i, (query, params) in enumerate(conn.executed)
+                    if "INSERT INTO schema_migrations" in query
+                    and params and params[0] == version)
+
     assert first_index("CREATE TABLE IF NOT EXISTS dir_people") \
-        < first_index("INSERT INTO schema_migrations")
-    assert first_index("INSERT INTO schema_migrations") \
+        < version_index("001_directory.sql")
+    assert version_index("001_directory.sql") \
         < first_index("CREATE TABLE IF NOT EXISTS policy_rules")
     assert first_index("CREATE TABLE IF NOT EXISTS policy_meta") \
-        < next(i for i, (query, params) in enumerate(conn.executed)
-               if "INSERT INTO schema_migrations" in query
-               and params and params[0] == "002_policy.sql")
+        < version_index("002_policy.sql")
+    assert version_index("002_policy.sql") \
+        < first_index("ALTER TABLE policy_decisions")
+    assert first_index("ALTER TABLE policy_decisions") \
+        < version_index("003_decision_priority.sql")
 
 
 def test_apply_migrations_skips_applied_versions():

@@ -107,6 +107,10 @@ class MemoryStore(Store):
     def upsert(self, table: str, row: dict) -> dict:
         _check_table(table)
         pk = TABLE_PK[table]
+        missing = [key for key in pk if key not in row]
+        if missing:
+            raise ValueError(
+                f"falta la clave primaria de {table}: {missing}")
         for index, existing in enumerate(self.data[table]):
             if all(existing.get(key) == row.get(key) for key in pk):
                 merged = {**existing, **copy.deepcopy(row)}
@@ -121,6 +125,7 @@ class MemoryStore(Store):
         stored = copy.deepcopy(row)
         serial = SERIAL_COLUMNS.get(table)
         if serial and stored.get(serial) is None:
+            stored.pop(serial, None)
             used = [int(item.get(serial) or 0) for item in self.data[table]]
             stored[serial] = max(used, default=0) + 1
         self.data[table].append(stored)
@@ -138,11 +143,11 @@ class MemoryStore(Store):
         for session in self.sessions:
             if session.get("identity") not in wanted:
                 continue
-            if session.get("profile_or_role", "academic") != "academic":
+            # Fail-closed: solo una sesión declarada académica aplica un
+            # perfil; una sesión sin rol no recibe la concesión.
+            if session.get("profile_or_role") != "academic":
                 continue
-            row = dict(session)
-            row.setdefault("profile_or_role", "academic")
-            found.append(row)
+            found.append(dict(session))
         return found
 
     def reset(self) -> None:
@@ -434,8 +439,8 @@ class PostgresStore(Store):
             rows = self._conn.execute(
                 "SELECT token, data FROM iam_sessions "
                 "WHERE data->>'identity' = ANY(%s) "
-                "AND COALESCE(data->>'profile_or_role', 'academic') "
-                "= 'academic'", (list(identities),)).fetchall()
+                "AND data->>'profile_or_role' = 'academic'",
+                (list(identities),)).fetchall()
         except self._psycopg.errors.UndefinedTable:
             return []
         sessions = []
@@ -447,7 +452,7 @@ class PostgresStore(Store):
                 "token": row["token"],
                 "identity": data.get("identity"),
                 "device": data.get("device"),
-                "profile_or_role": data.get("profile_or_role", "academic"),
+                "profile_or_role": data.get("profile_or_role"),
             })
         return sessions
 
@@ -472,12 +477,14 @@ def _postgres_configured() -> bool:
 
 
 def get_store() -> Store:
-    """Devuelve el almacén singleton y lo siembra si está vacío.
+    """Devuelve el almacén singleton.
 
-    Con PostgreSQL configurado y alcanzable usa `PostgresStore`; si el
-    paquete falta o la conexión falla, cae a `MemoryStore` y lo declara
-    en `STORE_MODE`. El fallo no se propaga: el servicio sigue decidiendo
-    con la semilla de pruebas.
+    Con PostgreSQL configurado y alcanzable usa `PostgresStore` y lo
+    siembra si el directorio está vacío. Si `psycopg` falta o la conexión
+    falla, degrada a un `MemoryStore` vacío (`STORE_MODE = "degraded"`):
+    sin directorio el motor no concede nada (fail-closed). Solo el modo
+    sin PostgreSQL configurado —pruebas y desarrollo— arranca con la
+    semilla de demostración.
     """
     global _store, STORE_MODE
     if _store is not None:
