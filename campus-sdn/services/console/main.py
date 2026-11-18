@@ -117,6 +117,41 @@ prototipo.</p>
 <pre id="idp-result"></pre>
 </div>
 <div class="card">
+<h2>Reglas y elevaciones</h2>
+<p>El DSL es la forma de autoría; se valida y previsualiza antes de
+publicar. Una regla afecta a toda la comunidad: revisa el impacto.</p>
+<button id="load-rules">Cargar reglas</button>
+<table id="rules"><thead><tr><th>ID</th><th>Efecto</th><th>Prioridad</th>
+<th>Estado</th><th>Nombre</th></tr></thead><tbody></tbody></table>
+<label>DSL de la regla</label>
+<textarea id="rule-dsl" rows="8">permit P03 "Nube privada — laboratorio"
+  priority 100
+  resource academic_service:lab-projects
+  when subject.employee_type = "student"
+   and subject.department = "telecom"
+   and subject.cycle = 8
+   and "SDN" in subject.courses
+   and context.building = "V"
+  from 2026-08-01 to 2026-12-31</textarea>
+<button id="rule-validate">Validar</button>
+<button id="rule-preview">Previsualizar impacto</button>
+<button id="rule-create">Crear regla</button>
+<pre id="rules-result"></pre>
+
+<h3>Elevaciones</h3>
+<button id="load-elevations">Cargar elevaciones</button>
+<table id="elevations"><thead><tr><th>Solicitante</th><th>Recurso</th>
+<th>TTL</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table>
+
+<h3>Decisiones de recurso</h3>
+<button id="load-policy-decisions">Cargar decisiones</button>
+<table id="policy-decisions"><thead><tr><th>Hora</th><th>Sujeto</th>
+<th>Permiso</th><th>Recurso</th><th>Resultado</th><th>Regla</th>
+<th>Prioridad</th></tr></thead><tbody></tbody></table>
+<pre id="policy-result"></pre>
+</div>
+
+<div class="card">
 <h2>Decisiones de permiso efectivo</h2>
 <p>Traza de los seis ejes: sujeto, acción, recurso, contexto, estado de
 seguridad, vigencia, permiso, decisión y motivos.</p>
@@ -302,6 +337,103 @@ async function loadDecisions() {
   } catch (e) { out.textContent = e.message; }
 }
 document.getElementById('load-decisions').onclick = loadDecisions;
+
+async function loadRules() {
+  const out = document.getElementById('rules-result');
+  try {
+    const data = await adminApi('/admin/rules');
+    const tbody = document.querySelector('#rules tbody');
+    tbody.innerHTML = '';
+    for (const rule of data.rules) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (rule.rule_id || '') + '</td><td>' +
+        (rule.effect || '') + '</td><td>' + (rule.priority || '') +
+        '</td><td>' + (rule.status || '') + '</td><td>' +
+        (rule.name || '') + '</td>';
+      tbody.appendChild(tr);
+    }
+    out.textContent = data.rules.length + ' reglas.';
+  } catch (e) { out.textContent = e.message; }
+}
+document.getElementById('load-rules').onclick = loadRules;
+
+async function ruleAction(path) {
+  const out = document.getElementById('rules-result');
+  try {
+    const dsl = document.getElementById('rule-dsl').value;
+    const data = await adminApi(path, 'POST', {dsl});
+    out.textContent = JSON.stringify(data, null, 2);
+    if (path === '/admin/rules') await loadRules();
+  } catch (e) { out.textContent = e.message; }
+}
+document.getElementById('rule-validate').onclick =
+  () => ruleAction('/admin/rules/validate');
+document.getElementById('rule-preview').onclick =
+  () => ruleAction('/admin/rules/preview');
+document.getElementById('rule-create').onclick =
+  () => ruleAction('/admin/rules');
+
+async function loadElevations() {
+  const out = document.getElementById('rules-result');
+  try {
+    const data = await adminApi('/admin/elevations');
+    const tbody = document.querySelector('#elevations tbody');
+    tbody.innerHTML = '';
+    for (const item of data.elevations) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (item.identity_id || '') + '</td><td>' +
+        (item.resource_id || '') + '</td><td>' + (item.ttl_s || '') +
+        '</td><td>' + (item.status || '') + '</td><td></td>';
+      const cell = tr.querySelector('td:last-child');
+      const approve = document.createElement('button');
+      approve.textContent = 'Aprobar';
+      approve.onclick = async () => {
+        const ttl = parseInt(prompt('TTL (s)', '86400') || '0');
+        const reason = prompt('Motivo', 'aprobado') || '';
+        try {
+          await adminApi('/admin/elevations/' + item.elevation_id +
+                         '/approve', 'POST', {ttl_s: ttl, reason});
+          await loadElevations();
+        } catch (e) { out.textContent = e.message; }
+      };
+      const revoke = document.createElement('button');
+      revoke.textContent = 'Revocar';
+      revoke.onclick = async () => {
+        try {
+          await adminApi('/admin/elevations/' + item.elevation_id +
+                         '/revoke', 'POST', {reason: 'revocada'});
+          await loadElevations();
+        } catch (e) { out.textContent = e.message; }
+      };
+      cell.appendChild(approve);
+      cell.appendChild(revoke);
+      tbody.appendChild(tr);
+    }
+    out.textContent = data.elevations.length + ' elevaciones.';
+  } catch (e) { out.textContent = e.message; }
+}
+document.getElementById('load-elevations').onclick = loadElevations;
+
+async function loadPolicyDecisions() {
+  const out = document.getElementById('policy-result');
+  try {
+    const data = await adminApi('/admin/policy-decisions');
+    const tbody = document.querySelector('#policy-decisions tbody');
+    tbody.innerHTML = '';
+    for (const d of data.decisions) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (d.ts || '') + '</td><td>' +
+        (d.subject_id || '') + '</td><td>' + (d.permission || '') +
+        '</td><td>' + (d.resource_id || '') + '</td><td>' +
+        (d.result || '') + '</td><td>' + (d.matched_rule_id || '') +
+        '</td><td>' + (d.priority ?? '') + '</td>';
+      tbody.appendChild(tr);
+    }
+    out.textContent = data.decisions.length + ' decisiones.';
+  } catch (e) { out.textContent = e.message; }
+}
+document.getElementById('load-policy-decisions').onclick =
+  loadPolicyDecisions;
 </script>
 </body>
 </html>"""
@@ -313,6 +445,33 @@ def _bus_url() -> str:
 
 def _iam_url() -> str:
     return os.environ.get("IAM_URL", "")
+
+
+def _policies_url() -> str:
+    return os.environ.get("POLICIES_URL", "")
+
+
+def _forward_policies(method: str, path: str, session: str,
+                      source_ip: str, body: dict | None = None) -> dict:
+    """Reenvía a Políticas; el servicio valida la sesión (P04/P17/P29)."""
+    base = _policies_url()
+    if not base:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    try:
+        response = httpx.request(
+            method, f"{base}{path}",
+            params={"source_ip": source_ip},
+            headers={"X-Session": session}, json=body, timeout=10)
+    except httpx.HTTPError:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {}
+    if response.status_code >= 400:
+        raise HTTPException(status_code=response.status_code,
+                            detail=payload.get("detail", "error"))
+    return payload
 
 
 def _source_ip(request: Request) -> str:
@@ -487,3 +646,101 @@ def admin_decisions(
         session: str = Depends(require_permission("P03", "console"))):
     """Traza de permiso efectivo (P03: TI, Admin y SA pueden consultar)."""
     return _forward("GET", "/decisions", session, _source_ip(request))
+
+
+# ---------------------------------------------------------------------------
+# Reglas y elevaciones (servicio de Políticas)
+# ---------------------------------------------------------------------------
+
+@app.get("/admin/rules")
+def admin_rules(
+        request: Request,
+        session: str = Depends(require_permission("P04", "access_policy"))):
+    return _forward_policies("GET", "/rules", session, _source_ip(request))
+
+
+@app.post("/admin/rules/validate")
+def admin_validate_rule(
+        body: dict, request: Request,
+        session: str = Depends(require_permission("P17", "access_policy"))):
+    return _forward_policies("POST", "/rules/validate", session,
+                             _source_ip(request), body)
+
+
+@app.post("/admin/rules/preview")
+def admin_preview_rule(
+        body: dict, request: Request,
+        session: str = Depends(require_permission("P17", "access_policy"))):
+    return _forward_policies("POST", "/rules/preview", session,
+                             _source_ip(request), body)
+
+
+@app.post("/admin/rules")
+def admin_create_rule(
+        body: dict, request: Request,
+        session: str = Depends(require_permission("P17", "access_policy"))):
+    return _forward_policies("POST", "/rules", session,
+                             _source_ip(request), body)
+
+
+@app.patch("/admin/rules/{rule_id}")
+def admin_update_rule(
+        rule_id: str, body: dict, request: Request,
+        session: str = Depends(require_permission("P17", "access_policy"))):
+    return _forward_policies("PATCH", f"/rules/{rule_id}", session,
+                             _source_ip(request), body)
+
+
+@app.get("/admin/rules/{rule_id}/versions")
+def admin_rule_versions(
+        rule_id: str, request: Request,
+        session: str = Depends(require_permission("P04", "access_policy"))):
+    return _forward_policies("GET", f"/rules/{rule_id}/versions", session,
+                             _source_ip(request))
+
+
+@app.get("/admin/elevations")
+def admin_elevations(
+        request: Request,
+        session: str = Depends(require_permission(
+            "P04", "elevation_request"))):
+    return _forward_policies("GET", "/elevations", session,
+                             _source_ip(request))
+
+
+@app.post("/admin/elevations/{elevation_id}/approve")
+def admin_approve_elevation(
+        elevation_id: str, body: dict, request: Request,
+        session: str = Depends(require_permission(
+            "P29", "elevation_request"))):
+    return _forward_policies(
+        "POST", f"/elevations/{elevation_id}/approve", session,
+        _source_ip(request), body)
+
+
+@app.post("/admin/elevations/{elevation_id}/reject")
+def admin_reject_elevation(
+        elevation_id: str, body: dict, request: Request,
+        session: str = Depends(require_permission(
+            "P29", "elevation_request"))):
+    return _forward_policies(
+        "POST", f"/elevations/{elevation_id}/reject", session,
+        _source_ip(request), body)
+
+
+@app.post("/admin/elevations/{elevation_id}/revoke")
+def admin_revoke_elevation(
+        elevation_id: str, body: dict, request: Request,
+        session: str = Depends(require_permission(
+            "P29", "elevation_request"))):
+    return _forward_policies(
+        "POST", f"/elevations/{elevation_id}/revoke", session,
+        _source_ip(request), body)
+
+
+@app.get("/admin/policy-decisions")
+def admin_policy_decisions(
+        request: Request,
+        session: str = Depends(require_permission("P04", "access_policy"))):
+    return _forward_policies("GET", "/decisions", session,
+                             _source_ip(request))

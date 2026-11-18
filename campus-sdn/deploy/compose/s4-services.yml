@@ -13,6 +13,7 @@ services:
       # La consola valida la sesión y reenvía la administración al IAM
       # local de su servidor (misma instancia que atendió el login).
       IAM_URL: http://iam:8001
+      POLICIES_URL: http://policies:8006
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8008:8008"
     healthcheck:
