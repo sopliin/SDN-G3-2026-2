@@ -13,6 +13,9 @@ services:
       IAM_URL: http://iam:8001
       BUS_URL: ${BUS_URL:-}
       I2_URL: ${I2_URL:-}
+      # La solicitud de elevación se reenvía a Políticas con la sesión;
+      # sin esta URL el portal responde 503 y no simula el flujo.
+      POLICIES_URL: http://policies:8006
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8080:8080"
     depends_on:

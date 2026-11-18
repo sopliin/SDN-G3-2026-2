@@ -24,13 +24,8 @@ class FakeIamResponse:
 @pytest.fixture()
 def portal_client(monkeypatch):
     monkeypatch.setattr(portal_module, "IAM_URL", "http://iam:8001")
-    monkeypatch.setattr(portal_module, "BUS_URL", "")
-    published = []
-    monkeypatch.setattr(
-        portal_module, "publish_event",
-        lambda url, event: published.append((url, event)),
-    )
-    return TestClient(portal_module.app), published
+    monkeypatch.setattr(portal_module, "POLICIES_URL", "")
+    return TestClient(portal_module.app), []
 
 
 def test_selector_lists_three_realms(portal_client):
@@ -146,26 +141,63 @@ def test_guest_register_forwards(portal_client, monkeypatch):
     assert response.json()["status"] == "registered"
 
 
-def test_elevation_without_bus_returns_503(portal_client):
+def test_elevation_without_policies_returns_503(portal_client):
     client, _ = portal_client
-    assert client.post("/elevation",
-                       json={"requester": "a12345"}).status_code == 503
+    assert client.post("/elevation", json={
+        "session": "S1", "resource_id": "lab-projects",
+        "ttl_s": 86400, "reason": "x"}).status_code == 503
 
 
-def test_elevation_publishes_validated_event(portal_client, monkeypatch):
-    client, published = portal_client
-    monkeypatch.setattr(portal_module, "BUS_URL", "amqp://test")
+def test_elevation_requires_session(portal_client, monkeypatch):
+    client, _ = portal_client
+    monkeypatch.setattr(portal_module, "POLICIES_URL",
+                        "http://policies:8006")
+    assert client.post("/elevation", json={
+        "resource_id": "lab-projects", "ttl_s": 86400,
+        "reason": "x"}).status_code == 401
+
+
+def test_elevation_forwards_session_to_policies(portal_client, monkeypatch):
+    client, _ = portal_client
+    monkeypatch.setattr(portal_module, "POLICIES_URL",
+                        "http://policies:8006")
+    seen = []
+
+    def fake_post(url, **kw):
+        seen.append((url, kw))
+        return FakeIamResponse(201, {"elevation": {
+            "elevation_id": "E-1", "status": "requested"}})
+
+    monkeypatch.setattr(portal_module.httpx, "post", fake_post)
     response = client.post("/elevation", json={
-        "requester": "a12345", "scope": "laboratory", "duration": 1800})
+        "session": "S1", "resource_id": "lab-projects",
+        "ttl_s": 86400, "reason": "proyecto"})
     assert response.status_code == 200
+    url, kw = seen[0]
+    assert url == "http://policies:8006/elevations"
+    assert kw["headers"]["X-Session"] == "S1"
+    assert kw["json"] == {"resource_id": "lab-projects", "ttl_s": 86400,
+                          "reason": "proyecto"}
+    assert "requester" not in kw["json"]
 
-    event = published[0][1]
-    assert event["type"] == "ElevationRequested"
-    assert event["payload"]["requester"] == "a12345"
-    assert event["sender"] == "portal"
-    # La validación del contrato ya ocurrió: un payload inválido habría
-    # fallado antes de publicar.
-    assert "password" not in str(event)
+
+def test_elevation_resources_are_forwarded(portal_client, monkeypatch):
+    client, _ = portal_client
+    monkeypatch.setattr(portal_module, "POLICIES_URL",
+                        "http://policies:8006")
+    seen = []
+
+    def fake_get(url, **kw):
+        seen.append((url, kw))
+        return FakeIamResponse(200, {"resources": [
+            {"resource_id": "lab-projects"}]})
+
+    monkeypatch.setattr(portal_module.httpx, "get", fake_get)
+    response = client.get("/elevation?session=S1")
+    assert response.status_code == 200
+    assert response.json()["resources"][0]["resource_id"] == "lab-projects"
+    assert seen[0][0] == "http://policies:8006/elevations/resources"
+    assert seen[0][1]["headers"]["X-Session"] == "S1"
 
 
 def test_ui_serves_captive_page(portal_client):
@@ -189,11 +221,6 @@ def test_login_passes_totp_required_through(portal_client, monkeypatch):
         "population": "operations", "username": "op-1", "password": "x"})
     assert response.status_code == 200
     assert response.json()["totp_required"] is True
-
-
-def test_elevation_scope_form(portal_client):
-    client, _ = portal_client
-    assert client.get("/elevation").json() == {"scopes": ["laboratory"]}
 
 
 def test_health(portal_client):

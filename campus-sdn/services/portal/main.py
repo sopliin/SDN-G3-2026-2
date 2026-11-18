@@ -7,21 +7,17 @@ bus. Las credenciales jamás se registran ni se publican.
 """
 
 import os
-from pathlib import Path
 
 import httpx
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from sdn_common.app import create_app
-from sdn_common.bus import publish_event
-from sdn_common.events import build_event, validate_event
 
 SERVICE = "portal"
-SCHEMAS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "events"
 IAM_URL = os.environ.get("IAM_URL", "http://127.0.0.1:8001")
-BUS_URL = os.environ.get("BUS_URL", "")
 I2_URL = os.environ.get("I2_URL", "")
+POLICIES_URL = os.environ.get("POLICIES_URL", "")
 
 app = create_app(SERVICE)
 
@@ -80,10 +76,20 @@ TOTP para continuar.</p>
 <div class="card">
 <h2>Elevación</h2>
 <form id="elevation">
-<label>Solicitante</label><input name="requester">
-<label>Alcance</label><input name="scope" value="laboratory">
-<label>Duración (s)</label><input name="duration" type="number" value="1800">
+<label>Recurso restringido</label>
+<select name="resource_id" id="elevation-resource">
+  <option value="lab-projects">Nube privada — laboratorio</option>
+</select>
+<label>Duración</label>
+<select name="ttl_s">
+  <option value="86400">1 día</option>
+  <option value="604800">1 semana</option>
+  <option value="10368000">4 meses</option>
+  <option value="15552000">6 meses</option>
+</select>
+<label>Motivo</label><input name="reason" placeholder="proyecto del curso">
 <button type="submit">Solicitar elevación</button>
+<p class="hint">Se usa la sesión del login; si recargaste la página, vuelve a entrar.</p>
 </form>
 </div>
 
@@ -96,6 +102,7 @@ TOTP para continuar.</p>
 <script>
 const result = document.getElementById('result');
 const show = (obj) => { result.textContent = JSON.stringify(obj, null, 2); };
+let sessionToken = null;
 const post = async (path, body) => {
   const response = await fetch(path, {
     method: 'POST',
@@ -121,6 +128,9 @@ document.getElementById('login').onsubmit = async (e) => {
   });
   const data = await response.json();
   show({status: response.status, body: data});
+  if (response.status === 200 && data.session) {
+    sessionToken = data.session;
+  }
   if (response.status === 200 && data.totp_required) {
     // solo quien ya pasó las credenciales ve el campo del segundo factor
     totpRow.style.display = 'block';
@@ -132,15 +142,27 @@ document.getElementById('guest').onsubmit = (e) => {
   post('/guest-register', {username: f.get('username'),
                            password: f.get('password')});
 };
-document.getElementById('elevation').onsubmit = (e) => {
+document.getElementById('elevation').onsubmit = async (e) => {
   e.preventDefault();
+  if (!sessionToken) {
+    show({status: 401, body: {detail: 'inicia sesión primero'}});
+    return;
+  }
   const f = new FormData(e.target);
-  post('/elevation', {requester: f.get('requester'),
-                      scope: f.get('scope'),
-                      duration: parseInt(f.get('duration'))});
+  const response = await fetch('/elevation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      session: sessionToken,
+      resource_id: f.get('resource_id'),
+      ttl_s: parseInt(f.get('ttl_s')),
+      reason: f.get('reason'),
+    }),
+  });
+  show({status: response.status, body: await response.json()});
 };
 document.getElementById('logout').onclick = () => {
-  const session = prompt('Token de sesión');
+  const session = sessionToken || prompt('Token de sesión');
   if (session) post('/logout', {session});
 };
 </script>
@@ -253,27 +275,50 @@ def guest_register(body: dict):
 
 
 @app.get("/elevation")
-def elevation_form():
-    """Alcances elevables disponibles para la población autenticada."""
-    return {"scopes": ["laboratory"]}
+def elevation_form(session: str = ""):
+    """Recursos restringidos disponibles para la sesión autenticada."""
+    if not POLICIES_URL:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    if not session:
+        raise HTTPException(status_code=401, detail="session required")
+    try:
+        response = httpx.get(
+            f"{POLICIES_URL}/elevations/resources",
+            headers={"X-Session": session}, timeout=5)
+    except httpx.HTTPError:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    if response.status_code >= 400:
+        raise HTTPException(status_code=response.status_code,
+                            detail="insufficient session")
+    return response.json()
 
 
 @app.post("/elevation")
-def request_elevation(body: dict):
-    """Publica ElevationRequested al bus; la decisión es de Políticas."""
-    if not BUS_URL:
-        raise HTTPException(status_code=503, detail="bus unavailable")
-    event = build_event(
-        "ElevationRequested",
-        {
-            "requester": body["requester"],
-            "requested_profile": body.get("requested_profile", "laboratory"),
-            "scope": body.get("scope", "laboratory"),
-            "duration": int(body.get("duration", 1800)),
-        },
-        sender=SERVICE,
-        correlation={"session": body.get("session")} if body.get("session") else None,
-    )
-    validate_event(event, SCHEMAS_DIR)
-    publish_event(BUS_URL, event)
-    return {"status": "accepted", "event_id": event["event_id"]}
+def request_elevation(body: dict, request: Request):
+    """Solicita una elevación real (P28) con la sesión del portal."""
+    if not POLICIES_URL:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    session = body.get("session", "")
+    if not session:
+        raise HTTPException(status_code=401, detail="session required")
+    payload = {
+        "resource_id": body.get("resource_id"),
+        "ttl_s": int(body.get("ttl_s", 86400)),
+        "reason": body.get("reason", ""),
+    }
+    client_ip = _client_ip(request)
+    try:
+        response = httpx.post(
+            f"{POLICIES_URL}/elevations", json=payload,
+            headers={"X-Session": session,
+                     "X-Forwarded-For": client_ip or ""}, timeout=5)
+    except httpx.HTTPError:
+        raise HTTPException(status_code=503, detail="policies unavailable")
+    try:
+        result = response.json()
+    except ValueError:
+        result = {}
+    if response.status_code >= 400:
+        raise HTTPException(status_code=response.status_code,
+                            detail=result.get("detail", "elevation rejected"))
+    return result
