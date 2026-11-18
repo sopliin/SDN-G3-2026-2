@@ -509,6 +509,11 @@ def set_store(store: Store) -> None:
     STORE_MODE = "postgres" if isinstance(store, PostgresStore) else "memory"
 
 
+def store_mode() -> str:
+    """Modo activo: memory, postgres o degraded (PG configurado, sin conexión)."""
+    return STORE_MODE
+
+
 def reset_store() -> None:
     """Olvida el singleton; la siguiente llamada lo reconstruye."""
     global _store, STORE_MODE
