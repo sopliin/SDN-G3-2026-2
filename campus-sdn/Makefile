@@ -67,6 +67,9 @@ status: ## Salud de contenedores y servicios
 test: ## Pruebas de contrato e integración (requiere .venv)
 	./.venv/bin/pytest tests
 
+policyctl: ## CLI de reglas y elevaciones (ARGS="rules list")
+	./.venv/bin/python tools/policyctl.py $(ARGS)
+
 # --- Esqueleto BASE del slice de 14 VMs (LLD 06_reglas §3) ---
 ONOS_CTRL := ssh -o BatchMode=yes -p 5811 ubuntu@10.20.12.185
 SKELETON_PORTAL ?= 10.0.0.10/32
