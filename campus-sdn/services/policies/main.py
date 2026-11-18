@@ -13,7 +13,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends
+from fastapi import Depends, Header, HTTPException
 
 from sdn_common.app import create_app
 from sdn_common.authz import require_permission
@@ -21,7 +21,9 @@ from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, utc_now, validate_event
 from services.policies import directory
 from services.policies import elevations
+from services.policies import engine
 from services.policies import rules
+from services.policies.storage import get_store
 
 SERVICE = "policies"
 SCHEMAS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "events"
@@ -163,6 +165,27 @@ app = create_app(SERVICE, lifespan=lifespan)
 app.include_router(directory.router)
 app.include_router(rules.router)
 app.include_router(elevations.router)
+
+
+@app.post("/engine/entitlements")
+def engine_entitlements(body: dict, x_service_token: str = Header(
+        default="", alias="X-Service-Token")):
+    """Consulta interna del IAM: qué recursos restringidos aplicar al login."""
+    token = os.environ.get("POLICY_SERVICE_TOKEN", "")
+    if not token:
+        raise HTTPException(status_code=503,
+                            detail="service token not configured")
+    if x_service_token != token:
+        raise HTTPException(status_code=401, detail="invalid service token")
+    identity_id = body.get("identity_id", "")
+    if not identity_id:
+        raise HTTPException(status_code=422, detail="identity_id required")
+    entitlements = engine.entitlements(
+        get_store(), identity_id=identity_id,
+        device_mac=body.get("device_mac"),
+        session_id=body.get("session_id"),
+        context=body.get("context") or {})
+    return {"entitlements": entitlements}
 
 
 @app.get("/profiles")

@@ -191,6 +191,106 @@ def _send_withdraw_order(session_token: str) -> dict:
     return {"status": "withdrawn"}
 
 
+def _policies_url() -> str:
+    return os.environ.get("POLICIES_URL", "")
+
+
+def _service_token() -> str:
+    return os.environ.get("POLICY_SERVICE_TOKEN", "")
+
+
+def _fetch_entitlements(identity: str, device_mac: str, session_token: str,
+                        source_ip: str) -> list[dict] | None:
+    """Consulta interna al motor; None si no está disponible."""
+    policies_url = _policies_url()
+    if not policies_url:
+        return None
+    import httpx
+
+    try:
+        response = _http().post(
+            f"{policies_url}/engine/entitlements",
+            json={"identity_id": identity, "device_mac": device_mac,
+                  "session_id": session_token,
+                  "context": {"source_ip": source_ip,
+                              "channel": "portal",
+                              "session_hard_timeout_s":
+                                  PROFILE_SESSION["academic"]["hard_timeout_s"]}},
+            headers={"X-Service-Token": _service_token()},
+            timeout=5)
+    except httpx.HTTPError:
+        return None
+    if response.status_code != 200:
+        return None
+    try:
+        return response.json().get("entitlements", [])
+    except ValueError:
+        return None
+
+
+def _send_entitlement_orders(session_token: str, device_mac: str,
+                             entitlements: list[dict]) -> dict:
+    """Aplica los perfiles restringidos que el motor concedió al login."""
+    i2_url = _i2_url()
+    if not i2_url:
+        return {"status": "skipped", "reason": "I2 not configured",
+                "cookies": []}
+    if not device_mac:
+        return {"status": "skipped", "reason": "no device", "cookies": []}
+    import httpx
+
+    cookies = []
+    failures = []
+    for entitlement in entitlements:
+        cidr = entitlement.get("cidr")
+        if not cidr:
+            continue
+        identifier = (entitlement.get("grant_id")
+                      or entitlement.get("rule_id")
+                      or entitlement.get("resource_id"))
+        cookie = f"{session_token}:ent:{identifier}"
+        ttl = max(1, int(entitlement.get("ttl_s") or 1))
+        order = {
+            "order": "APPLY_PROFILE",
+            "device": {"mac": device_mac},
+            "scope": [cidr],
+            "profile": "elevation",
+            "validity": {"idle_timeout_s": min(ttl, 1800),
+                         "hard_timeout_s": ttl},
+            "context": {"cookie": cookie, "requester": SERVICE,
+                        "reason": "entitlement"},
+        }
+        try:
+            response = _http().post(f"{i2_url}/orders", json=order, timeout=10)
+        except httpx.HTTPError:
+            failures.append("unreachable")
+            continue
+        if response.status_code >= 400:
+            failures.append("rejected")
+            continue
+        cookies.append(cookie)
+    status = "applied" if cookies else ("rejected" if failures else "skipped")
+    return {"status": status, "cookies": cookies}
+
+
+def _send_entitlement_withdraw(cookie: str) -> dict:
+    i2_url = _i2_url()
+    if not i2_url:
+        return {"status": "skipped", "reason": "I2 not configured"}
+    import httpx
+
+    order = {"order": "WITHDRAW",
+             "context": {"cookie": cookie, "requester": SERVICE,
+                         "reason": "logout"}}
+    try:
+        response = _http().post(f"{i2_url}/orders", json=order, timeout=10)
+    except httpx.HTTPError:
+        return {"status": "unreachable"}
+    if response.status_code >= 400:
+        return {"status": "rejected", "code": response.status_code}
+    return {"status": "withdrawn"}
+
+
 def _stub_verify() -> bool:
     return os.environ.get("STUB_VERIFY", "") == "1"
 
@@ -803,6 +903,10 @@ def _close_session(token: str, reason: str) -> dict:
         _db_session_delete(token)
     # Accounting Stop correlacionado con el Start (R1.9); best-effort.
     _send_session_accounting(session, "Stop")
+    entitlement_withdrawals = [
+        _send_entitlement_withdraw(cookie)
+        for cookie in session.get("entitlement_cookies", [])
+    ]
     network = (_send_withdraw_order(token) if session.get("device")
                else {"status": "skipped", "reason": "no device"})
     _publish(build_event(
@@ -813,7 +917,8 @@ def _close_session(token: str, reason: str) -> dict:
         sender=SERVICE,
         correlation={"session": token},
     ))
-    return {**session, "network": network}
+    return {**session, "network": network,
+            "entitlement_withdrawals": entitlement_withdrawals}
 
 
 def _valid_session(token: str, source_ip: str | None = None) -> dict:
@@ -970,8 +1075,21 @@ def verify(credentials: dict):
     network = (_send_profile_order(token, device_mac, profile)
                if device_mac else {"status": "skipped",
                                    "reason": "no device"})
+    entitlements = {"status": "skipped", "reason": "no device"}
+    if population == "university" and device_mac:
+        fetched = _fetch_entitlements(username, device_mac, token,
+                                      credentials.get("source_ip", ""))
+        if fetched is None:
+            entitlements = {"status": "unavailable"}
+        else:
+            entitlements = _send_entitlement_orders(
+                token, device_mac, fetched)
+            if entitlements.get("cookies"):
+                sessions[token]["entitlement_cookies"] = entitlements["cookies"]
+                _db_session_put(token, sessions[token])
     return {"session": token, "profile_or_role": profile,
-            "device": device_mac or None, "network": network}
+            "device": device_mac or None, "network": network,
+            "entitlements": entitlements}
 
 
 def _associate_device(device_mac: str, username: str, profile: str) -> None:

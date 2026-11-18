@@ -47,6 +47,10 @@ services:
       # la red nunca se entera (login «a medias», F-03 §4/§7).
       I2_URL: ${I2_URL:-}
       REGISTRY_URL: http://registry:8002
+      # El motor decide qué recursos restringidos aplica al login; el
+      # token de servicio autentica la llamada interna.
+      POLICIES_URL: http://policies:8006
+      POLICY_SERVICE_TOKEN: ${POLICY_SERVICE_TOKEN:-}
       # Contexto ambiental: clase de cada puesto (PC1/PC2 académicos,
       # PC3/PC4 operadores). El estado persistente permite a la consola
       # cambiarlo; el archivo versionado es la semilla.
