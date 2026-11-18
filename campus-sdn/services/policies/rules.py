@@ -100,6 +100,7 @@ def _new_id(store, base: str) -> str:
 
 
 def _row_for_storage(rule: dict, rule_id: str, actor: str) -> dict:
+    today = datetime.now(timezone.utc).date().isoformat()
     return {
         "rule_id": rule_id,
         "name": rule.get("name") or rule_id,
@@ -113,7 +114,7 @@ def _row_for_storage(rule: dict, rule_id: str, actor: str) -> dict:
         "resource_expr": rule.get("resource"),
         "context_expr": None,
         "state_expr": None,
-        "valid_from": rule.get("valid_from"),
+        "valid_from": rule.get("valid_from") or today,
         "valid_to": rule.get("valid_to"),
         "status": "active",
         "version": 1,
@@ -176,6 +177,9 @@ def update_rule(store, rule_id: str, changes: dict, *,
     if "status" in updates and updates["status"] not in (
             "active", "disabled", "draft"):
         raise ValueError("invalid status")
+    if "valid_from" in updates and not updates["valid_from"]:
+        updates["valid_from"] = current.get("valid_from") or (
+            datetime.now(timezone.utc).date().isoformat())
     row = {**current, **updates, "version": int(current.get("version", 1)) + 1,
            "updated_at": _now_iso()}
     store.upsert("policy_rules", row)
