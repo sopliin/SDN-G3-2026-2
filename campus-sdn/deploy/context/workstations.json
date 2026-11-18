@@ -1,0 +1,9 @@
+{
+  "description": "Puesto de trabajo -> poblacion permitida. La MAC es el localizador que la red aprende (I2); el portal la resuelve por la IP de origen y el IAM la compara con el perfil. En el slice: PC1/PC2 academicos e invitados; PC3/PC4 operadores.",
+  "workstations": {
+    "FA:16:3E:79:48:F0": {"label": "PC1", "host": "h1", "class": "academic"},
+    "FA:16:3E:6E:90:EE": {"label": "PC2", "host": "h2", "class": "academic"},
+    "FA:16:3E:0B:3A:F4": {"label": "PC3", "host": "h3", "class": "operations"},
+    "FA:16:3E:2C:C9:01": {"label": "PC4", "host": "h4", "class": "operations"}
+  }
+}

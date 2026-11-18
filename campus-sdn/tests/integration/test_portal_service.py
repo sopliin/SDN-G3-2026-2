@@ -199,3 +199,76 @@ def test_elevation_scope_form(portal_client):
 def test_health(portal_client):
     client, _ = portal_client
     assert client.get("/health").status_code == 200
+
+
+def test_login_uses_forwarded_for_as_the_device_ip(portal_client,
+                                                   monkeypatch):
+    """Detrás de HAProxy, la IP de la conexión es la del balanceador; la
+    del equipo viaja en X-Forwarded-For. El portal la usa para resolver
+    la MAC y la envía al IAM para ligar la sesión (F-03 §4)."""
+    client, _ = portal_client
+    monkeypatch.setattr(portal_module, "I2_URL", "http://adapter:8090")
+    seen = {"get": None, "post": None}
+
+    def fake_get(url, **kw):
+        seen["get"] = kw.get("params")
+        return FakeIamResponse(200, {"mac": "FA:16:3E:79:48:F0",
+                                     "ip": "10.0.0.101"})
+
+    def fake_post(url, **kw):
+        seen["post"] = kw["json"]
+        return FakeIamResponse(200, {"session": "SES-1"})
+
+    monkeypatch.setattr(portal_module.httpx, "get", fake_get)
+    monkeypatch.setattr(portal_module.httpx, "post", fake_post)
+    response = client.post(
+        "/login",
+        json={"population": "university", "username": "a12345",
+              "password": "x"},
+        headers={"X-Forwarded-For": "10.0.0.101, 10.0.0.12"},
+    )
+    assert response.status_code == 200
+    assert seen["get"] == {"ip": "10.0.0.101"}
+    assert seen["post"]["device"] == "FA:16:3E:79:48:F0"
+    assert seen["post"]["source_ip"] == "10.0.0.101"
+
+
+def test_logout_carries_the_source_ip(portal_client, monkeypatch):
+    client, _ = portal_client
+    seen = []
+
+    def fake_post(url, **kw):
+        seen.append(kw["json"])
+        return FakeIamResponse(200, {"status": "closed"})
+
+    monkeypatch.setattr(portal_module.httpx, "post", fake_post)
+    response = client.post(
+        "/logout", json={"session": "SES-1"},
+        headers={"X-Forwarded-For": "10.0.0.101"})
+    assert response.status_code == 200
+    assert seen[0]["source_ip"] == "10.0.0.101"
+
+
+def test_logout_from_another_device_is_rejected(portal_client,
+                                                monkeypatch):
+    client, _ = portal_client
+    monkeypatch.setattr(portal_module.httpx, "post",
+                        lambda url, **kw: FakeIamResponse(401))
+    response = client.post(
+        "/logout", json={"session": "SES-1"},
+        headers={"X-Forwarded-For": "10.0.0.102"})
+    assert response.status_code == 401
+
+
+def test_login_propagates_context_forbidden(portal_client, monkeypatch):
+    """Un 403 del IAM (población que no corresponde al puesto) llega al
+    usuario como 403 con su motivo, no como credenciales inválidas."""
+    client, _ = portal_client
+    monkeypatch.setattr(
+        portal_module.httpx, "post",
+        lambda url, **kw: FakeIamResponse(
+            403, {"detail": "population not allowed at this workstation"}))
+    response = client.post("/login", json={
+        "population": "university", "username": "a", "password": "x"})
+    assert response.status_code == 403
+    assert "workstation" in response.json()["detail"]

@@ -1,3 +1,7 @@
 ---
 # Valor por defecto del rol platform; el inventario lo sobreescribe.
 compose_file: ""
+
+# Usuario superusuario del PostgreSQL del slice (coincide con
+# POSTGRES_USER del .env). Se usa para permitir la replicación.
+postgres_user: postgresql

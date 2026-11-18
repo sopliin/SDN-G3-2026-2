@@ -1,0 +1,24 @@
+---
+# Baja de una cuenta de comunidad en el IdP simulado (OpenLDAP).
+# Herramienta del IdP simulado: en un despliegue real la baja la hace la
+# universidad en su directorio; la plataforma no la administra.
+- name: Baja de cuenta de comunidad en el IdP simulado
+  hosts: srv1
+  become: true
+  tasks:
+    - name: Eliminar la cuenta de ou=people
+      ansible.builtin.shell: |
+        docker exec s1-openldap ldapdelete -x -H ldap://127.0.0.1 \
+          -D "cn=admin,dc=campus,dc=local" \
+          -w "$(grep '^LDAP_ADMIN_PASSWORD=' /opt/campus-sdn/deploy/compose/.env | cut -d= -f2)" \
+          "uid={{ user }},ou=people,dc=campus,dc=local"
+      register: ldap_delete
+      changed_when: ldap_delete.rc == 0
+      failed_when: >
+        ldap_delete.rc != 0 and 'No such object' not in ldap_delete.stderr
+
+    - name: Resultado
+      ansible.builtin.debug:
+        msg: >-
+          {{ user }}: {{ 'eliminada' if ldap_delete.rc == 0
+             else 'no existía (sin cambios)' }}

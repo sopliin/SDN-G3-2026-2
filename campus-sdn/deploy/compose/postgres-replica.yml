@@ -1,0 +1,35 @@
+# Réplica de PostgreSQL en SRV-3 (standby en streaming del primario de
+# SRV-2). No la usan los servicios: el IAM sigue apuntando al primario.
+# La promoción es manual y está documentada en
+# docs/04-alta-disponibilidad.md §4; el primario necesita la línea de
+# pg_hba para la replicación (ver el mismo documento).
+services:
+  postgres_replica:
+    image: postgres:16
+    container_name: s3-postgres-replica
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definir POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: bd_politicas
+      PGPASSWORD: ${POSTGRES_PASSWORD:?definir POSTGRES_PASSWORD en .env}
+      PRIMARY_HOST: 10.0.0.12
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+    ports:
+      - "${SERVICE_BIND_IP:-0.0.0.0}:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U $${POSTGRES_USER:-postgres} -d bd_politicas"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    command: >
+      bash -c "if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+        until pg_isready -h $$PRIMARY_HOST -p 5432 -U $$POSTGRES_USER; do sleep 2; done;
+        pg_basebackup -h $$PRIMARY_HOST -U $$POSTGRES_USER -D /var/lib/postgresql/data -Fp -Xs -P -R;
+        sed -i \"s/primary_conninfo = '\\(.*\\)'/primary_conninfo = '\\1 password=$$PGPASSWORD'/\" $$PGDATA/postgresql.auto.conf;
+      fi;
+      exec docker-entrypoint.sh postgres"
+
+volumes:
+  postgres_replica_data:

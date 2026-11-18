@@ -47,6 +47,18 @@
     status_code: [200, 204, 404]
   tags: [onos]
 
+- name: Activar la consola web (gui y gui2)
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:8181/onos/v1/applications/{{ item }}/active"
+    url_username: "{{ onos_rest_user }}"
+    url_password: "{{ onos_rest_password }}"
+    method: POST
+    status_code: [200, 204]
+  loop:
+    - org.onosproject.gui
+    - org.onosproject.gui2
+  tags: [onos]
+
 - name: Resumen del clúster
   ansible.builtin.uri:
     url: http://127.0.0.1:8181/onos/v1/cluster

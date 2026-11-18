@@ -161,6 +161,18 @@ def login_selector():
     return {"populations": ["university", "operations", "guest"]}
 
 
+def _client_ip(request: Request) -> str | None:
+    """IP real del equipo que entra: la del X-Forwarded-For que añade
+    HAProxy (el portal vive detrás de la VIP) o, sin balanceador, la de
+    la conexión. La IP es lo que liga la sesión al dispositivo."""
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        first = forwarded.split(",")[0].strip()
+        if first:
+            return first
+    return request.client.host if request.client else None
+
+
 def _resolve_device(client_ip: str) -> dict | None:
     """El dispositivo lo conoce la red, no el usuario: la fuente de la
     conexión (IP) se traduce a la asociación MAC↔ubicación que el
@@ -187,25 +199,45 @@ def login(credentials: dict, request: Request):
     El dispositivo lo aporta la red: la MAC de la fuente de la conexión,
     resuelta por el controlador — jamás tecleada por el usuario."""
     body = dict(credentials)
-    device = _resolve_device(request.client.host)
+    client_ip = _client_ip(request)
+    device = _resolve_device(client_ip)
     if device:
         body["device"] = device["mac"]
+    if client_ip:
+        body["source_ip"] = client_ip
     try:
         response = httpx.post(f"{IAM_URL}/verify", json=body, timeout=5)
     except httpx.HTTPError:
         raise HTTPException(status_code=503, detail="identity unavailable")
+    if response.status_code == 403:
+        # Política de contexto (p. ej. población que no corresponde al
+        # puesto): el motivo se conserva; no es una credencial inválida.
+        detail = "forbidden"
+        try:
+            detail = response.json().get("detail", detail)
+        except ValueError:
+            pass
+        raise HTTPException(status_code=403, detail=detail)
     if response.status_code != 200:
         raise HTTPException(status_code=401, detail="invalid credentials")
     return response.json()
 
 
 @app.post("/logout")
-def logout(session: dict):
-    """Retiro por cookie y SessionClosed inmediatos: lo ejecuta el IAM."""
+def logout(session: dict, request: Request):
+    """Retiro por cookie y SessionClosed inmediatos: lo ejecuta el IAM.
+    La IP de origen viaja para que la sesión solo pueda cerrarse desde el
+    mismo dispositivo que la abrió (ligadura de sesión, F-03 §4)."""
+    body = dict(session)
+    client_ip = _client_ip(request)
+    if client_ip:
+        body["source_ip"] = client_ip
     try:
-        response = httpx.post(f"{IAM_URL}/logout", json=session, timeout=5)
+        response = httpx.post(f"{IAM_URL}/logout", json=body, timeout=5)
     except httpx.HTTPError:
         raise HTTPException(status_code=503, detail="identity unavailable")
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="session not from device")
     return response.json()
 
 

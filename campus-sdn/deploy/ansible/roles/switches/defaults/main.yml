@@ -10,3 +10,20 @@ switch_bridge: br0
 switch_ports: []
 switch_dpid: ""
 controller_targets: []
+
+# Credenciales del REST de ONOS para el agente del árbol. Deben coincidir
+# con las del rol onos (karaf/karaf es el par por defecto del piloto); el
+# vault o el inventario las sobreescriben en ambos roles a la vez.
+onos_rest_user: karaf
+onos_rest_password: karaf
+
+# Árbol preferido (RA-07): aristas [dpid, puerto]-[dpid, puerto] que el
+# agente mantiene mientras todas estén ACTIVAS. Coincide con el árbol de
+# datos del inventario §6 y con los switch_redundant_ports del inventario
+# (los bloqueados son el resto de enlaces). Raíz lógica: SW1.
+tree_preferred_edges:
+  - [[1, 4], [4, 4]]   # SW1.ens7  <-> SW4.ens7
+  - [[1, 6], [2, 1]]   # SW1.ens9  <-> SW2.ens4
+  - [[2, 3], [3, 1]]   # SW2.ens6  <-> SW3.ens4
+  - [[4, 7], [5, 2]]   # SW4.ens10 <-> SW5.ens5
+  - [[5, 4], [6, 2]]   # SW5.ens7  <-> SW6.ens5

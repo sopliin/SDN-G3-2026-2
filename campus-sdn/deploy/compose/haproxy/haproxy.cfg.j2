@@ -8,6 +8,9 @@ global
 
 defaults
   mode http
+  # La IP de origen del equipo que entra viaja al portal y al IAM:
+  # sin esto la sesión no puede ligarse al dispositivo (F-03 §4).
+  option forwardfor
   timeout connect 5s
   timeout client 30s
   timeout server 30s
@@ -17,7 +20,10 @@ frontend portal
   default_backend portal_be
 
 backend portal_be
-  balance roundrobin
+  # Afinidad por IP de origen: la sesión vive en memoria en una
+  # instancia y las peticiones del mismo equipo deben volver a
+  # ella (login y logout en el mismo IAM).
+  balance source
   option httpchk GET /health
   server local {{ unicast_src_ip }}:8080 check inter 5s fall 3 rise 2
   server par {{ ha_proxy_peer }}:8080 check inter 5s fall 3 rise 2
@@ -27,7 +33,10 @@ frontend consola
   default_backend consola_be
 
 backend consola_be
-  balance roundrobin
+  # Afinidad por IP de origen: la sesión vive en memoria en una
+  # instancia y las peticiones del mismo equipo deben volver a
+  # ella (login y logout en el mismo IAM).
+  balance source
   option httpchk GET /health
   server local {{ unicast_src_ip }}:8008 check inter 5s fall 3 rise 2
   server par {{ ha_proxy_peer }}:8008 check inter 5s fall 3 rise 2
@@ -38,7 +47,10 @@ frontend svc_{{ port }}
   default_backend svc_{{ port }}_be
 
 backend svc_{{ port }}_be
-  balance roundrobin
+  # Afinidad por IP de origen: la sesión vive en memoria en una
+  # instancia y las peticiones del mismo equipo deben volver a
+  # ella (login y logout en el mismo IAM).
+  balance source
   option httpchk GET /health
   server local {{ unicast_src_ip }}:{{ port }} check inter 5s fall 3 rise 2
   server par {{ ha_proxy_peer }}:{{ port }} check inter 5s fall 3 rise 2

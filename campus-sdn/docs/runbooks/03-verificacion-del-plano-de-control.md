@@ -34,6 +34,23 @@ ssh -p 5811 ubuntu@10.20.12.185 'curl -s -u karaf:karaf http://127.0.0.1:8181/on
 
 **Esperado:** `drivers`, `openflow`, `hostprovider`, `lldpprovider` y `proxyarp` en `ACTIVE`; **`fwd` fuera** (instalaría flujos que chocan con la escalera; el rol la desactiva en cada despliegue). Si aparece `fwd`, desactivarla: `curl -u karaf:karaf -X DELETE http://127.0.0.1:8181/onos/v1/applications/org.onosproject.fwd/active` (en los tres nodos).
 
+**La interfaz gráfica.** El clúster sirve la consola web en el 8181 de cada nodo. Desde la laptop, con un túnel:
+
+```bash
+ssh -N -L 8181:192.168.0.11:8181 -p 5811 ubuntu@10.20.12.185
+```
+
+y en el navegador `http://localhost:8181/onos/ui/` (credenciales del piloto: `karaf`/`karaf`). La vista de topología dibuja los seis switches, los enlaces y los ocho hosts. Cualquiera de los tres servidores sirve (5811–5813); el túnel se cierra con `Ctrl-C` en esa terminal. Si el 8181 local está ocupado, comprueba si ya hay un túnel con `ss -ltnp | grep 8181` (en ese caso basta con abrir el navegador, o cerrarlo con `kill <pid>`), o usa `-L 8182:192.168.0.11:8181` y `http://localhost:8182/onos/ui/`.
+
+La consola necesita las apps `org.onosproject.gui` y `org.onosproject.gui2` activas; el rol `onos` y el Compose ya las incluyen. Si `/onos/ui/` responde 404, actívalas y espera unos segundos:
+
+```bash
+for app in org.onosproject.gui org.onosproject.gui2; do
+  ssh -p 5811 ubuntu@10.20.12.185 \
+    "curl -s -u karaf:karaf -X POST http://127.0.0.1:8181/onos/v1/applications/$app/active"
+done
+```
+
 ## 3. El almacenamiento Atomix
 
 ```bash
@@ -51,13 +68,13 @@ En cada switch (puertos 5821–5826):
 ssh -t -p 5821 ubuntu@10.20.12.185 'sudo ovs-vsctl show'
 ```
 
-**Esperado:** el bridge `br0` con `fail_mode: secure`, los tres controladores (`tcp:192.168.0.11:6653`, `.12`, `.13`), los puertos de datos con trunks 10/20/30 —salvo los cinco enlaces redundantes, en `tag=99`/`trunks=99` mientras el piloto reenvía con NORMAL ([`04`](04-perfil-base.md))— y `OpenFlow13`. En ONOS, los seis dispositivos `of:0000000000000001…0006` con `available: true`:
+**Esperado:** el bridge `br0` con `fail_mode: secure`, los tres controladores (`tcp:192.168.0.11:6653`, `.12`, `.13`), los puertos de datos con trunks 10/20/30 —salvo los cinco enlaces redundantes, en `tag=99`/`trunks=99` (los mantiene el agente `campus-sdn-tree`; operación y prueba de failover en [`05-redundancia-del-plano-de-datos.md`](05-redundancia-del-plano-de-datos.md))— y `OpenFlow13`. En ONOS, los seis dispositivos `of:0000000000000001…0006` con `available: true`:
 
 ```bash
 ssh -p 5811 ubuntu@10.20.12.185 'curl -s -u karaf:karaf http://127.0.0.1:8181/onos/v1/devices'
 ```
 
-**Los enlaces entre switches (LLDP) y las ubicaciones de hosts (ARP) están descubiertos** (2026-11-13): `GET /onos/v1/links` devuelve 20 enlaces dirigidos — los 10 físicos del plan: LLDP viaja también por los puertos de la VLAN 99, así que el descubrimiento no depende de la VLAN de datos — y `/onos/v1/hosts` ubica los ocho equipos finales. El mapa completo está en [`pruebas/00-inventario-del-slice-actual.md`](../pruebas/00-inventario-del-slice-actual.md) §6. Los puertos de datos de los switches los levanta el rol y los mantiene la unidad `campus-sdn-ports` tras cada arranque.
+**Los enlaces entre switches (LLDP/BDDP) y las ubicaciones de hosts (ARP) están descubiertos** (2026-11-13): `GET /onos/v1/links` devuelve 20 enlaces dirigidos — los 10 físicos del plan: las sondas de descubrimiento viajan también por los puertos de la VLAN 99, así que el descubrimiento no depende de la VLAN de datos — y `/onos/v1/hosts` ubica los ocho equipos finales. El mapa completo está en [`pruebas/00-inventario-del-slice-actual.md`](../pruebas/00-inventario-del-slice-actual.md) §6. Los puertos de datos de los switches los levanta el rol y los mantiene la unidad `campus-sdn-ports` tras cada arranque; el árbol de la VLAN de datos lo mantiene `campus-sdn-tree`.
 
 ## 5. Failover del control (sin tocar el plano de datos)
 

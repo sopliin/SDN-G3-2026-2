@@ -37,8 +37,12 @@ def _policy_path() -> Path:
 POLICY_PATH = _policy_path()
 
 
-def _allowed(role: str, permission: str, resource_type: str) -> bool:
-    """La asignación rol→permiso cubre el tipo de recurso (C9)."""
+def _allowed(role: str, permission: str, resource_types) -> bool:
+    """La asignación rol→permiso cubre al menos uno de los tipos de
+    recurso solicitados (C9). Un endpoint puede aceptar variantes por
+    rol (p. ej. P09 `alert` para TI y `network_alert` para Admin)."""
+    types = ([resource_types] if isinstance(resource_types, str)
+             else list(resource_types))
     policy = yaml.safe_load(POLICY_PATH.read_text())
     for assignment in policy.get("assignments", []):
         if assignment["role"] != role:
@@ -46,13 +50,15 @@ def _allowed(role: str, permission: str, resource_type: str) -> bool:
         if assignment["permission"] != permission:
             continue
         resources = assignment["resources"]
-        return resource_type in resources or "*" in resources
+        if "*" in resources or any(t in resources for t in types):
+            return True
     return False
 
 
-def require_permission(permission: str, resource_type: str):
-    """Dependencia de FastAPI: sesión válida (SSO) + permiso sobre el
-    tipo de recurso. 401 sin sesión, 403 con sesión sin permiso."""
+def require_permission(permission: str, resource_type):
+    """Dependencia de FastAPI: sesión válida (SSO) + permiso sobre al
+    menos uno de los tipos de recurso. 401 sin sesión, 403 con sesión
+    sin permiso. `resource_type` puede ser un tipo o una lista."""
     def dependency(session: str = Header(default="", alias="X-Session")):
         iam_url = os.environ.get("IAM_URL", "")
         if not iam_url:

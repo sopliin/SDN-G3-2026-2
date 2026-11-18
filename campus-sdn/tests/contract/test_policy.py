@@ -17,7 +17,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 VALIDATE = ROOT / "policy" / "tools" / "validate.py"
 OPERATIVE = ROOT / "policy" / "permissions.yaml"
-HISTORICAL = ROOT.parent / "implementation" / "policy" / "permisos.yaml"
+# Tras la reorganización del corpus (f57bd81), implementation/ vive bajo
+# plan/: el gemelo histórico sigue siendo la fuente del diseño.
+HISTORICAL = ROOT.parent / "plan" / "implementation" / "policy" / "permisos.yaml"
 
 
 def load(path):

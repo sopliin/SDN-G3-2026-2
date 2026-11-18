@@ -10,7 +10,9 @@ services:
     restart: unless-stopped
     environment:
       BUS_URL: ${BUS_URL:-}
-      IAM_URL: ${IAM_URL:-}
+      # La consola valida la sesión y reenvía la administración al IAM
+      # local de su servidor (misma instancia que atendió el login).
+      IAM_URL: http://iam:8001
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8008:8008"
     healthcheck:

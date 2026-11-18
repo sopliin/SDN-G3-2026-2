@@ -1,0 +1,20 @@
+---
+# Lista las cuentas de comunidad del IdP simulado (uid y cn; nunca la
+# contraseña en claro, que LDAP devuelve hasheada).
+- name: Cuentas de comunidad en el IdP simulado
+  hosts: srv1
+  become: true
+  tasks:
+    - name: ldapsearch sobre ou=people
+      ansible.builtin.shell: |
+        docker exec s1-openldap ldapsearch -x -H ldap://127.0.0.1 \
+          -b "ou=people,dc=campus,dc=local" \
+          -D "cn=admin,dc=campus,dc=local" \
+          -w "$(grep '^LDAP_ADMIN_PASSWORD=' /opt/campus-sdn/deploy/compose/.env | cut -d= -f2)" \
+          "(objectClass=inetOrgPerson)" uid cn
+      register: ldap_list
+      changed_when: false
+
+    - name: Cuentas
+      ansible.builtin.debug:
+        msg: "{{ ldap_list.stdout_lines }}"

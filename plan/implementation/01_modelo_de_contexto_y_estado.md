@@ -61,10 +61,13 @@ Describe dónde y cuándo se solicita.
 | `zone` | acceso, distribución, núcleo, servicios, gestión, externa | Topología |
 | `time_window` | horario académico, horario administrativo, mantenimiento, fuera de ventana | chrony / política |
 | `origin_ip` | dirección de origen observada | Controlador |
+| `workstation_class` | academic, operations, desconocido | Mapa de puestos (`deploy/context/workstations.json`) |
 | `maintenance_mode` | verdadero / falso | Políticas |
 | `network_profile` | BASE, ACADÉMICO, OPERADOR_*, ELEVACIÓN | Controlador |
 
 El contexto ambiental se evalúa en el Policy Engine y, para las decisiones de red, en el controlador.
+
+**El puesto de trabajo.** `workstation_class` es la clase del equipo desde el que se solicita: `academic` para los puestos de comunidad e invitados, `operations` para los puestos de operadores. La MAC es el localizador que la red aprende (I2) y el portal la resuelve por la IP de origen; el mapa de puestos la traduce a clase. La población debe corresponder al puesto: un académico o un invitado en un puesto de operadores, o un operador en un puesto académico, se rechaza **antes** del segundo factor (403) y el intento queda auditado. Un operador exige además un puesto de operadores registrado; un equipo fuera del mapa no habilita su sesión. La asignación del prototipo está en `campus-sdn/deploy/context/workstations.json` (PC1/PC2 académicos, PC3/PC4 operadores) y su operación en el runbook `06-administracion-de-identidades.md`.
 
 ### 2.3 Contexto de recurso
 
@@ -90,6 +93,17 @@ No forman parte del contexto y se mantienen como ejes separados:
 - **La vigencia.** Es una condición temporal de la autorización, no una propiedad del entorno.
 - **El rol.** Es una etiqueta del sujeto, no un atributo de la sesión.
 - **El perfil de red.** Es el resultado de una decisión de red, no una entrada del contexto de servicios.
+
+
+### 2.5 Traza de la decisión
+
+Cada evaluación de login y de administración se registra en `iam_decisions`
+con los seis ejes: sujeto (identidad, población, rol), acción, recurso,
+contexto (IP, dispositivo, puesto, canal), estado de seguridad, vigencia,
+permiso, decisión (`permit`/`deny`/`step_up`) y motivos. Es la evidencia
+legible de la fórmula y la base del motor de decisión. La correspondencia
+entre permisos y acciones concretas vive en `policy/actions.yaml`; la
+revisión humana, en [`10_catalogo_de_acciones_y_permisos.md`](10_catalogo_de_acciones_y_permisos.md).
 
 ## 3. Estado de seguridad
 

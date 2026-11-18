@@ -48,6 +48,7 @@ El catálogo se organiza en **tres clases de destino** —según quién los cons
 | Recurso o servicio | Tipo | Descripción | Nivel |
 |---|---|---|---|
 | Repositorios y recursos de investigación | Servicio | Repositorios especiales y recursos de los grupos de investigación. | Alto |
+| Nube privada — segmento de laboratorio/proyecto | Servicio | Entorno de prácticas y proyectos sobre la nube privada; exige elevación y TTL. La nube privada como servicio académico general sigue en §2.1. | Alto |
 | Servicios técnicos internos | Servicio | Servicios internos no disponibles para el perfil BASE. | Alto |
 
 ### 2.3 Infraestructura

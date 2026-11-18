@@ -45,7 +45,7 @@ SW5.ens7 <-> SW6.ens5
 10 enlaces físicos, 20 dirigidos
 ```
 
-Mientras el piloto reenvía con la acción NORMAL, cinco de esos enlaces viajan solo por LLDP en la VLAN 99 y la VLAN 10 de datos usa un árbol (§6 del inventario); el cableado es el del diseño y ONOS ve los diez.
+Mientras el piloto reenvía con la acción NORMAL, cinco de esos enlaces viajan solo por las sondas de descubrimiento de ONOS (LLDP/BDDP) en la VLAN 99 y la VLAN 10 de datos usa un árbol (§6 del inventario); el cableado es el del diseño y ONOS ve los diez.
 
 ### 2. Las catorce máquinas virtuales
 
@@ -233,6 +233,8 @@ ssh -p 5811 ubuntu@10.20.12.185 \
 ```
 
 **Esperado:** `6 dispositivos; 6 disponibles`, `8 hosts`, y 60 flujos instalados por la aplicación del controlador (diez por switch). Los enlaces son los del criterio 1.
+
+Si se abre la consola web, el panel *Summary* muestra **`Topology SCCs: 6`**; es esperado en este slice: ONOS calcula las componentes fuertemente conexas solo con enlaces `DIRECT` y los 20 enlaces son `INDIRECT` (aprendidos por BDDP, porque la red de la nube no transporta el LLDP). No es una partición: `/links` devuelve los 20 dirigidos y `/hosts` los ocho equipos.
 
 ## 4. Servicios de red (criterios 17–18)
 

@@ -1,0 +1,22 @@
+[Unit]
+Description=campus-sdn: árbol generador SDN (VLAN 10/99) según los enlaces de ONOS
+After=network-online.target openvswitch-switch.service campus-sdn-ports.service
+Requires=openvswitch-switch.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=ONOS_ENDPOINTS=http://192.168.0.11:8181,http://192.168.0.12:8181,http://192.168.0.13:8181
+Environment=ONOS_USER={{ onos_rest_user }}
+Environment=ONOS_PASSWORD={{ onos_rest_password }}
+Environment=BRIDGE={{ switch_bridge }}
+Environment=DPID={{ switch_dpid }}
+Environment=POLL_SECONDS=2
+# Comillas porque tojson emite espacios y systemd corta el valor ahí.
+Environment="PREFERRED_EDGES={{ tree_preferred_edges | tojson }}"
+ExecStart=/usr/bin/python3 /opt/campus-sdn/sdn_tree.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

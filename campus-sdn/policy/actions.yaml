@@ -1,0 +1,220 @@
+version: 1
+actions:
+- id: A01
+  permission: P02
+  rbac: false
+  name: Login y decisión de perfil de red
+  service: IAM
+  method: POST
+  path: /verify
+  resource_types:
+  - network_session
+  state: implemented
+  notes: Credenciales, puesto, TOTP, IP/dispositivo y vigencia; registra la decisión
+    en iam_decisions.
+- id: A02
+  permission: P14
+  name: Listar cuentas locales (operadores)
+  service: IAM
+  method: GET
+  path: /operators
+  resource_types:
+  - local_account
+  state: implemented
+- id: A03
+  permission: P24
+  name: Crear operador (SA crea Admin/TI/SA; Admin crea TI)
+  service: IAM
+  method: POST
+  path: /operators
+  resource_types:
+  - administrative_account
+  - administrative_it_account
+  state: implemented
+- id: A04
+  permission: P24
+  name: Actualizar rol o contraseña de un operador
+  service: IAM
+  method: PATCH
+  path: /operators/{username}
+  resource_types:
+  - administrative_account
+  - administrative_it_account
+  state: implemented
+- id: A05
+  permission: P24
+  name: Eliminar un operador
+  service: IAM
+  method: DELETE
+  path: /operators/{username}
+  resource_types:
+  - administrative_account
+  - administrative_it_account
+  state: implemented
+- id: A06
+  permission: P30
+  name: Listar puestos de trabajo
+  service: IAM
+  method: GET
+  path: /workstations
+  resource_types:
+  - privileged_it_device
+  - privileged_device
+  state: implemented
+- id: A07
+  permission: P30
+  name: Crear o actualizar un puesto (clase academic/operations)
+  service: IAM
+  method: PUT
+  path: /workstations/{mac}
+  resource_types:
+  - privileged_it_device
+  - privileged_device
+  state: implemented
+- id: A08
+  permission: P30
+  name: Eliminar un puesto
+  service: IAM
+  method: DELETE
+  path: /workstations/{mac}
+  resource_types:
+  - privileged_it_device
+  - privileged_device
+  state: implemented
+- id: A09
+  permission: P14
+  name: Listar cuentas de comunidad del IdP simulado
+  service: IAM
+  method: GET
+  path: /idp/users
+  resource_types:
+  - local_account
+  state: implemented
+  notes: Herramienta del prototipo sobre el directorio que consulta RADIUS; en producción
+    la comunidad es de la universidad.
+  prototype: true
+  rbac: false
+- id: A10
+  permission: P14
+  name: Crear cuenta de comunidad en el IdP simulado
+  service: IAM
+  method: POST
+  path: /idp/users
+  resource_types:
+  - local_account
+  state: implemented
+  prototype: true
+  rbac: false
+- id: A11
+  permission: P14
+  name: Cambiar contraseña o nombre de una cuenta de comunidad
+  service: IAM
+  method: PATCH
+  path: /idp/users/{uid}
+  resource_types:
+  - local_account
+  state: implemented
+  prototype: true
+  rbac: false
+- id: A12
+  permission: P14
+  name: Eliminar cuenta de comunidad del IdP simulado
+  service: IAM
+  method: DELETE
+  path: /idp/users/{uid}
+  resource_types:
+  - local_account
+  state: implemented
+  prototype: true
+  rbac: false
+- id: A13
+  permission: P03
+  name: Consultar la traza de permiso efectivo
+  service: IAM
+  method: GET
+  path: /decisions
+  resource_types:
+  - console
+  state: implemented
+- id: A14
+  permission: P31
+  name: Listar sesiones vigentes
+  service: IAM
+  method: GET
+  path: /sessions
+  resource_types:
+  - session
+  state: implemented
+- id: A15
+  permission: P31
+  name: Revocar una sesión
+  service: IAM
+  method: DELETE
+  path: /sessions/{id}
+  resource_types:
+  - session
+  state: implemented
+- id: A16
+  permission: P14
+  name: Listar invitados registrados
+  service: IAM
+  method: GET
+  path: /guests
+  resource_types:
+  - local_account
+  state: implemented
+- id: A17
+  permission: P09
+  name: Consultar alertas en vivo de la consola
+  service: Console
+  method: GET
+  path: /alerts
+  resource_types:
+  - alert
+  - network_alert
+  state: implemented
+- id: A18
+  permission: P02
+  rbac: false
+  name: Aplicar el perfil de red de una sesión
+  service: I2 (controller_adapter)
+  method: POST
+  path: /orders
+  resource_types:
+  - network_session
+  state: implemented
+  notes: El IAM ordena APPLY_PROFILE; el adaptador traduce a reglas 200 con el alcance
+    del perfil.
+- id: A19
+  permission: P28
+  name: Solicitar elevación de acceso a un recurso restringido
+  service: Policies
+  method: POST
+  path: /elevations
+  resource_types:
+  - elevation_request
+  state: designed
+  notes: El académico pide con sesión, recurso, TTL y justificación; la solicitud no
+    concede nada.
+- id: A20
+  permission: P29
+  name: Aprobar, rechazar o revocar una elevación
+  service: Policies
+  method: POST
+  path: /elevations/{id}/approve
+  resource_types:
+  - elevation_request
+  state: designed
+  notes: Admin/SA; C4 impide aprobar la propia solicitud; la aprobación crea una
+    concesión con TTL y aplica el perfil ELEVACIÓN.
+- id: A21
+  permission: P03
+  name: Usar el segmento restringido bajo ELEVACIÓN
+  service: I2 (controller_adapter)
+  method: POST
+  path: /orders
+  resource_types:
+  - academic_service
+  state: designed
+  notes: El motor decide P03 sobre la instancia restringida; la concesión instala
+    una regla 200 con hard_timeout igual al TTL.

@@ -81,10 +81,47 @@
 # el esqueleto del piloto reenvíe con la acción NORMAL, la VLAN 10 de
 # datos recorre solo un árbol y los enlaces redundantes quedan en la
 # VLAN 99 (solo LLDP): visibles para ONOS, fuera del plano de datos.
-# Al activar los caminos calculados en ONOS, vuelven a la VLAN 10.
+# Esta tarea deja el estado inicial seguro; el agente del árbol (RA-07,
+# unidad campus-sdn-tree) lo mantiene y lo recalcula ante caídas de
+# enlace. Los puertos redundantes del inventario deben coincidir con
+# tree_preferred_edges de defaults.
 - name: Enlaces redundantes fuera de la VLAN de datos
   ansible.builtin.command: ovs-vsctl set port {{ item }} tag=99 trunks=99
   loop: "{{ switch_redundant_ports | default([]) }}"
+  tags: [switches]
+
+# Agente del árbol generador SDN: cada switch calcula el mismo árbol
+# (misma vista de /onos/v1/links, mismo algoritmo determinista) y mueve
+# sus puertos de enlace entre la VLAN de datos y la 99. Sin bucles por
+# construcción; redundancia por recálculo al caer un enlace.
+- name: Directorio del agente del árbol
+  ansible.builtin.file:
+    path: /opt/campus-sdn
+    state: directory
+  tags: [switches]
+
+- name: Agente del árbol (script)
+  ansible.builtin.copy:
+    src: "../../scripts/sdn_tree.py"
+    dest: /opt/campus-sdn/sdn_tree.py
+    mode: "0755"
+  tags: [switches]
+
+- name: Unidad del agente del árbol
+  ansible.builtin.template:
+    src: sdn-tree.service.j2
+    dest: /etc/systemd/system/campus-sdn-tree.service
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [switches]
+
+- name: Agente del árbol activo
+  ansible.builtin.systemd:
+    name: campus-sdn-tree
+    enabled: true
+    state: restarted
+    daemon_reload: true
   tags: [switches]
 
 - name: Controladores del bridge

@@ -313,7 +313,44 @@ Ansible se usa donde el aprovisionamiento es repetible e idempotente. Las decisi
 - Claves y certificados propios, rotados.
 - Mínimo privilegio para las cuentas de automatización.
 
+### 10.4 Árbol sin bucles y redundancia (RA-07)
+
+**Por qué importa:** con el reenvío NORMAL del piloto y dos enlaces redundantes activos en la misma VLAN, cada trama de broadcast se duplica e inunda en bucle; la tormenta se midió en el slice el 2026-11-13 (carga de CPU al límite hasta mover los enlaces redundantes a la VLAN 99). La redundancia sin un protocolo de árbol es un multiplicador de la tormenta, no una mejora.
+
+**STP y sus límites.** La estrategia de referencia es RSTP con root guard, pero tiene dos condiciones: los BPDUs deben viajar entre switches y el protocolo no debe pelear con el controlador. En el slice virtual no se cumple la primera — la red del proveedor filtra los BPDUs entre VMs (verificado: sw1 los emite y sw2 no los recibe), y con `stp_enable` cada switch se creería raíz y desbloquearía todo. Por eso el diseño (v2_plan_H §RA-07) decidió que la redundancia no cuesta un protocolo de árbol: el controlador ya tiene el grafo.
+
+**Estrategia en tres niveles:**
+
+1. **Piloto (en servicio desde 2026-11-16): árbol SDN por recálculo.** El agente `campus-sdn-tree` (una unidad systemd por switch, rol `switches`) calcula el árbol generador determinista sobre los enlaces ACTIVOS de `/onos/v1/links` y mueve puertos entre la VLAN de datos y la VLAN 99 (solo descubrimiento). Sin bucles por construcción (el grafo activo es un árbol), bloquear-antes-de-habilitar en cada transición, ciclos de 2 s alineados al reloj NTP y purga de la tabla MAC en cada cambio. Medido: failover de un enlace del árbol en ≈1,4 s y reversión ≈1 s, sin bucles; el detalle operativo está en [`campus-sdn/docs/runbooks/05-redundancia-del-plano-de-datos.md`](../../campus-sdn/docs/runbooks/05-redundancia-del-plano-de-datos.md).
+2. **Plano de datos final: conmutación local.** Los caminos calculados (entradas de prioridad 20, LLD 06_reglas §4) con grupos fast-failover: el propio switch conmuta al camino de respaldo en milisegundos cuando cae el puerto vigilado, sin esperar al recálculo del controlador. Sustituye a NORMAL y al árbol por VLAN.
+3. **Campus físico (Pica8).** Con BPDUs reales, RSTP con root guard es viable de nuevo, o el mismo árbol SDN del nivel 1 si se prefiere un único mecanismo; la elección se registra en el informe del campus. En cualquier caso, storm control y BPDU guard (§10.2) se mantienen como segunda línea.
+
+**Regla de verificación:** todo cambio en la topología de datos se demuestra con un ping continuo a 5 paquetes/s y el corte de un enlace del árbol: la pérdida debe quedar acotada (~1,4 s en el piloto) y los diarios de los agentes deben mostrar el orden bloquear→habilitar. Sin esa evidencia, una topología redundante se considera sin verificar.
+
 En el slice virtual se verifica qué funciones existen. Si alguna no está, se prioriza el aislamiento de gestión, las claves SSH, las ACL y el registro; las reglas SDN cubren la seguridad del usuario y el modo seguro cubre el switch.
+
+### 10.5 Alcance de la sesión por rol (decisión 2026-11-18)
+
+**Antes (atajo del demo).** Los perfiles `it_specialist`, `network_admin` y
+`super_admin` tenían alcance vacío. El adaptador, sin alcance, instalaba una
+regla 200 con `in_port` + `eth_src` **sin `IPV4_DST`**: el dispositivo del
+operador podía alcanzar cualquier destino, incluida la red de gestión. El
+académico y el invitado sí tenían `10.0.0.0/24`.
+
+**Después.** El alcance se alinea con el rol:
+
+| Perfil | Alcance | Reglas 200 |
+|---|---|---|
+| academic / guest | `10.0.0.0/24` | una, con `IPV4_DST` |
+| it_specialist | `10.0.0.10/32` (VIP consola/APIs) + `192.168.0.11/32`, `.12/32`, `.13/32` (controladores) | cuatro |
+| network_admin | `10.0.0.10/32` + `192.168.0.0/24` | dos |
+| super_admin | igual que Admin (el acceso remoto no existe en el slice) | dos |
+
+El cambio vive en `services/iam/main.py` (`SESSION_SCOPE`); `PROFILE_SCOPES`
+permite fijar otros alcances por despliegue. El adaptador crea una regla por
+alcance, así el switch materializa el rol. Verificado el 2026-11-18: un SA
+desde PC3 instala las reglas `10.0.0.10/32` y `192.168.0.0/24`; el académico
+desde PC1 conserva `10.0.0.0/24`; el operador desde PC1 sigue denegado.
 
 ## 11. Requisitos de calidad
 

@@ -62,6 +62,7 @@ make status
 - `base` instala Docker, Compose, chrony y DNS; **no** instala Docker en switches ni h2/h3. **Hecho el 2026-11-13.**
 - `images` copia, verifica, carga y limpia los bundles (el disco es la restricción).
 - `identity` construye en la laptop las imágenes propias y las carga en cada VM de plataforma según `own_services` — **va antes de `platform` y `onos`**, que las usan.
+- **Actualizar una imagen propia**: el rol `identity` cachea la construcción (`/tmp/campus-custom/.build-ok`) y los bundles. Tras cambiar código, `rm -rf /tmp/campus-custom` antes de `make deploy TAGS=identity` y después `make deploy TAGS=platform`: el `up -d` que recrea los contenedores es de `platform`. Sin el segundo paso, el contenedor sigue con la imagen anterior aunque la nueva esté cargada.
 - `platform` levanta los Compose por VM (SRV-1 infra; SRV-2/3 M1–M4 con HAProxy/keepalived).
 - `onos` levanta el clúster de tres nodos con su `cluster.json`.
 

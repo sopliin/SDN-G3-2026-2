@@ -34,7 +34,9 @@ services:
       # escalera del LLD (G-06). hostprovider y lldpprovider alimentan el
       # descubrimiento de hosts y enlaces; proxyarp responde el ARP de la
       # escalera (verificado en el slice anterior).
-      ONOS_APPS: drivers,openflow,hostprovider,lldpprovider,proxyarp
+      # gui y gui2 sirven la consola web (/onos/ui/); apps-clean deja
+      # inactivas las apps no listadas y la consola responde 404.
+      ONOS_APPS: drivers,openflow,hostprovider,lldpprovider,proxyarp,org.onosproject.gui,org.onosproject.gui2
       JAVA_OPTS: -Xmx2g
     volumes:
       - /opt/campus-sdn/onos/config/cluster.json:/root/onos/config/cluster.json

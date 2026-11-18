@@ -102,6 +102,14 @@
         "srv2",
         "srv3"
       ]
+    },
+    {
+      "name": "cadvisor",
+      "ref": "gcr.io/cadvisor/cadvisor:v0.49.1",
+      "digest": "sha256:3cde6faf0791ebf7b41d6f8ae7145466fed712ea6f252c935294d2608b1af388",
+      "used_by": [
+        "s2"
+      ]
     }
   ]
 }

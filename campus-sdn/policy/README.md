@@ -6,7 +6,7 @@
 
 ---
 
-[`permissions.yaml`](permissions.yaml) es la copia operativa de la etapa 0, con los valores de dominio en inglés. El corpus conserva el modelo en español ([`implementation/policy/permisos.yaml`](../../implementation/policy/permisos.yaml)) y ambas copias se cambian juntas y versionadas; las pruebas de contrato verifican que sigan sincronizadas en estructura. Los nombres, descripciones y notas se mantienen en español en ambas: son texto para personas, no identificadores.
+[`permissions.yaml`](permissions.yaml) es la copia operativa de la etapa 0, con los valores de dominio en inglés. El corpus conserva el modelo en español ([`implementation/policy/permisos.yaml`](../../plan/implementation/policy/permisos.yaml)) y ambas copias se cambian juntas y versionadas; las pruebas de contrato verifican que sigan sincronizadas en estructura. Los nombres, descripciones y notas se mantienen en español en ambas: son texto para personas, no identificadores.
 
 ## 1. Correspondencia de valores
 
@@ -89,3 +89,12 @@
 | [permissions.schema.json](../contracts/policy/permissions.schema.json) | La forma estructural que el YAML debe cumplir |
 | [tools/validate.py](tools/validate.py) | Valida forma e integridad referencial |
 | [tools/generate_matrix.py](tools/generate_matrix.py) | Genera la matriz rol × permiso y la compara con el corpus |
+
+## 2. Dos capas: política y binding de acciones
+
+- [`permissions.yaml`](permissions.yaml) es la **política** de la etapa 0: roles, P01–P36, asignaciones, condiciones C1–C11 y obligaciones. No conoce endpoints ni servicios.
+- [`actions.yaml`](actions.yaml) es el **binding**: qué operación concreta aplica un permiso (servicio, método/ruta, tipo de recurso, estado). No repite roles ni condiciones; se derivan de la política.
+- La revisión humana de la fórmula, los roles y las acciones está en [`plan/implementation/10_catalogo_de_acciones_y_permisos.md`](../../plan/implementation/10_catalogo_de_acciones_y_permisos.md). El modelo de dominio de la fase A está en [`05_acciones.md`](../../docs/phases/A-Modelo_de_dominio/05_acciones.md), [`06_contexto.md`](../../docs/phases/A-Modelo_de_dominio/06_contexto.md), [`07_estado_de_seguridad.md`](../../docs/phases/A-Modelo_de_dominio/07_estado_de_seguridad.md), [`08_vigencia.md`](../../docs/phases/A-Modelo_de_dominio/08_vigencia.md), [`09_condiciones.md`](../../docs/phases/A-Modelo_de_dominio/09_condiciones.md) y [`10_reglas_dinamicas_y_atributos.md`](../../docs/phases/A-Modelo_de_dominio/10_reglas_dinamicas_y_atributos.md).
+- [`../tests/contract/test_actions.py`](../tests/contract/test_actions.py) verifica que cada acción referencia un permiso existente y que su recurso está cubierto por una asignación. Las acciones del IdP simulado están marcadas como **prototipo** y no se presentan como permisos de la matriz.
+
+Un cambio de rol, condición o recurso se hace en `permissions.yaml` (y en su gemelo del corpus); una operación nueva se declara en `actions.yaml` y se prueba. No se mezclan.

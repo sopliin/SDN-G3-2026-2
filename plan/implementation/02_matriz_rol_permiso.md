@@ -142,8 +142,14 @@ La matriz es una vista del archivo [`policy/permisos.yaml`](policy/permisos.yaml
 
 | Documento | Relación |
 |---|---|
-| [`03_permisos.md`](../docs/fases/A-Modelo_de_dominio/03_permisos.md) | Catálogo P01–P36 |
+| [`03_permisos.md`](../../docs/phases/A-Modelo_de_dominio/03_permisos.md) | Catálogo P01–P36 |
 | [`01_modelo_de_contexto_y_estado.md`](01_modelo_de_contexto_y_estado.md) | Definición de contexto, estado y vigencia |
 | [`policy/permisos.yaml`](policy/permisos.yaml) | Fuente de verdad |
 | [`03_plan_de_pruebas_permisos.md`](03_plan_de_pruebas_permisos.md) | Casos de prueba de la matriz |
-| [`../docs/componentes/02_autorizacion.md`](../docs/componentes/02_autorizacion.md) | Autorización en servicios y red |
+| [`policy/actions.yaml`](../../campus-sdn/policy/actions.yaml) | Binding acción → permiso → recurso; no redefine roles |
+| [`10_catalogo_de_acciones_y_permisos.md`](10_catalogo_de_acciones_y_permisos.md) | Revisión de la fórmula, roles y acciones |
+| [`../../docs/phases/A-Modelo_de_dominio/05_acciones.md`](../../docs/phases/A-Modelo_de_dominio/05_acciones.md) | Catálogo de acciones de la fase A |
+| [`../../docs/phases/A-Modelo_de_dominio/09_condiciones.md`](../../docs/phases/A-Modelo_de_dominio/09_condiciones.md) | Condiciones y ejes de decisión |
+| [`../docs/componentes/02_autorizacion.md`](../../docs/components/02_autorizacion.md) | Autorización en servicios y red |
+
+**Nota de implementación (2026-11-18):** la matriz no cambia. El binding corrigió dos operaciones: los puestos usan **P30** (no P21) y la revocación de sesión exige **P31/C8** (el TI solo opera las propias). La administración del IdP simulado es una excepción del prototipo, fuera de esta matriz.

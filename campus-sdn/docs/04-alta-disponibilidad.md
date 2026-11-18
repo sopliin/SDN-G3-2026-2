@@ -44,10 +44,25 @@ La capa activa-activo no replica los datos todavía; lo que el informe previo pr
 
 | Pieza | Estado actual | Falta |
 |---|---|---|
-| PostgreSQL | Primario único en SRV-2 ([`postgres.yml`](../deploy/compose/postgres.yml)); los servicios aún no lo consumen | Réplica en SRV-3, respaldo lógico en SRV-1 y la promoción probada |
-| Redis | Maestro único en SRV-1 ([`redis.yml`](../deploy/compose/redis.yml)) | Réplicas en SRV-2/3 y Sentinel |
+| PostgreSQL | Primario en SRV-2 + **réplica en streaming en SRV-3** ([`postgres-replica.yml`](../deploy/compose/postgres-replica.yml)); el IAM usa el primario; operadores, puestos, sesiones, invitados y decisiones están en la base | Promoción automática y probada en la campaña; el primario antiguo se reconstruye tras un switchover |
+| Redis | Maestro único en SRV-1 ([`redis.yml`](../deploy/compose/redis.yml)); el IAM aún no lo usa | Réplicas en SRV-2/3 y Sentinel |
 | RabbitMQ | Nodo único en SRV-1 ([`rabbitmq.yml`](../deploy/compose/rabbitmq.yml)) | Clúster de tres nodos con colas de quórum |
 | IdP | Primario en SRV-1; FreeRADIUS/OpenLDAP ya duplicados en SRV-2/3 como réplica fría | Réplica activa (failover automático del `RADIUS_HOST`) |
 | Espejo | Suricata de SRV-1 espera la NIC `ens6` | NIC + espejo distribuido en SRV-2/3 |
 
 La promoción de PostgreSQL y el failover de Redis forman parte de la campaña de medición; este documento se actualiza cuando la etapa 2 se despliegue.
+
+**Réplica de PostgreSQL (desplegada el 2026-11-18).** `s3-postgres-replica` en SRV-3 hace `pg_basebackup -R` del primario de SRV-2 al primer arranque y queda en **streaming asíncrono** (`pg_is_in_recovery() = t`; el primario muestra `10.0.0.13|streaming|async`). El primario necesita la línea `host replication all 10.0.0.13/32 scram-sha-256` en `pg_hba.conf`; el compose del primario no la genera, se añade una vez y se recarga con `pg_reload_conf()`.
+
+**Promoción manual (procedimiento de la campaña):**
+
+```bash
+# 1. Promover la réplica (deja de ser standby y acepta escrituras)
+ssh -p 5813 ubuntu@10.20.12.185 \
+  'sudo docker exec -u postgres s3-postgres-replica pg_ctl promote -D /var/lib/postgresql/data'
+# 2. Apuntar el IAM de SRV-3 al nuevo primario (mismo host) y recrearlo
+#    PGHOST=10.0.0.13 en el .env de srv3; docker compose up -d iam
+# 3. El primario antiguo (SRV-2) se reconstruye como standby cuando vuelva.
+```
+
+La promoción **no está automatizada** y no se ejecutó en el slice: hacerlo sin un VIP de base de datos obliga a cambiar `PGHOST` y recrear el IAM. Queda para la campaña, junto con la prueba de que las sesiones y los invitados sobreviven al switchover.

@@ -16,7 +16,8 @@ IMAGES ?=
 
 .PHONY: help images-pull images-verify images-save images-load \
         ping deploy up down status test verify native-sync native-install \
-        native-skeleton native-test dhcp-probe bench-r4 bench-r1r2
+        native-skeleton native-test dhcp-probe bench-r4 bench-r1r2 \
+        ldap-user ldap-list ldap-delete ldap-passwd operator operator-list
 
 help: ## Muestra los objetivos disponibles
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -88,8 +89,45 @@ dhcp-probe: ## Sonda DHCP desde h1 por la red de datos (pide la clave de sudo)
 	scp -q -P $(PROBE_PORT) deploy/scripts/dhcp_probe.py ubuntu@$(PROBE_HOST):/tmp/
 	ssh -t -p $(PROBE_PORT) ubuntu@$(PROBE_HOST) 'sudo python3 /tmp/dhcp_probe.py $(PROBE_IFACE)'
 
+# --- Identidades del slice ---
+# La comunidad la crea el IdP (simulado con OpenLDAP); los operadores,
+# la plataforma por la API del IAM (cadena P24 o bootstrap del primer
+# operador). Los invitados se autoregistran.
+LDAP_USER ?= USR-1000
+LDAP_PASS ?= user_1000
+LDAP_NAME ?= Usuario 1000
+OPERATOR_USER ?= TI-0028
+OPERATOR_PASS ?= operator_0028
+OPERATOR_ROLE ?= super_admin
+SESSION ?=
+BOOTSTRAP_TOKEN := $(shell grep '^IAM_BOOTSTRAP_TOKEN=' deploy/env/.env 2>/dev/null | cut -d= -f2)
+
+ldap-user: ## Crea una cuenta de comunidad en el IdP simulado (LDAP_USER, LDAP_PASS)
+	$(ANSIBLE) -e "user=$(LDAP_USER) password=$(LDAP_PASS) name='$(LDAP_NAME)'" \
+	  deploy/ansible/playbooks/ldap_user.yml
+
+ldap-list: ## Lista las cuentas de comunidad del IdP simulado
+	$(ANSIBLE) deploy/ansible/playbooks/ldap_list.yml
+
+ldap-delete: ## Elimina una cuenta de comunidad del IdP simulado (LDAP_USER)
+	$(ANSIBLE) -e "user=$(LDAP_USER)" deploy/ansible/playbooks/ldap_delete.yml
+
+ldap-passwd: ## Cambia la contraseña de una cuenta de comunidad (LDAP_USER, LDAP_PASS)
+	$(ANSIBLE) -e "user=$(LDAP_USER) password=$(LDAP_PASS)" \
+	  deploy/ansible/playbooks/ldap_passwd.yml
+
+operator: ## Crea un operador por la API del IAM (OPERATOR_*, SESSION o bootstrap)
+	ssh -p 5812 ubuntu@10.20.12.185 "curl -s -X POST http://10.0.0.12:8001/operators \
+	  -H 'Content-Type: application/json' \
+	  -d '{\"username\":\"$(OPERATOR_USER)\",\"password\":\"$(OPERATOR_PASS)\",\"role\":\"$(OPERATOR_ROLE)\",\"session\":\"$(SESSION)\",\"bootstrap_token\":\"$(BOOTSTRAP_TOKEN)\"}'"
+
+operator-list: ## Lista los operadores (SESSION de un operador con P24)
+	ssh -p 5812 ubuntu@10.20.12.185 "curl -s 'http://10.0.0.12:8001/operators?session=$(SESSION)'"
+
 # --- Corte nativo (DEL SLICE ANTERIOR, 10.20.11.x: en desuso desde el
-# --- slice de 14 VMs, que corre todo en contenedores con disco 20 GB) ---
+# --- slice de 14 VMs, que corre todo en contenedores con disco 20 GB).
+# --- La IP vigente del slice es 10.20.12.185; 10.20.11.24 se conserva
+# --- solo para reproducir el registro del corte nativo. ---
 SLICE_GATEWAY ?= 10.20.11.24
 SSH_CTRL := ssh -o BatchMode=yes -p 5800 ubuntu@$(SLICE_GATEWAY)
 

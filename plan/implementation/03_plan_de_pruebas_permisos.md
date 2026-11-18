@@ -41,12 +41,13 @@ L6  Cobertura y mutación (calidad de la suite)
 - Toda celda `Cxx` de la matriz existe en el YAML.
 - Todo permiso P01–P36 y P22-CFG aparece exactamente una vez en el catálogo.
 - La matriz del documento coincide con las asignaciones del YAML (`generar_matriz.py --check`).
+- El binding `actions.yaml` referencia solo permisos existentes y recursos cubiertos por asignaciones; las acciones prototipo (IdP) están marcadas y no se presentan como RBAC (`tests/contract/test_actions.py`).
 
 Herramientas: `pytest`, `jsonschema` cuando el entorno lo provea, `generar_matriz.py`.
 
 ### L1. Unidad de decisión
 
-Cada prueba construye un sujeto, una acción, un recurso, un contexto, un estado y una vigencia, y compara la decisión con la esperada.
+Los casos se derivan de [`05_acciones.md`](../../docs/phases/A-Modelo_de_dominio/05_acciones.md), [`06_contexto.md`](../../docs/phases/A-Modelo_de_dominio/06_contexto.md), [`07_estado_de_seguridad.md`](../../docs/phases/A-Modelo_de_dominio/07_estado_de_seguridad.md), [`08_vigencia.md`](../../docs/phases/A-Modelo_de_dominio/08_vigencia.md), [`09_condiciones.md`](../../docs/phases/A-Modelo_de_dominio/09_condiciones.md) y [`10_reglas_dinamicas_y_atributos.md`](../../docs/phases/A-Modelo_de_dominio/10_reglas_dinamicas_y_atributos.md). Cada prueba construye un sujeto, una acción, un recurso, un contexto, un estado y una vigencia, y compara la decisión con la esperada. El ejemplo de la nube privada (elevación P28/P29 con TTL) es el caso de referencia de la unidad; los casos y el modelo de datos están en [`11_modelo_de_datos_y_motor_de_reglas.md`](11_modelo_de_datos_y_motor_de_reglas.md) §11. El motor dinámico solo aplica a la comunidad; operadores e invitados se prueban con su RBAC/TTL estático.
 
 | Grupo | Casos representativos |
 |---|---|
@@ -108,11 +109,20 @@ Cada servicio expone sus operaciones y cada operación declara el permiso que ex
 
 La prueba usa `httpx` contra el servicio en un contenedor y una base PostgreSQL efímera. Los eventos se publican en RabbitMQ y se verifica su entrega y su idempotencia.
 
+- La traza `iam_decisions` registra las decisiones de login y administración con los seis ejes; un `deny` debe incluir el motivo y un `permit` el perfil y el contexto.
+- Las sesiones creadas en una instancia se validan y cierran en la otra (PostgreSQL compartido); un invitado registrado en una instancia inicia sesión en la otra.
+- El barrido y el Interim corren solo en SRV-2 (`IAM_MAINTENANCE=1`); no se duplica el accounting.
+
 ### L4. Enforcement en el switch
 
 La decisión de red se materializa como FLOW_MOD. La prueba verifica la regla instalada, no solo la respuesta de la API.
 
 | Flujo | Verificación |
+|---|---|
+| `SESSION_SCOPE` académico | Una regla 200 con `IPV4_DST=10.0.0.0/24` |
+| `SESSION_SCOPE` SA | Dos reglas 200: `10.0.0.10/32` y `192.168.0.0/24` |
+| `SESSION_SCOPE` TI | Cuatro reglas: VIP + `192.168.0.11–13/32` |
+| Operador sin alcance | No debe existir una regla 200 sin `IPV4_DST` |
 |---|---|
 | BASE | Portal con prioridad 150, DHCP/DNS con 10, DROP a gestión con 100, anti-spoofing con 110. |
 | ACADÉMICO | Regla de sesión con prioridad 190, cookie `0x01`, `idle_timeout` configurado. |

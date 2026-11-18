@@ -33,8 +33,10 @@ services:
       - openldap_data:/var/lib/ldap
       - openldap_config:/etc/ldap/slapd.d
     ports:
-      - "127.0.0.1:389:389"
-      - "127.0.0.1:636:636"
+      # La consola/IAM de srv2/srv3 administra el directorio por la red
+      # de gestión (192.168.0.11); no se expone en la red de datos.
+      - "${LDAP_BIND_IP:-127.0.0.1}:389:389"
+      - "${LDAP_BIND_IP:-127.0.0.1}:636:636"
     healthcheck:
       test: ["CMD-SHELL", "ldapsearch -x -H ldap://127.0.0.1 -s base namingContexts >/dev/null"]
       interval: 15s

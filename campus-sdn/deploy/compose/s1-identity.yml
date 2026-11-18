@@ -39,6 +39,44 @@ services:
       GUEST_TTL_S: "86400"
       STUB_VERIFY: ${STUB_VERIFY:-}
       BUS_URL: ${BUS_URL:-}
+      # La sesión ordena el perfil al controlador (I2) y registra la
+      # asociación en el Registry: sin estas URLs el login funciona pero
+      # la red nunca se entera (login «a medias», F-03 §4/§7).
+      I2_URL: ${I2_URL:-}
+      REGISTRY_URL: http://registry:8002
+      # Contexto ambiental: clase de cada puesto (PC1/PC2 académicos,
+      # PC3/PC4 operadores). El estado persistente permite a la consola
+      # cambiarlo; el archivo versionado es la semilla.
+      WORKSTATIONS_FILE: /app/context/workstations.json
+      WORKSTATIONS_STATE_FILE: /data/workstations.json
+      # Los operadores sobreviven al reinicio del contenedor; el volumen
+      # es local a la instancia (la Etapa 2 de HA lo comparte).
+      OPERATORS_FILE: /data/operators.json
+      # Solo SRV-2 ejecuta el barrido y el Interim (sesiones
+      # compartidas): evita duplicar el accounting.
+      IAM_MAINTENANCE: ${IAM_MAINTENANCE:-0}
+      # Estado compartido entre srv2 y srv3: PostgreSQL en SRV-2. Sin
+      # estas variables (o si la base no responde, el IAM cae a los
+      # archivos locales y el login sigue funcionando).
+      PGHOST: 10.0.0.12
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-}
+      PGDATABASE: bd_politicas
+      # Directorio institucional simulado: el OpenLDAP de SRV-1, por la
+      # red de gestión. La consola administra cuentas de comunidad con
+      # operaciones LDAP reales (no un mock); en producción ese
+      # directorio es de la universidad.
+      IDP_LDAP_URL: ldap://192.168.0.11:389
+      IDP_LDAP_ADMIN_DN: cn=admin,dc=campus,dc=local
+      IDP_LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:-}
+      # Primer operador (la cadena P24 exige un operador ya existente):
+      # solo el arranque usa este token, que vive en el .env (nunca en
+      # el repositorio).
+      IAM_BOOTSTRAP_TOKEN: ${IAM_BOOTSTRAP_TOKEN:-}
+    volumes:
+      - ../context/workstations.json:/app/context/workstations.json:ro
+      - iam_data:/data
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8001:8001"
     depends_on:
@@ -110,3 +148,4 @@ services:
 volumes:
   openldap_data:
   openldap_config:
+  iam_data:

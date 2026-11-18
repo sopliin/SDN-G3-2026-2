@@ -4,6 +4,7 @@
 # posterior). ONOS-3 llega por onos.yml.
 include:
   - s1-identity.yml
+  - postgres-replica.yml
   - s2-observability.yml
   - s3-services.yml
   - s4-services.yml

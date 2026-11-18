@@ -1,0 +1,21 @@
+---
+# Cambio de contraseña de una cuenta de comunidad en el IdP simulado.
+# Herramienta del IdP simulado: en un despliegue real la universidad
+# gestiona la credencial en su directorio.
+- name: Cambio de contraseña en el IdP simulado
+  hosts: srv1
+  become: true
+  tasks:
+    - name: Actualizar userPassword
+      ansible.builtin.shell: |
+        docker exec s1-openldap ldappasswd -x -H ldap://127.0.0.1 \
+          -D "cn=admin,dc=campus,dc=local" \
+          -w "$(grep '^LDAP_ADMIN_PASSWORD=' /opt/campus-sdn/deploy/compose/.env | cut -d= -f2)" \
+          -s "{{ password }}" \
+          "uid={{ user }},ou=people,dc=campus,dc=local"
+      register: ldap_passwd
+      changed_when: ldap_passwd.rc == 0
+
+    - name: Resultado
+      ansible.builtin.debug:
+        msg: "{{ user }}: contraseña actualizada"

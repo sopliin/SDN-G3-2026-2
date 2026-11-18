@@ -15,7 +15,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
+      # Compartido con el IAM de SRV-3 por la red de datos; en SRV-2
+      # SERVICE_BIND_IP es 10.0.0.12. No se expone fuera del slice.
+      - "${SERVICE_BIND_IP:-0.0.0.0}:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d bd_politicas"]
       interval: 10s

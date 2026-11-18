@@ -22,10 +22,11 @@ Reglas de implementación y documentación. Todo agente y todo autor debe leerla
 - Toda tarea se ejecuta por `make`; no hay pasos manuales fuera del Makefile y de Ansible.
 - Sin secretos en el repositorio: `.env`, el inventario `slice.yml` y el vault están ignorados por git; las credenciales viajan por Ansible Vault o variables de entorno.
 - `deploy/images/bundles/` no se versiona: git guarda el lock, no los binarios.
-- `policy/permissions.yaml` es la copia operativa de la etapa 0; su gemelo histórico está en `../implementation/policy/`. Se cambian juntos y versionados.
+- `policy/permissions.yaml` es la copia operativa de la etapa 0; su gemelo histórico está en `../plan/implementation/policy/`. Se cambian juntos y versionados.
+- `policy/actions.yaml` es el binding acción → permiso (servicio, método/ruta, recurso); no duplica roles ni condiciones y se valida con `tests/contract/test_actions.py`. La revisión de la fórmula y los roles está en `../plan/implementation/10_catalogo_de_acciones_y_permisos.md`.
 - Los contratos se congelan antes de escribir servicios: contrato → prueba de contrato → servicio.
 
 ## Referencias
 
-- Plan de construcción: [`../implementation/09_plan_de_construccion.md`](../implementation/09_plan_de_construccion.md)
+- Plan de construcción: [`../plan/implementation/09_plan_de_construccion.md`](../plan/implementation/09_plan_de_construccion.md)
 - Mapa, estado y formatos: [`docs/01-mapa.md`](docs/01-mapa.md), [`docs/02-estado.md`](docs/02-estado.md), [`docs/03-formatos.md`](docs/03-formatos.md)

@@ -1,0 +1,38 @@
+---
+# Alta de una cuenta de comunidad en el IdP simulado (OpenLDAP).
+# La plataforma NO gestiona la comunidad: en un despliegue real la crea
+# la universidad en su IdP (matrícula/RRHH). Este playbook simula ese
+# alta para el prototipo y deja la cuenta visible por LDAP y RADIUS.
+- name: Alta de cuenta de comunidad en el IdP simulado
+  hosts: srv1
+  become: true
+  vars:
+    ldap_user: "{{ user }}"
+    ldap_password: "{{ password }}"
+    ldap_name: "{{ name | default(user) }}"
+  tasks:
+    - name: Crear la cuenta en ou=people
+      ansible.builtin.shell: |
+        set -e
+        docker exec -i s1-openldap ldapadd -x -H ldap://127.0.0.1 \
+          -D "cn=admin,dc=campus,dc=local" \
+          -w "$(grep '^LDAP_ADMIN_PASSWORD=' /opt/campus-sdn/deploy/compose/.env | cut -d= -f2)" <<'LDIF'
+        dn: uid={{ ldap_user }},ou=people,dc=campus,dc=local
+        objectClass: inetOrgPerson
+        uid: {{ ldap_user }}
+        cn: {{ ldap_name }}
+        sn: {{ ldap_name }}
+        userPassword: {{ ldap_password }}
+        LDIF
+      args:
+        executable: /bin/bash
+      register: ldap_add
+      changed_when: ldap_add.rc == 0
+      failed_when: >
+        ldap_add.rc != 0 and 'Already exists' not in ldap_add.stderr
+
+    - name: Resultado
+      ansible.builtin.debug:
+        msg: >-
+          {{ ldap_user }}: {{ 'creada' if ldap_add.rc == 0
+             else 'ya existía (sin cambios)' }}

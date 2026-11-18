@@ -613,7 +613,9 @@ assignments:
 
   # Especialista de TI
   - {id: T001, role: it_specialist, permission: P03, effect: permit, resources: [security_service, console, security_api], conditions: [C9], obligations: [audit]}
-  - {id: T002, role: it_specialist, permission: P04, effect: permit, resources: [alert, incident, security_log, metric, security_resource], conditions: [C9], obligations: [audit]}
+  # 2026-11-18: el TI lee las reglas (P04 access_policy) porque afectan a
+  # toda la comunidad; crear/aprobar sigue siendo P17/P29 de Admin/SA.
+  - {id: T002, role: it_specialist, permission: P04, effect: permit, resources: [alert, incident, security_log, metric, security_resource, access_policy, elevation_request], conditions: [C9], obligations: [audit]}
   - {id: T003, role: it_specialist, permission: P05, effect: permit, resources: [authorized_response, alert, incident], conditions: [C7, C9], obligations: [audit, notify]}
   - {id: T004, role: it_specialist, permission: P06, effect: permit, resources: [management_network, switch, sdn_controller], conditions: [C1], obligations: [audit]}
   - {id: T005, role: it_specialist, permission: P07, effect: permit, resources: [traffic, metric], conditions: [C1], obligations: [audit]}
@@ -630,7 +632,7 @@ assignments:
 
   # Administrador de Red
   - {id: R001, role: network_admin, permission: P03, effect: permit, resources: [console, network_api], conditions: [C9], obligations: [audit]}
-  - {id: R002, role: network_admin, permission: P04, effect: permit, resources: [network_resource, switch, sdn_controller, access_policy], conditions: [C9], obligations: [audit]}
+  - {id: R002, role: network_admin, permission: P04, effect: permit, resources: [network_resource, switch, sdn_controller, access_policy, elevation_request], conditions: [C9], obligations: [audit]}
   - {id: R003, role: network_admin, permission: P05, effect: permit, resources: [network_operation], conditions: [C9], obligations: [audit]}
   - {id: R004, role: network_admin, permission: P06, effect: permit, resources: [management_network, switch, sdn_controller], conditions: [C1], obligations: [audit]}
   - {id: R005, role: network_admin, permission: P07, effect: permit, resources: [traffic, metric], conditions: [C1], obligations: [audit]}

@@ -611,7 +611,10 @@ assignments:
 
   # Especialista de TI
   - {id: T001, role: especialista_ti, permission: P03, effect: permit, resources: [servicio_seguridad, consola, api_seguridad], conditions: [C9], obligations: [auditar]}
-  - {id: T002, role: especialista_ti, permission: P04, effect: permit, resources: [alerta, incidente, log_seguridad, metrica, recurso_seguridad], conditions: [C9], obligations: [auditar]}
+  # 2026-11-18: el TI lee las reglas y las solicitudes de elevación (P04
+  # politica_acceso, solicitud_elevacion) porque afectan a toda la
+  # comunidad; crear/aprobar sigue siendo P17/P29 de Admin/SA.
+  - {id: T002, role: especialista_ti, permission: P04, effect: permit, resources: [alerta, incidente, log_seguridad, metrica, recurso_seguridad, politica_acceso, solicitud_elevacion], conditions: [C9], obligations: [auditar]}
   - {id: T003, role: especialista_ti, permission: P05, effect: permit, resources: [respuesta_autorizada, alerta, incidente], conditions: [C7, C9], obligations: [auditar, notificar]}
   - {id: T004, role: especialista_ti, permission: P06, effect: permit, resources: [red_gestion, switch, controlador_sdn], conditions: [C1], obligations: [auditar]}
   - {id: T005, role: especialista_ti, permission: P07, effect: permit, resources: [trafico, metrica], conditions: [C1], obligations: [auditar]}
@@ -628,7 +631,7 @@ assignments:
 
   # Administrador de Red
   - {id: R001, role: administrador_red, permission: P03, effect: permit, resources: [consola, api_red], conditions: [C9], obligations: [auditar]}
-  - {id: R002, role: administrador_red, permission: P04, effect: permit, resources: [recurso_red, switch, controlador_sdn, politica_acceso], conditions: [C9], obligations: [auditar]}
+  - {id: R002, role: administrador_red, permission: P04, effect: permit, resources: [recurso_red, switch, controlador_sdn, politica_acceso, solicitud_elevacion], conditions: [C9], obligations: [auditar]}
   - {id: R003, role: administrador_red, permission: P05, effect: permit, resources: [operacion_red], conditions: [C9], obligations: [auditar]}
   - {id: R004, role: administrador_red, permission: P06, effect: permit, resources: [red_gestion, switch, controlador_sdn], conditions: [C1], obligations: [auditar]}
   - {id: R005, role: administrador_red, permission: P07, effect: permit, resources: [trafico, metrica], conditions: [C1], obligations: [auditar]}

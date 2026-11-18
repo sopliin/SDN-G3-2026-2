@@ -33,6 +33,13 @@
         - /opt/campus-sdn/deploy/compose/keepalived
         - /opt/campus-sdn/deploy/compose/atomix
         - /opt/campus-sdn/deploy/compose/radius
+        - /opt/campus-sdn/deploy/context
+      tags: [platform]
+
+    - name: Mapa de puestos de trabajo
+      ansible.builtin.copy:
+        src: "../../context/workstations.json"
+        dest: /opt/campus-sdn/deploy/context/workstations.json
       tags: [platform]
 
     - name: Archivo Compose raíz
@@ -46,6 +53,13 @@
         src: "../../compose/{{ item }}"
         dest: "/opt/campus-sdn/deploy/compose/{{ item }}"
       loop: "{{ compose_extra_files | default([]) }}"
+      tags: [platform]
+
+    - name: Provisión de Grafana (datasource y dashboards)
+      ansible.builtin.copy:
+        src: "../../compose/grafana/"
+        dest: /opt/campus-sdn/deploy/compose/grafana/
+        mode: "0644"
       tags: [platform]
 
     - name: Leer el .env (nodo de control)
@@ -160,6 +174,15 @@
       ansible.builtin.command:
         cmd: docker compose -p campus-sdn -f {{ compose_file }} up -d
         chdir: /opt/campus-sdn/deploy/compose
+      tags: [platform]
+
+    - name: Permitir replicación PostgreSQL desde SRV-3
+      ansible.builtin.shell: |
+        docker exec -u postgres s3-postgres sh -c "grep -q '10.0.0.13/32' \$PGDATA/pg_hba.conf || echo 'host replication all 10.0.0.13/32 scram-sha-256' >> \$PGDATA/pg_hba.conf"
+        docker exec -u postgres s3-postgres psql -U {{ postgres_user }} -d bd_politicas -c "select pg_reload_conf()"
+      when:
+        - inventory_hostname == 'srv2'
+        - compose_file == 'srv2-platform.yml'
       tags: [platform]
 
     - name: Servicios detenidos

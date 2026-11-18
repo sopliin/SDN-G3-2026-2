@@ -8,7 +8,7 @@
 
 ## 1. Propósito
 
-Fijar cómo se construye la solución: el repositorio [`campus-sdn`](../campus-sdn/), su estructura, el modelo de imágenes y el orden de trabajo. Este plan aterriza el despliegue de [`05`](05_plan_de_implementacion.md) y los paquetes de trabajo de [`06`](06_plan_de_trabajo_etapa_2.md) y [`07`](07_plan_de_trabajo_etapa_3.md) en código reproducible: cada tarea manual del diseño se convierte en un script, un rol de Ansible o un objetivo de Makefile.
+Fijar cómo se construye la solución: el repositorio [`campus-sdn`](../../campus-sdn/), su estructura, el modelo de imágenes y el orden de trabajo. Este plan aterriza el despliegue de [`05`](05_plan_de_implementacion.md) y los paquetes de trabajo de [`06`](06_plan_de_trabajo_etapa_2.md) y [`07`](07_plan_de_trabajo_etapa_3.md) en código reproducible: cada tarea manual del diseño se convierte en un script, un rol de Ansible o un objetivo de Makefile.
 
 La automatización se escribe completa en la laptop y se ejecuta contra el slice cuando las VMs estén disponibles. Ninguna etapa queda como tarea manual pendiente: lo que no se puede ejecutar hoy se deja preparado y se verifica hasta donde el entorno local lo permite.
 
@@ -164,6 +164,10 @@ Laptop con internet                        Slice
 ## 6. Política y contratos
 
 - `policy/permissions.yaml` es la copia operativa del cierre de la etapa 0; la fuente histórica sigue en [`implementation/policy/`](policy/). Cualquier cambio se versiona en el YAML y se propaga a la matriz con el generador.
+- La fase A fija el **catálogo de acciones** ([`05_acciones.md`](../../docs/phases/A-Modelo_de_dominio/05_acciones.md)), el **contexto** ([`06_contexto.md`](../../docs/phases/A-Modelo_de_dominio/06_contexto.md)), el **estado de seguridad** ([`07_estado_de_seguridad.md`](../../docs/phases/A-Modelo_de_dominio/07_estado_de_seguridad.md)), la **vigencia** ([`08_vigencia.md`](../../docs/phases/A-Modelo_de_dominio/08_vigencia.md)), las **condiciones** ([`09_condiciones.md`](../../docs/phases/A-Modelo_de_dominio/09_condiciones.md)) y las **reglas dinámicas/atributos** ([`10_reglas_dinamicas_y_atributos.md`](../../docs/phases/A-Modelo_de_dominio/10_reglas_dinamicas_y_atributos.md)); el binding los implementa.
+- `policy/actions.yaml` es el **binding de acciones**: servicio, método/ruta, permiso Pxx y tipo de recurso. No repite roles ni condiciones; se derivan de `permissions.yaml` y se validan con `tests/contract/test_actions.py`. La revisión humana está en [`10_catalogo_de_acciones_y_permisos.md`](10_catalogo_de_acciones_y_permisos.md).
+- La decisión efectiva de login y administración se registra en `iam_decisions` (PostgreSQL compartido) y se muestra en la consola; es la traza de los seis ejes.
+- La etapa 2 lleva operadores, puestos, sesiones, invitados y decisiones a PostgreSQL; la réplica streaming vive en SRV-3 y la promoción es manual ([`../campus-sdn/docs/04-alta-disponibilidad.md`](../../campus-sdn/docs/04-alta-disponibilidad.md) §4).
 - `policy/profiles.yaml` se deriva del YAML cuando los servicios consuman perfiles por separado; queda listado en `docs/02-estado.md`.
 - `contracts/policy/` guarda el esquema JSON que valida ambos archivos.
 - Los contratos se congelan antes de escribir servicios: el orden es contrato → prueba de contrato → servicio.
@@ -230,4 +234,4 @@ Prerrequisitos:
 | [`07_plan_de_trabajo_etapa_3.md`](07_plan_de_trabajo_etapa_3.md) | Paquetes de trabajo de ejecución y medición |
 | [`04_capacidades_del_switch.md`](04_capacidades_del_switch.md), [`08_inventario_del_slice.md`](08_inventario_del_slice.md) | Verificación del slice que precede al despliegue |
 | [`00_cierre_etapa_0_permisos.md`](00_cierre_etapa_0_permisos.md), [`policy/`](policy/) | Fuente de `campus-sdn/policy/` |
-| [`../campus-sdn/README.md`](../campus-sdn/README.md) | Entrada al código y al estado |
+| [`../campus-sdn/README.md`](../../campus-sdn/README.md) | Entrada al código y al estado |
