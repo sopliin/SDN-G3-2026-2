@@ -82,6 +82,21 @@ make operator-list SESSION=<sesión de operador>
 - Desde un puesto de operadores (PC3/PC4) la sesión se emite con el dispositivo y la regla; desde una PC académica (PC1/PC2) se rechaza con 403 **antes** del TOTP.
 - El alta todavía no publica un evento propio de auditoría; el `SessionOpened`/`SessionClosed` del login sí. Es una limitación declarada del prototipo (el evento `DeviceRegistered` cubre el registro de dispositivos, no el alta de operadores).
 
+**Alta de emergencia (*break-glass*).** Si nadie con P24 puede iniciar sesión (sin acceso al TOTP del SA) y el token de arranque ya no sirve (existe un SA), quien administra la infraestructura (root en SRV-2) puede dar de alta un operador con la misma función del IAM, dentro de su contenedor; el alta queda en PostgreSQL y la ven ambas instancias:
+
+```bash
+# en srv2; la clave entra por stdin, nunca en la línea de comandos
+echo <clave-en-base64> | sudo docker exec -i s1-iam python -c \
+  "import sys,base64;from services.iam.main import register_operator;
+print(register_operator('ADM-XXXX', base64.b64decode(sys.stdin.read().strip()).decode(), 'network_admin'))"
+```
+
+Se salta el control P24 a propósito: se usa solo como último recurso, con el rol mínimo necesario (nunca `super_admin`) y se registra aquí.
+
+| Fecha | Cuenta | Rol | Quién | Motivo |
+|---|---|---|---|---|
+| 2026-11-19 | `ADM-BENCH` | network_admin | líder de G3 (R4 y mediciones) | Campañas R1/R2/R4 y demo; sin acceso al TOTP de SA-0001. Credenciales en `bench/slice.env` del integrante (no versionado) |
+
 ## 4. Invitados
 
 ```bash

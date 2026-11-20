@@ -13,7 +13,7 @@ La implementación se organiza en cuatro etapas secuenciales. Cada una tiene un 
 | **0 — Permisos** | Modelo de autorización ejecutable: catálogo, matriz, política y pruebas | [00](00_cierre_etapa_0_permisos.md), [01](01_modelo_de_contexto_y_estado.md), [02](02_matriz_rol_permiso.md), [03](03_plan_de_pruebas_permisos.md), [policy](policy/) | **Cerrada** (2026-10-28) | Matriz 37 × 4, YAML validado y generador en verde |
 | **1 — Verificación del slice** | Confirmar capacidades del switch, dimensionamiento y presupuesto de recursos | [04](04_capacidades_del_switch.md), [08](08_inventario_del_slice.md) | **Documentada**; pendiente de ejecución en el slice | Checklist de capacidades ejecutado y tabla del slice completa |
 | **2 — Despliegue** | Llevar el diseño al slice: switches, clúster ONOS, servidores y servicios base | [05](05_plan_de_implementacion.md), [06](06_plan_de_trabajo_etapa_2.md), [09](09_plan_de_construccion.md) | **Planificada** | Entorno reproducible, clúster sano y flujos F1–F3 operativos |
-| **3 — Ejecución y medición** | Integrar F1–F7, ejecutar R4, probar permisos y medir los requisitos | [07](07_plan_de_trabajo_etapa_3.md) | **Planificada** | Evidencia completa, métricas registradas y cierre documentado |
+| **3 — Ejecución y medición** | Integrar F1–F7, ejecutar R4, probar permisos y medir los requisitos | [07](07_plan_de_trabajo_etapa_3.md), [13](13_plan_de_alta_disponibilidad.md) | **Planificada** | Evidencia completa, métricas registradas y cierre documentado |
 
 ## 1. Relación entre etapas
 

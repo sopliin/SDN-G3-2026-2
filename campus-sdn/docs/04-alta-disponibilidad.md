@@ -19,7 +19,7 @@ Cómo está montada la alta disponibilidad del piloto y cómo se comporta. Son d
 
 - Los módulos M1–M4 corren **duplicados en SRV-2 y SRV-3** ([`srv2-platform.yml`](../deploy/compose/srv2-platform.yml) y [`srv3-platform.yml`](../deploy/compose/srv3-platform.yml) incluyen los cuatro stacks).
 - SRV-1 concentra lo compartido: IdP primario, el bus RabbitMQ, Redis y el espejo ([`srv1-platform.yml`](../deploy/compose/srv1-platform.yml)).
-- **HAProxy** ([`haproxy.yml`](../deploy/compose/haproxy.yml), red host) escucha en la VIP `10.0.0.10` y reparte entre la instancia local y la del par por `roundrobin` con chequeo `GET /health` (configuración [`haproxy.cfg.j2`](../deploy/compose/haproxy/haproxy.cfg.j2), renderizada con la IP de datos del par). El puerto 8080 del Portal y el 8008 de la Consola pasan por la VIP; el resto de servicios se alcanza por la IP de datos de cada nodo.
+- **HAProxy** ([`haproxy.yml`](../deploy/compose/haproxy.yml), red host) escucha en la VIP `10.0.0.10` y reparte entre la instancia local y la del par con afinidad por IP de origen (`balance source`) y chequeo `GET /health` (configuración [`haproxy.cfg.j2`](../deploy/compose/haproxy/haproxy.cfg.j2), renderizada con la IP de datos del par). El puerto 8080 del Portal y el 8008 de la Consola pasan por la VIP; el resto de servicios se alcanza por la IP de datos de cada nodo.
 - **keepalived** (red host, `NET_ADMIN`) sostiene la VIP con VRRP por **unicast** sobre la interfaz de datos (`bond0`): SRV-2 con prioridad 200 (maestro) y SRV-3 con 100 (respaldo); el `vrrp_script chk_haproxy` retira la VIP del nodo donde HAProxy muere (configuración [`keepalived.conf.j2`](../deploy/compose/keepalived/keepalived.conf.j2)).
 - **El host habilita `net.ipv4.ip_nonlocal_bind=1`** (`/etc/sysctl.d/99-vip.conf`, lo aplica el rol `platform`): Docker no permite `sysctls` en contenedores con red host, así que va en el sistema. Con eso ambos HAProxy pueden escuchar en la VIP y solo el maestro recibe tráfico.
 - **Comportamiento esperado:** la VIP vive en el maestro; si el nodo cae o HAProxy muere, el respaldo la toma en 1–3 s (el valor se medirá en la campaña). Los servicios se publican en su IP de datos (`SERVICE_BIND_IP` por host en el `.env`) y por la VIP en 8080 y 8008.
@@ -66,3 +66,7 @@ ssh -p 5813 ubuntu@10.20.12.185 \
 ```
 
 La promoción **no está automatizada** y no se ejecutó en el slice: hacerlo sin un VIP de base de datos obliga a cambiar `PGHOST` y recrear el IAM. Queda para la campaña, junto con la prueba de que las sesiones y los invitados sobreviven al switchover.
+
+## 5. Riesgos verificados y plan
+
+Una revisión en vivo (2026-11-19) encontró que la HA de hoy cubre la entrada (VIP), el clúster de control y la base, pero no el estado ni el control efectivo: srv1 es maestro de los seis switches, srv2/srv3 siguen en `READY`, ONOS, Atomix, el bus y PostgreSQL escuchan en las IP de datos, los PACKET_IN de ARP no tienen límite y las instancias duplicadas de Auditoría, Monitor, Detección e Incidentes compiten por la misma cola. El diagnóstico completo, la amenaza de saturación del canal de control, los paquetes de trabajo (CP-1…CP-7, SV-1…SV-8), las pruebas de failover y el calendario están en [`plan/implementation/13_plan_de_alta_disponibilidad.md`](../../plan/implementation/13_plan_de_alta_disponibilidad.md).

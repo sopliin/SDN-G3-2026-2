@@ -173,6 +173,22 @@ ovs-ofctl -O OpenFlow13 dump-flows "$BR" | wc -l
 
 Se llena la tabla con flujos de prueba hasta el límite y se registra el punto de fallo. Si el switch virtual limita por debajo de la envolvente, se reduce el número de caminos o se agrupan destinos. El resultado se reporta con la medición, no con el supuesto.
 
+### 8.1 Hardware de referencia: Pica8 P-3297
+
+El slice usa OVS (sin TCAM física), así que el límite que importa para un despliegue real es el del switch de referencia del diseño (RP-11). El P-3297 es un Pica8 de 48 puertos 10/100/1000 RJ45 y 4 SFP+ de 10G ([P-3297 Switch Machine Outline](https://pica8.atlassian.net/wiki/spaces/PicOS21125sp/pages/1182297/P-3297+Switch+Machine+Outline)).
+
+**Lo publicado por Pica8.** Al lanzarlo (2014) se presentó con una TCAM grande que **duplica** el espacio para reglas OpenFlow frente al hardware Trident de la época, cuya capacidad típica describían en 1 000–2 000 flujos ([anuncio](https://businesswire.com/news/home/20140217005142/en/Pica8-Announces-Most-Complete-Line-of-Data-Center-Optimized-White-Box-Switches-Compliant-with-OpenFlow-and-Linux-Network-Operating-Systems), citado por buscador; la página respondió 403 al leerla). La tabla oficial de escalabilidad de flujos por chipset de PicOS 3.1 ([Flow Scalability per Broadcom Chipset](https://pica8.atlassian.net/wiki/spaces/PicOS31sp/pages/10488186/Flow+Scalability+per+Broadcom+Chipset)) da, entre otros:
+
+| Chipset | TCAM | Flujos con todas las tuplas | Solo IPv4 | Solo IPv6 | Solo MAC |
+|---|---|---|---|---|---|
+| Firebolt3 / Helix4 / Trident2 | 108 kB | 2 048 | 4 096 | 1 024 | 4 096 |
+| **Triumph2** | **216 kB** | **4 096** | **8 192** | **2 048** | **8 192** |
+| Trident+ | 54 kB | 1 024 | 2 048 | 512 | 2 048 |
+
+**Lo que no está confirmado.** Ninguna página de Pica8 consultada (2026-11-19) asocia el P-3297 a un chipset. La lectura «TCAM que duplica» coincide con Triumph2 (216 kB, el doble de 108 kB), pero es una **inferencia**: hasta confirmarla, el P-3297 se trata como un rango de **2 048 a 4 096 flujos con todas las tuplas**. Se confirma en el equipo con la información del sistema de PicOS (chipset) o con la etiqueta del fabricante. PicOS ofrece además un modo de coincidencia corta en el que cada flujo ocupa una sola entrada de TCAM y la capacidad se duplica ([Configuring match-mode](https://pica8-fs.atlassian.net/wiki/spaces/PicOS444/pages/70707890/Configuring+match-mode)); con el modo por defecto, un flujo con muchos campos puede ocupar más de una entrada.
+
+**La envolvente del diseño frente a esa TCAM.** Lo medido en el slice el 2026-11-19, sin sesiones: 17 entradas en SW1, 13 en SW2/SW4/SW5 y 11 en SW3/SW6 (esqueleto, confianza 60 y las 3 entradas de ONOS para LLDP, BDDP y ARP). Cada sesión añade una entrada por destino de su alcance (académico 1, administrador y superadministrador 2, TI 4), en el switch de acceso; cada mitigación, una por origen más un *meter*. Con el límite inferior (2 048), un switch de acceso de 48 puertos tiene margen de sobra: aun con todos los puertos ocupados por sesiones de TI (48 × 4 = 192) quedan más de 1 800 entradas para mitigaciones. Estas cuentas son de diseño; la cifra que se reporta es la medida con la campaña `sessions` de [`campus-sdn/docs/pruebas/07`](../../campus-sdn/docs/pruebas/07-campanas-en-el-slice.md).
+
 ## 9. Riesgos y decisiones
 
 | Riesgo | Probabilidad | Impacto | Decisión |
