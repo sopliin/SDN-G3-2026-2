@@ -8,7 +8,7 @@
 
 ## 1. Propósito
 
-Que cualquiera que abra este repositorio sepa, en pocos minutos, **qué hay, qué significa cada pieza y cómo se conectan**. Responde cuatro preguntas en este orden: qué es este repositorio (§2), cómo se ve completo (§3), por dónde se empieza a leer (§4), qué es y para qué sirve cada pieza (§5) y qué flujos las unen (§6). Cuando un formato no se entienda, [`03-formatos.md`](03-formatos.md) lo explica desde cero. Las reglas de implementación están en [`../CLAUDE.md`](../CLAUDE.md).
+Que cualquiera que abra este repositorio sepa, en pocos minutos, **qué hay, qué significa cada pieza y cómo se conectan**. Responde cuatro preguntas en este orden: qué es este repositorio (§2), cómo se ve completo (§3), por dónde se empieza a leer (§4), qué es y para qué sirve cada pieza (§5) y qué flujos las unen (§6). Cuando un formato no se entienda, [`03-formatos.md`](03-formatos.md) lo explica desde cero.
 
 ## 2. Qué es este repositorio
 
@@ -23,14 +23,12 @@ El corpus es el plano; este repositorio es la obra. Todo lo que aquí existe mat
 
 ## 3. El árbol, de un vistazo
 
-Las carpetas marcadas *(pendiente)* existen a propósito: fijan el lugar de cada pieza antes de escribirla, para que el orden de construcción del plan se vea en la estructura. `tree` no muestra los archivos ocultos (`.gitignore`, `.env.example`, `.gitkeep`); los `.gitkeep` están vacíos y existen solo porque git no guarda carpetas vacías.
+Las carpetas marcadas *(pendiente)* existen a propósito: fijan el lugar de cada pieza antes de escribirla, para que el orden de construcción del plan se vea en la estructura. Lo que no se versiona está en el `.gitignore` de la raíz del repositorio. `tree` no muestra los archivos ocultos (`.env.example`, `.gitkeep`); los `.gitkeep` están vacíos y existen solo porque git no guarda carpetas vacías.
 
 ```text
 campus-sdn/
-├── CLAUDE.md                    # reglas de implementación y documentación: leer antes de tocar
 ├── README.md                    # puerta de entrada: objetivos make, reglas y enlaces
 ├── Makefile                     # única puerta de operación: cada tarea es un objetivo
-├── .gitignore                   # qué no se versiona: bundles, .env, slice.yml, vault
 ├── bench/                       # campañas de medición R1/R2/R4 contra el slice y sus resultados
 │
 ├── contracts/                   # las promesas formales entre servicios, validables por máquina
@@ -291,7 +289,7 @@ Y una tabla de respuesta rápida para ubicarse sin leer todo:
 | [adr/](adr/) | Decisiones de código que no se deducen del código (se llenan al decidir) |
 | [runbooks/](runbooks/) | Procedimientos operativos paso a paso: [01-despliegue-del-slice.md](runbooks/01-despliegue-del-slice.md) — el día-D; [03-verificacion-del-plano-de-control.md](runbooks/03-verificacion-del-plano-de-control.md) — controlador y switches; [04-perfil-base.md](runbooks/04-perfil-base.md) — esqueleto BASE; [05-r1-control-de-acceso.md](runbooks/05-r1-control-de-acceso.md) — R1 y la matriz de permisos (el 02 es el registro del slice anterior) |
 
-El corpus de arquitectura **no** está aquí: vive en [`../../docs/fases/`](../../docs/fases/) y se enlaza, no se copia. Los nombres de estos archivos sí están en español y numerados por orden de lectura — es la excepción deliberada a la regla de idioma, documentada en [`../CLAUDE.md`](../CLAUDE.md).
+El corpus de arquitectura **no** está aquí: vive en [`../../docs/fases/`](../../docs/fases/) y se enlaza, no se copia. Los nombres de estos archivos sí están en español y numerados por orden de lectura — es la excepción deliberada a la regla de idioma.
 
 ## 6. Los hilos: cómo se conecta todo
 
@@ -377,7 +375,7 @@ Cada nivel responde a una pregunta distinta y se apoya en el anterior; juntos so
 
 ## 7. Reglas de convivencia
 
-Las reglas completas están en [`../CLAUDE.md`](../CLAUDE.md); aquí el resumen:
+Las reglas de convivencia, en resumen:
 
 - **Idioma:** carpetas, archivos e identificadores de código en inglés; documentación, comentarios y mensajes en español; `docs/` en español y numerado.
 - **Toda tarea se ejecuta por `make`**; no hay pasos manuales fuera del Makefile y de Ansible.
@@ -390,7 +388,6 @@ Las reglas completas están en [`../CLAUDE.md`](../CLAUDE.md); aquí el resumen:
 | Documento | Relación |
 |---|---|
 | [`../README.md`](../README.md) | Puerta de entrada y reglas |
-| [`../CLAUDE.md`](../CLAUDE.md) | Reglas de implementación y documentación |
 | [`02-estado.md`](02-estado.md) | Qué está avanzado y qué pendiente, con fechas |
 | [`03-formatos.md`](03-formatos.md) | Cómo leer YAML, JSON, OpenAPI y Compose |
 | [`../../implementation/09_plan_de_construccion.md`](../../implementation/09_plan_de_construccion.md) | El plan que ordena la construcción de todo lo anterior |

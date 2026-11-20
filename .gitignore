@@ -3,18 +3,30 @@ CLAUDE.md
 *.pptx
 *.png
 
-# PDF externos a SDN-project/ (sílabo, enunciado, exportaciones)
+# PDF externos (sílabo, enunciado, exportaciones)
 /*.[pP][dD][fF]
 
-# Secretos y configuración real del slice (por si se copian aquí)
+# Secretos y configuración real del slice: nunca versionados.
 .env
 *.env
 !*.env.example
-deploy/env/.env
+campus-sdn/deploy/env/.env
+campus-sdn/deploy/env/.env.*
+!campus-sdn/deploy/env/.env.example
 **/inventory/slice.yml
 **/vault/
 *.pem
 *.key
+
+# Imágenes empaquetadas: git guarda el lock, no los binarios.
+campus-sdn/deploy/images/bundles/
+
+# Los archivos generados llevan secretos del .env (plantillas en el repo)
+campus-sdn/deploy/radius/mods-ldap
+campus-sdn/deploy/radius/clients.conf
+
+# Entregables del curso: se mantienen locales, no se publican en GitHub.
+campus-sdn/docs/informe-previo/
 
 # Python y herramientas
 __pycache__/
@@ -22,6 +34,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 *.egg-info/
+*.retry
 
 # Sistema
 .DS_Store

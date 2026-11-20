@@ -1,0 +1,4 @@
+index,attackers,kind,nominal_pps,peak_pps,detected,detection_s,decision_ms,apply_ms,effect_s,start_to_mitigated_s,action,severity,attribution_ok,mitigated_at,probe_loss,recovery_after_apply_s
+1,["h1"],"udp-flood","max",332413.25,false,null,null,null,null,null,null,null,false,[],"90 packets transmitted, 90 received, 0% packet loss, time 17857ms",null
+2,["h2"],"syn-flood","max",435403.62,false,null,null,null,null,null,null,null,false,[],"90 packets transmitted, 85 received, 5.55556% packet loss, time 17893ms",null
+3,["h1"],"icmp-flood","max",383677.42,false,null,null,null,null,null,null,null,false,[],"90 packets transmitted, 85 received, 5.55556% packet loss, time 17895ms",null

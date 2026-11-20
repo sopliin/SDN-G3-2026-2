@@ -24,9 +24,9 @@
 | Stack base S3/S4: Compose validados, roles `base`/`images`/`platform` y `site.yml` | [`../deploy/compose/`](../deploy/compose/), [`../deploy/ansible/`](../deploy/ansible/) | 2026-10-31 |
 | Verificación local: PostgreSQL y RabbitMQ en verde (healthy, `bd_politicas`, UI 200) | laptop, con Compose + bundles | 2026-10-31 |
 | Mapa del repositorio y tutorial de formatos para el equipo | [`01-mapa.md`](01-mapa.md), [`03-formatos.md`](03-formatos.md) | 2026-10-31 |
-| Reglas de implementación y documentación para agentes y autores | [`../CLAUDE.md`](../CLAUDE.md) | 2026-10-31 |
+| Reglas de implementación y documentación para agentes y autores | `CLAUDE.md` (local, no versionado) | 2026-10-31 |
 | Pruebas de contrato en verde: 16 tipos + envoltura + rechazos + política (RNF-12) | [`../tests/contract/`](../tests/contract/) | 2026-10-31 |
-| Auditoría de idioma: campos de contratos, rutas, valores y pruebas a inglés; correspondencia con el LLD en los README de `contracts/` | [`../CLAUDE.md`](../CLAUDE.md) | 2026-10-31 |
+| Auditoría de idioma: campos de contratos, rutas, valores y pruebas a inglés; correspondencia con el LLD en los README de `contracts/` | `CLAUDE.md` (local, no versionado) | 2026-10-31 |
 | Paso 3 escrito: roles `onos` (clúster de 3 nodos, `cluster.json` renderizado) y `switches` (OVS, VLANs, controladores); `site.yml` e inventario completos | [`../deploy/ansible/roles/`](../deploy/ansible/roles/) | 2026-10-31 |
 | Paso 4, primera mitad: `sdn_common` (app, eventos validados, bus), servicio Portal con I3, Compose de S1 (FreeRADIUS + OpenLDAP); 49 pruebas en verde | [`../services/`](../services/), [`../contracts/api/i3-portal.openapi.yaml`](../contracts/api/i3-portal.openapi.yaml) | 2026-10-31 |
 | Paso 4, segunda mitad: servicios IAM (verificación, sesiones, TOTP) y Registry (dispositivos, historial) con pruebas de servicio; 60 pruebas en verde | [`../services/iam/`](../services/iam/), [`../services/registry/`](../services/registry/), [`../tests/integration/`](../tests/integration/) | 2026-10-31 |

@@ -28,7 +28,6 @@ Repositorio de construcción de la solución: contratos, servicios, política ej
 
 ```text
 campus-sdn/
-├── CLAUDE.md            # reglas de implementación y documentación
 ├── contracts/          # esquemas de eventos, OpenAPI y política
 ├── services/           # los diez servicios + common/
 ├── policy/             # permissions.yaml (etapa 0), profiles.yaml, tools/
@@ -52,7 +51,6 @@ campus-sdn/
 
 | Documento | Uso |
 |---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Reglas de implementación y documentación |
 | [`docs/01-mapa.md`](docs/01-mapa.md) | Estructura del repositorio y los hilos que conectan sus piezas |
 | [`docs/02-estado.md`](docs/02-estado.md) | Avances y pendientes del proyecto |
 | [`docs/03-formatos.md`](docs/03-formatos.md) | Tutorial: leer YAML, JSON, OpenAPI y Compose |
