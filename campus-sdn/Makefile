@@ -16,7 +16,7 @@ IMAGES ?=
 
 .PHONY: help images-pull images-verify images-save images-load \
         ping deploy up down status test verify native-sync native-install \
-        native-skeleton native-test dhcp-probe bench-r4 bench-r1r2 \
+        native-skeleton native-test dhcp-probe slice-check r4-campaign-on r4-campaign-off bench-r4 bench-r1r2 \
         ldap-user ldap-list ldap-delete ldap-passwd operator operator-list
 
 help: ## Muestra los objetivos disponibles
@@ -73,7 +73,8 @@ policyctl: ## CLI de reglas y elevaciones (ARGS="rules list")
 # --- Esqueleto BASE del slice de 14 VMs (LLD 06_reglas §3) ---
 ONOS_CTRL := ssh -o BatchMode=yes -p 5811 ubuntu@10.20.12.185
 SKELETON_PORTAL ?= 10.0.0.10/32
-SKELETON_SERVERS ?= 10.0.0.11,10.0.0.12,10.0.0.13,10.0.0.1
+# h4 (10.0.0.104) es el servidor web de la intranet de las campañas (víctima de R4).
+SKELETON_SERVERS ?= 10.0.0.11,10.0.0.12,10.0.0.13,10.0.0.1,10.0.0.104
 SKELETON_DHCP ?= 10.0.0.1
 SKELETON_DNS ?= 10.0.0.1
 SWITCH_DPIDS_JSON := {"sw1": "of:0000000000000001", "sw2": "of:0000000000000002", "sw3": "of:0000000000000003", "sw4": "of:0000000000000004", "sw5": "of:0000000000000005", "sw6": "of:0000000000000006"}
@@ -148,6 +149,21 @@ native-skeleton: ## Reinstala el esqueleto BASE + confianza 60 vía ONOS
 
 native-test: native-sync ## Suite de pruebas en el controller (Python 3.12 del slice)
 	$(SSH_CTRL) 'cd /opt/campus-sdn && .venv/bin/pytest -q tests'
+
+slice-check: ## Acceso SSH y sudo a las 14 VMs con bench/slice.env (no cambia nada)
+	python3 bench/slice.py check
+
+R4_COMPOSE := cd /opt/campus-sdn/deploy/compose && docker compose -p campus-sdn
+
+r4-campaign-on: ## Cadena R4 de la campaña: solo en srv2 (override r4-campaign.yml), TTL 60 s
+	for n in srv2 srv3; do python3 bench/slice.py run $$n --sudo \
+	  "echo $$(base64 < deploy/compose/r4-campaign.yml | tr -d '\n') | base64 -d > /opt/campus-sdn/deploy/compose/r4-campaign.yml"; done
+	python3 bench/slice.py run srv2 --sudo '$(R4_COMPOSE) -f srv2-platform.yml -f r4-campaign.yml up -d --no-build --no-deps monitor detection policies'
+	python3 bench/slice.py run srv3 --sudo '$(R4_COMPOSE) -f srv3-platform.yml -f r4-campaign.yml up -d --no-build --no-deps policies && docker stop s2-monitor s2-detection s3-incidents'
+
+r4-campaign-off: ## Devuelve monitor, detección, incidentes y políticas a la configuración base
+	python3 bench/slice.py run srv2 --sudo '$(R4_COMPOSE) -f srv2-platform.yml up -d --no-build --no-deps monitor detection policies'
+	python3 bench/slice.py run srv3 --sudo '$(R4_COMPOSE) -f srv3-platform.yml up -d --no-build --no-deps monitor detection incidents policies'
 
 bench-r4: ## Campaña R4 en el slice (SLICE_SUDO_PASSWORD requerido)
 	python3 bench/r4_campaign.py

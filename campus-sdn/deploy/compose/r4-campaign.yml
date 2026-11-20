@@ -1,0 +1,35 @@
+# Override de la campaña R4 (docs/pruebas/07-campanas-en-el-slice.md §2).
+# Se aplica SOBRE el Compose de cada servidor, solo a los servicios
+# nombrados, sin reemplazar los archivos del despliegue:
+#
+#   srv2: docker compose -p campus-sdn -f srv2-platform.yml -f r4-campaign.yml \
+#           up -d --no-build --no-deps monitor detection policies
+#   srv3: docker compose -p campus-sdn -f srv3-platform.yml -f r4-campaign.yml \
+#           up -d --no-build --no-deps policies
+#         docker stop s2-monitor s2-detection s3-incidents
+#
+# La cadena R4 vive en UNA instancia (srv2): con dos consumidores en la
+# misma cola cada detector vería la mitad de las ventanas. Un `up` sin
+# este archivo devuelve los servicios a su configuración base.
+services:
+  monitor:
+    environment:
+      # Adaptador I2 del propio servidor (red host, 8090).
+      I2_URL: ${R4_I2_URL:-http://10.0.0.12:8090}
+      # Destinos vigilados: h4, servidor web de la intranet de la campaña.
+      MONITOR_TARGETS: ${R4_MONITOR_TARGETS:-10.0.0.104}
+      SAMPLE_INTERVAL_S: "1"
+
+  detection:
+    environment:
+      # Piso absoluto, ventanas consecutivas y rearme del corte nativo
+      # medido (2026-11-04); el umbral crítico desactivado: siempre meter.
+      DETECTION_MIN_PPS: "1000"
+      DETECTION_CONSECUTIVE: "2"
+      DETECTION_CLEAR: "5"
+      DETECTION_CRITICAL_PPS: "0"
+
+  policies:
+    environment:
+      # TTL corto: cada ensayo espera a que la regla expire sola.
+      MITIGATION_TTL_S: "60"

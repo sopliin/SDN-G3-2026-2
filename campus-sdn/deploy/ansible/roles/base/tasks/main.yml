@@ -17,6 +17,21 @@
     state: present
   tags: [base]
 
+# Generadores y clientes de las campañas (bench/): ataques R4, pruebas de
+# R1/R2 y reaprendizaje de hosts en ONOS. Solo en los equipos finales y el
+# gateway (cliente legítimo de R4).
+- name: Herramientas de medición en hosts y gateway
+  when: inventory_hostname in groups['endpoints'] | default([]) or inventory_hostname == 'gw'
+  ansible.builtin.apt:
+    name:
+      - hping3
+      - iperf3
+      - arping
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  tags: [base, bench]
+
 - name: Docker y Compose (donde aplica)
   when: install_docker | default(true) | bool
   block:
