@@ -145,3 +145,44 @@ def test_health(monitor_client):
     assert client.get("/health").status_code == 200
     assert client.get("/metrics").json() == {"metrics": []}
     assert client.get("/baselines").json()["baselines"]["aggregate"]["mean"] == 0.0
+
+
+# --- R4-01: casos especiales de compute_samples ------------------------------
+
+def test_compute_samples_same_instant_returns_nothing(monitor_client):
+    """R4-01 (límite): dos lecturas con la misma marca de tiempo no producen
+    muestra (evita dividir entre cero) ni interrumpen la ejecución."""
+    monitor_module.state.update(ports={}, flows={}, at=None)
+    flows = [session_flow("f1", "fa:16:3e:1d:96:70", 0)]
+    assert monitor_module.compute_samples(TARGETS, counters(1000), flows,
+                                          now=100.0) == []
+    flows = [session_flow("f1", "fa:16:3e:1d:96:70", 500)]
+    assert monitor_module.compute_samples(TARGETS, counters(2000), flows,
+                                          now=100.0) == []
+    # Una lectura con marca anterior (reloj que retrocede) tampoco.
+    assert monitor_module.compute_samples(TARGETS, counters(3000), flows,
+                                          now=99.0) == []
+
+
+def test_compute_samples_counter_reset_is_never_negative(monitor_client):
+    """R4-01 (límite): si el switch reinicia sus contadores (el valor nuevo es
+    menor que el anterior), la tasa queda en cero, nunca negativa, y el
+    emisor cuyo contador también se reinició no se atribuye como origen."""
+    monitor_module.state.update(ports={}, flows={}, at=None)
+    monitor_module.compute_samples(
+        TARGETS, counters(50000), [session_flow("f1", "fa:16:3e:1d:96:70", 40000)],
+        now=100.0)
+    payloads = monitor_module.compute_samples(
+        TARGETS, counters(10), [session_flow("f1", "fa:16:3e:1d:96:70", 5)],
+        now=101.0)
+    assert len(payloads) == 1
+    sample = payloads[0]
+    assert sample["pps"] == 0.0
+    assert sample["bps"] == 0.0
+    assert sample["origins"] == []
+    # La siguiente ventana vuelve a medir con normalidad desde el valor
+    # reiniciado: 1000 paquetes en 1 s.
+    sample = monitor_module.compute_samples(
+        TARGETS, counters(1010), [session_flow("f1", "fa:16:3e:1d:96:70", 1005)],
+        now=102.0)[0]
+    assert sample["pps"] == 1000.0
