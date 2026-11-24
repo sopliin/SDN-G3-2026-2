@@ -15,12 +15,12 @@ TAGS ?=
 IMAGES ?=
 
 .PHONY: help images-pull images-verify images-save images-load \
-        ping deploy up down status test verify native-sync native-install \
-        native-skeleton native-test dhcp-probe slice-check r4-campaign-on r4-campaign-off bench-r4 bench-r1r2 \
+        ping deploy up down status venv test test-ip7 verify native-sync native-install \
+        native-skeleton native-test dhcp-probe slice-check env-pull r4-campaign-on r4-campaign-off bench-r4 bench-r1r2 \
         ldap-user ldap-list ldap-delete ldap-passwd operator operator-list
 
 help: ## Muestra los objetivos disponibles
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | \
 	awk 'BEGIN {FS = ":.*?## "} {printf "  %-16s %s\n", $$1, $$2}'
 
 images-pull: ## Descarga las imágenes del lock y fija sus digests
@@ -35,7 +35,10 @@ images-save: ## Empaqueta las imágenes en deploy/images/bundles/
 images-load: ## Carga bundles en el demonio local (IMAGES=onos[,rabbitmq])
 	./deploy/images/load.sh $(IMAGES)
 
-build: ## Construye las imágenes de los servicios propios (prefijo campus-sdn-)
+# Las VMs son x86_64: una laptop arm64 (Apple Silicon) construiría imágenes
+# que no arrancan en el slice. Se fija la plataforma para cualquier anfitrión.
+build: export DOCKER_DEFAULT_PLATFORM := linux/amd64
+build: ## Construye las imágenes de los servicios propios (prefijo campus-sdn-) para linux/amd64
 	# Los dummy solo satisfacen la interpolación de Compose al parsear el
 	# archivo completo; el build no los usa. Los valores reales llegan por
 	# .env al levantar.
@@ -64,8 +67,35 @@ down: ## Detiene los servicios
 status: ## Salud de contenedores y servicios
 	$(ANSIBLE) --tags verify $(SITE)
 
+PYTHON312 ?= python3.12
+UNIT_OUT := bench/results/$(shell date +%Y%m%d-%H%M%S)-unit
+
+venv: ## Crea .venv (Python >= 3.12) con las dependencias de servicios y pruebas
+	$(PYTHON312) -m venv .venv
+	./.venv/bin/pip install -q -e ./services/common pyotp bcrypt pyrad httpx \
+	  "psycopg[binary]" ldap3 "uvicorn[standard]" pyyaml pytest pytest-cov
+
 test: ## Pruebas de contrato e integración (requiere .venv)
 	./.venv/bin/pytest tests
+
+test-ip7: ## Pruebas unitarias obligatorias R1/R2/R4 + suite: reporte JUnit y cobertura en bench/results/<fecha>-unit/
+	mkdir -p $(UNIT_OUT)
+	./.venv/bin/pytest tests -v -p no:cacheprovider \
+	  --junitxml=$(UNIT_OUT)/junit.xml \
+	  --cov=services --cov-report=term --cov-report=html:$(UNIT_OUT)/coverage \
+	  2>&1 | tee $(UNIT_OUT)/pytest.txt
+	./.venv/bin/pytest tests/unit/test_ip7_r1_authentication.py \
+	  tests/unit/test_ip7_r2_authorization.py tests/unit/test_ip7_r4_ddos.py \
+	  -v -p no:cacheprovider --junitxml=$(UNIT_OUT)/junit-ip7.xml \
+	  --cov=services.iam --cov=sdn_common.authz \
+	  --cov=services.controller_adapter --cov=services.monitor \
+	  --cov=services.detection --cov=services.policies.main \
+	  --cov=services.incidents --cov-branch --cov-report=term-missing \
+	  --cov-report=json:$(UNIT_OUT)/coverage-ip7.json \
+	  2>&1 | tee $(UNIT_OUT)/pytest-ip7.txt
+	./.venv/bin/python tools/function_coverage.py $(UNIT_OUT)/coverage-ip7.json \
+	  | tee $(UNIT_OUT)/coverage-ip7-functions.txt
+	rm -f .coverage
 
 policyctl: ## CLI de reglas y elevaciones (ARGS="rules list")
 	./.venv/bin/python tools/policyctl.py $(ARGS)
@@ -152,6 +182,9 @@ native-test: native-sync ## Suite de pruebas en el controller (Python 3.12 del s
 
 slice-check: ## Acceso SSH y sudo a las 14 VMs con bench/slice.env (no cambia nada)
 	python3 bench/slice.py check
+
+env-pull: ## Recupera los .env reales de srv1–srv3 a deploy/env/ (600, sin imprimir valores)
+	python3 tools/pull_env.py
 
 R4_COMPOSE := cd /opt/campus-sdn/deploy/compose && docker compose -p campus-sdn
 

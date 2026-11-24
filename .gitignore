@@ -39,3 +39,9 @@ __pycache__/
 # Sistema
 .DS_Store
 ._*
+
+# Artefactos de pruebas y de pip install -e
+.coverage
+campus-sdn/services/common/build/
+*.egg-info/
+campus-sdn/bench/results/*-unit/coverage/
