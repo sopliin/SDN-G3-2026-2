@@ -1,0 +1,90 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /Users/sopliin/Downloads/sdn_proyecto/campus-sdn/.venv/bin/python3.12
+rootdir: /Users/sopliin/Downloads/sdn_proyecto/campus-sdn
+plugins: cov-7.1.0, anyio-4.16.0
+collecting ... collected 55 items
+
+tests/unit/test_ip7_r1_authentication.py::test_1_1_1_valid_community_user_gets_identifier_and_role PASSED [  1%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_2_valid_operator_two_steps_returns_role PASSED [  3%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[bad_password] PASSED [  5%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[unknown_user] PASSED [  7%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[empty_fields] PASSED [  9%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[empty_password] PASSED [ 10%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[sql_injection_user] PASSED [ 12%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[sql_injection_password] PASSED [ 14%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[unknown_operator] PASSED [ 16%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[bad_operator_password] PASSED [ 18%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[unknown_guest] PASSED [ 20%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_3_invalid_attempts_rejected_with_same_message[unknown_population] PASSED [ 21%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_4_bad_totp_rejected_with_same_message PASSED [ 23%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_5_missing_fields_do_not_crash PASSED [ 25%]
+tests/unit/test_ip7_r1_authentication.py::test_1_1_6_injection_reaches_idp_as_literal PASSED [ 27%]
+tests/unit/test_ip7_r1_authentication.py::test_1_2_1_below_threshold_account_stays_enabled PASSED [ 29%]
+tests/unit/test_ip7_r1_authentication.py::test_1_2_2_threshold_locks_even_the_right_password PASSED [ 30%]
+tests/unit/test_ip7_r1_authentication.py::test_1_2_3_lock_expires_and_window_forgets_old_failures PASSED [ 32%]
+tests/unit/test_ip7_r1_authentication.py::test_1_2_4_unknown_user_is_locked_too PASSED [ 34%]
+tests/unit/test_ip7_r1_authentication.py::test_1_2_5_concurrent_failures_count_once_each PASSED [ 36%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_1_admin_permitted_on_sdn_console PASSED [ 38%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_2_teacher_denied_with_reason PASSED [ 40%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_3_unknown_role_denied_by_default[guest] PASSED [ 41%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_3_unknown_role_denied_by_default[Invitado] PASSED [ 43%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_3_unknown_role_denied_by_default[] PASSED [ 45%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_3_unknown_role_denied_by_default[ADMIN] PASSED [ 47%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_4_unknown_resource_denied_even_for_wildcard PASSED [ 49%]
+tests/unit/test_ip7_r2_authorization.py::test_2_1_5_unknown_permission_and_partial_assignment PASSED [ 50%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_1_permit_and_deny_same_resource_deny_prevails PASSED [ 52%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_2_narrow_deny_inside_broad_permit PASSED [ 54%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_3_unrestricted_permit_and_duplicates PASSED [ 56%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_4_invalid_policy_raises_value_error[policy0] PASSED [ 58%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_4_invalid_policy_raises_value_error[policy1] PASSED [ 60%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_4_invalid_policy_raises_value_error[policy2] PASSED [ 61%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_5_apply_profile_installs_drop_without_instructions PASSED [ 63%]
+tests/unit/test_ip7_r2_authorization.py::test_3_1_6_academic_profile_order_denies_server_data_ips PASSED [ 65%]
+tests/unit/test_ip7_r4_ddos.py::test_4_1_1_rate_from_two_consecutive_readings PASSED [ 67%]
+tests/unit/test_ip7_r4_ddos.py::test_4_1_2_same_instant_produces_no_sample PASSED [ 69%]
+tests/unit/test_ip7_r4_ddos.py::test_4_1_3_counter_reset_never_negative PASSED [ 70%]
+tests/unit/test_ip7_r4_ddos.py::test_4_1_4_first_reading_and_unknown_port PASSED [ 72%]
+tests/unit/test_ip7_r4_ddos.py::test_4_2_1_identifies_only_sources_above_limit PASSED [ 74%]
+tests/unit/test_ip7_r4_ddos.py::test_4_2_2_distributed_attack_names_every_attacker PASSED [ 76%]
+tests/unit/test_ip7_r4_ddos.py::test_5_1_1_momentary_spike_does_not_alert PASSED [ 78%]
+tests/unit/test_ip7_r4_ddos.py::test_5_1_2_sustained_excess_alerts_once_naming_target PASSED [ 80%]
+tests/unit/test_ip7_r4_ddos.py::test_5_1_3_floor_boundary PASSED         [ 81%]
+tests/unit/test_ip7_r4_ddos.py::test_5_2_1_flash_crowd_blocks_no_legitimate_user PASSED [ 83%]
+tests/unit/test_ip7_r4_ddos.py::test_5_2_2_gradual_growth_is_learned_not_alerted PASSED [ 85%]
+tests/unit/test_ip7_r4_ddos.py::test_6_1_1_policy_decides_per_attacker PASSED [ 87%]
+tests/unit/test_ip7_r4_ddos.py::test_3_2_1_rate_limit_meter_only_on_attackers PASSED [ 89%]
+tests/unit/test_ip7_r4_ddos.py::test_3_2_2_block_source_is_drop PASSED   [ 90%]
+tests/unit/test_ip7_r4_ddos.py::test_3_2_3_block_without_origins_is_rejected PASSED [ 92%]
+tests/unit/test_ip7_r4_ddos.py::test_4_3_1_release_when_rule_expires_with_duration PASSED [ 94%]
+tests/unit/test_ip7_r4_ddos.py::test_4_3_2_not_released_before_rule_is_seen PASSED [ 96%]
+tests/unit/test_ip7_r4_ddos.py::test_7_1_1_incident_closed_with_duration_once PASSED [ 98%]
+tests/unit/test_ip7_r4_ddos.py::test_5_3_1_detection_rearms_only_after_quiet_period PASSED [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/sopliin/Downloads/sdn_proyecto/campus-sdn/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/sopliin/Downloads/sdn_proyecto/campus-sdn/bench/results/20261124-035343-unit/junit-ip7.xml -
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.12.16-final-0 _______________
+
+Name                                      Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------
+services/common/sdn_common/authz.py          58     18     28      3    66%   25, 32->31, 34, 80, 89-104
+services/controller_adapter/__init__.py       0      0      0      0   100%
+services/controller_adapter/main.py         260    115     90      8    51%   51, 55, 59-60, 73-74, 77-86, 89-90, 94-96, 99-100, 103, 108-112, 115, 118-119, 122, 126, 141-142, 143->145, 149-150, 152, 154, 176, 223-230, 265, 300-302, 313-314, 347-356, 361-366, 376-389, 399-432, 438-441, 447-452, 458-465, 470, 475, 481-482, 487
+services/detection/__init__.py                0      0      0      0   100%
+services/detection/main.py                   84      8     18      2    88%   88-89, 95, 144-152, 161
+services/iam/__init__.py                      0      0      0      0   100%
+services/iam/main.py                        917    583    276     23    32%   115-125, 136, 146-150, 162, 164, 181-184, 187-188, 190, 199-215, 219, 223, 229-252, 258-297, 301-315, 325-351, 355-376, 382-384, 396-403, 409, 413, 458-459, 465-493, 499-508, 512-523, 527-536, 540-547, 551-563, 567-578, 582-593, 597-604, 612, 622-628, 632-642, 650, 658-664, 672-674, 678-680, 691, 697-712, 716-724, 729-741, 745-754, 763-769, 779-786, 799, 806-813, 853-854, 883-890, 900, 935-945, 956-967, 1039-1062, 1071-1091, 1096-1105, 1112-1122, 1127-1129, 1133-1139, 1187->1190, 1197-1200, 1202->1208, 1214, 1228, 1233, 1239-1248, 1257-1266, 1273-1275, 1295-1315, 1325-1347, 1356-1372, 1379-1380, 1388-1400, 1407-1413, 1420-1421, 1429-1430, 1437-1438, 1444-1453, 1459-1462, 1467, 1471, 1478-1480, 1488-1489, 1497-1502, 1512-1521, 1527-1531, 1542-1561, 1566-1592, 1598-1625, 1630-1648
+services/incidents/__init__.py                0      0      0      0   100%
+services/incidents/main.py                   81     39     22      1    44%   33, 37-38, 43-44, 49-99, 119->121, 126-134, 143, 150-152, 160-164, 171-174
+services/monitor/__init__.py                  0      0      0      0   100%
+services/monitor/main.py                    212     99     78      9    51%   55, 59, 63, 67, 76, 80, 86-87, 94, 133, 137, 139, 142, 145, 156->154, 174-185, 190-236, 241-269, 277, 283, 316-332, 336-342, 347-355, 365, 373-384
+services/policies/main.py                   106     44     30      3    49%   59-64, 89-90, 95->121, 123-148, 153-161, 174-188, 194, 202-204, 210, 217-219
+-------------------------------------------------------------------------------------
+TOTAL                                      1718    906    542     49    43%
+Coverage JSON written to file bench/results/20261124-035343-unit/coverage-ip7.json
+======================== 55 passed, 1 warning in 7.56s =========================

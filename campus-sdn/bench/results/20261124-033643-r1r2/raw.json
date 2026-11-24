@@ -1,0 +1,306 @@
+{
+ "precision": {
+  "tests": [
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "servidor web de la intranet",
+    "target": "10.0.0.104:80",
+    "privileged": false,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "bus RabbitMQ (datos)",
+    "target": "10.0.0.11:5672",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "PostgreSQL (datos)",
+    "target": "10.0.0.12:5432",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "ONOS REST (datos)",
+    "target": "10.0.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "OpenFlow (datos)",
+    "target": "10.0.0.11:6653",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "ONOS REST (gestión)",
+    "target": "192.168.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "SSH de srv1 (gestión)",
+    "target": "192.168.0.11:22",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "bus RabbitMQ (datos)",
+    "target": "10.0.0.11:5672",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "PostgreSQL (datos)",
+    "target": "10.0.0.12:5432",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "ONOS REST (datos)",
+    "target": "10.0.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "OpenFlow (datos)",
+    "target": "10.0.0.11:6653",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "ONOS REST (gestión)",
+    "target": "192.168.0.11:8181",
+    "privileged": true,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "SSH de srv1 (gestión)",
+    "target": "192.168.0.11:22",
+    "privileged": true,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 0
+   }
+  ],
+  "restriction_precision": 100.0,
+  "authorized_delivery": 33.33,
+  "gaps": [],
+  "management_path_via_gw": false
+ },
+ "api": {
+  "cases": {
+   "sin sesión → Consola GET /alerts (P09)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/operators (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/idp/users (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/decisions": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → IAM GET /sessions (P31)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Políticas GET /thresholds": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "sin sesión → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "sin sesión → Incidentes GET /incidents (P10)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Consola GET /alerts (P09)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/operators (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/idp/users (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/decisions": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → IAM GET /sessions (P31)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Políticas GET /thresholds": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Incidentes GET /incidents (P10)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "network_admin → Consola GET /alerts (P09)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/operators (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/idp/users (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/decisions": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → IAM GET /sessions (P31)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Políticas GET /thresholds": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Incidentes GET /incidents (P10)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "token de operador desde PC1": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true,
+    "owner_session_after": 401
+   }
+  },
+  "violations": [
+   "sin sesión → Auditoría GET /events (P08)",
+   "sin sesión → Monitor GET /metrics (P07)",
+   "sin sesión → Incidentes GET /incidents (P10)",
+   "académico → Auditoría GET /events (P08)",
+   "académico → Monitor GET /metrics (P07)",
+   "académico → Incidentes GET /incidents (P10)"
+  ]
+ }
+}

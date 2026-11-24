@@ -1,0 +1,839 @@
+{
+ "latency": {
+  "verify_ms": {
+   "n": 200,
+   "mean": 201.5,
+   "p50": 208.32,
+   "p95": 231.15,
+   "p99": 243.92,
+   "min": 146.92,
+   "max": 321.34
+  },
+  "errors": 0,
+  "login_to_dataplane": [
+   {
+    "login_ms": 554.5,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 567.3
+   },
+   {
+    "login_ms": 599.6,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 599.8
+   },
+   {
+    "login_ms": 601.1,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 596.0
+   },
+   {
+    "login_ms": 583.9,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 572.2
+   },
+   {
+    "login_ms": 533.6,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 539.8
+   },
+   {
+    "login_ms": 549.4,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 547.0
+   },
+   {
+    "login_ms": 549.4,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 542.9
+   },
+   {
+    "login_ms": 539.6,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 547.8
+   },
+   {
+    "login_ms": 507.5,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 501.3
+   },
+   {
+    "login_ms": 500.0,
+    "network": "applied",
+    "replies_before_login": 0,
+    "request_to_first_reply_ms": 489.7
+   }
+  ],
+  "login_to_dataplane_ms": {
+   "n": 10,
+   "mean": 550.38,
+   "p50": 547.8,
+   "p95": 599.8,
+   "p99": 599.8,
+   "min": 489.7,
+   "max": 599.8
+  },
+  "portal_login_ms": {
+   "n": 10,
+   "mean": 551.86,
+   "p50": 549.4,
+   "p95": 601.1,
+   "p99": 601.1,
+   "min": 500.0,
+   "max": 601.1
+  },
+  "operator_two_step": {
+   "ok": 10,
+   "of": 10,
+   "credentials_ms": {
+    "n": 10,
+    "mean": 867.94,
+    "p50": 885.11,
+    "p95": 951.13,
+    "p99": 951.13,
+    "min": 778.08,
+    "max": 951.13
+   },
+   "totp_ms": {
+    "n": 10,
+    "mean": 1027.85,
+    "p50": 1007.55,
+    "p95": 1128.68,
+    "p99": 1128.68,
+    "min": 955.73,
+    "max": 1128.68
+   },
+   "total_ms": {
+    "n": 10,
+    "mean": 1895.78,
+    "p50": 1937.52,
+    "p95": 2069.86,
+    "p99": 2069.86,
+    "min": 1760.9,
+    "max": 2069.86
+   }
+  }
+ },
+ "block": {
+  "identity": {
+   "contraseña incorrecta": {
+    "host": "h1",
+    "attempts": 40,
+    "codes": [
+     401
+    ],
+    "rejected": 40
+   },
+   "usuario inexistente": {
+    "host": "h1",
+    "attempts": 20,
+    "codes": [
+     401
+    ],
+    "rejected": 20
+   },
+   "contraseña vacía": {
+    "host": "h1",
+    "attempts": 10,
+    "codes": [
+     401
+    ],
+    "rejected": 10
+   },
+   "invitado inexistente": {
+    "host": "h1",
+    "attempts": 10,
+    "codes": [
+     401
+    ],
+    "rejected": 10
+   },
+   "operador inexistente": {
+    "host": "h3",
+    "attempts": 10,
+    "codes": [
+     401
+    ],
+    "rejected": 10
+   },
+   "operador contraseña incorrecta": {
+    "host": "h3",
+    "attempts": 2,
+    "codes": [
+     401
+    ],
+    "rejected": 2
+   },
+   "operador TOTP incorrecto": {
+    "host": "h3",
+    "attempts": 2,
+    "codes": [
+     401
+    ],
+    "rejected": 2
+   },
+   "operador sin TOTP (solo 1er paso)": {
+    "host": "h3",
+    "attempts": 10,
+    "codes": [
+     200
+    ],
+    "rejected": 10
+   }
+  },
+  "identity_block_rate": 100.0,
+  "context": {
+   "académico en PC3 (puesto de operadores)": {
+    "host": "h3",
+    "attempts": 10,
+    "codes": [
+     403
+    ],
+    "rejected": 10
+   },
+   "operador en PC1 (puesto académico)": {
+    "host": "h1",
+    "attempts": 10,
+    "codes": [
+     403
+    ],
+    "rejected": 10
+   },
+   "operador por la API del IAM desde PC1 (sin puesto)": {
+    "host": "h1",
+    "attempts": 1,
+    "codes": [
+     200
+    ],
+    "rejected": 0
+   }
+  },
+  "stolen_session": {
+   "status_from_h2": 401,
+   "h1_rules_after": 1
+  },
+  "dataplane": {
+   "h2→h1 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h1 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h1 udp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h3 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h3 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h3 udp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h4 icmp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h4 tcp-syn": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→h4 udp": {
+    "sent": 200,
+    "delivered": 0
+   },
+   "h2→bus 10.0.0.11:5672": {
+    "sent": 20,
+    "delivered": 0
+   },
+   "h2→PostgreSQL 10.0.0.12:5432": {
+    "sent": 20,
+    "delivered": 0
+   },
+   "h2→ONOS 10.0.0.11:8181": {
+    "sent": 20,
+    "delivered": 0
+   }
+  },
+  "dataplane_block_rate": 100.0,
+  "control_portal_before_login": {
+   "sent": 20,
+   "connected": 20
+  }
+ },
+ "lockout": {
+  "threshold": 5,
+  "lockout_s": 300,
+  "below_limit": {
+   "failures": [
+    401,
+    401,
+    401,
+    401
+   ],
+   "valid_login": 200
+  },
+  "at_limit": {
+   "failures": [
+    401,
+    401,
+    401,
+    401,
+    401
+   ],
+   "valid_login": 401,
+   "valid_login_after_5s": 401
+  },
+  "unlocked_below_limit": true,
+  "locked_at_limit": true
+ },
+ "concurrency": {
+  "levels": [
+   {
+    "threads": 1,
+    "requests": 27,
+    "ok": 27,
+    "errors": 0,
+    "logins_per_s": 2.7,
+    "latency_ms": {
+     "n": 27,
+     "mean": 211.76,
+     "p50": 209.41,
+     "p95": 247.59,
+     "p99": 269.45,
+     "min": 169.21,
+     "max": 269.45
+    }
+   },
+   {
+    "threads": 5,
+    "requests": 131,
+    "ok": 131,
+    "errors": 0,
+    "logins_per_s": 13.1,
+    "latency_ms": {
+     "n": 131,
+     "mean": 227.38,
+     "p50": 210.14,
+     "p95": 321.41,
+     "p99": 613.65,
+     "min": 161.71,
+     "max": 645.06
+    }
+   },
+   {
+    "threads": 10,
+    "requests": 182,
+    "ok": 181,
+    "errors": 1,
+    "logins_per_s": 18.1,
+    "latency_ms": {
+     "n": 181,
+     "mean": 344.54,
+     "p50": 311.59,
+     "p95": 463.96,
+     "p99": 1059.56,
+     "min": 223.94,
+     "max": 1105.0
+    }
+   },
+   {
+    "threads": 20,
+    "requests": 193,
+    "ok": 193,
+    "errors": 0,
+    "logins_per_s": 19.3,
+    "latency_ms": {
+     "n": 193,
+     "mean": 875.9,
+     "p50": 816.29,
+     "p95": 1444.66,
+     "p99": 1732.18,
+     "min": 248.16,
+     "max": 1824.34
+    }
+   },
+   {
+    "threads": 40,
+    "requests": 200,
+    "ok": 199,
+    "errors": 1,
+    "logins_per_s": 19.9,
+    "latency_ms": {
+     "n": 199,
+     "mean": 1943.59,
+     "p50": 1816.12,
+     "p95": 2936.35,
+     "p99": 3441.26,
+     "min": 1354.64,
+     "max": 3558.13
+    }
+   }
+  ],
+  "note": "una instancia del IAM (balance source)"
+ },
+ "granularity": {
+  "roles": [
+   "academic",
+   "it_specialist",
+   "network_admin",
+   "super_admin"
+  ],
+  "profiles": [
+   "base",
+   "academic",
+   "it_operator",
+   "admin_operator",
+   "sa_operator",
+   "elevation"
+  ],
+  "permissions": 37,
+  "conditions": 11,
+  "assignments": 78,
+  "resource_types": 57,
+  "delegations": 1
+ },
+ "precision": {
+  "tests": [
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "servidor web de la intranet",
+    "target": "10.0.0.104:80",
+    "privileged": false,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "bus RabbitMQ (datos)",
+    "target": "10.0.0.11:5672",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "PostgreSQL (datos)",
+    "target": "10.0.0.12:5432",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "ONOS REST (datos)",
+    "target": "10.0.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "OpenFlow (datos)",
+    "target": "10.0.0.11:6653",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "ONOS REST (gestión)",
+    "target": "192.168.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "SSH de srv1 (gestión)",
+    "target": "192.168.0.11:22",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "bus RabbitMQ (datos)",
+    "target": "10.0.0.11:5672",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "PostgreSQL (datos)",
+    "target": "10.0.0.12:5432",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "ONOS REST (datos)",
+    "target": "10.0.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "OpenFlow (datos)",
+    "target": "10.0.0.11:6653",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": false,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "ONOS REST (gestión)",
+    "target": "192.168.0.11:8181",
+    "privileged": true,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 0
+   },
+   {
+    "profile": "network_admin",
+    "host": "h3",
+    "resource": "SSH de srv1 (gestión)",
+    "target": "192.168.0.11:22",
+    "privileged": true,
+    "expect": "allowed",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 0
+   }
+  ],
+  "restriction_precision": 60.0,
+  "authorized_delivery": 33.33,
+  "gaps": [
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "bus RabbitMQ (datos)",
+    "target": "10.0.0.11:5672",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "PostgreSQL (datos)",
+    "target": "10.0.0.12:5432",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "ONOS REST (datos)",
+    "target": "10.0.0.11:8181",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   },
+   {
+    "profile": "academic",
+    "host": "h1",
+    "resource": "OpenFlow (datos)",
+    "target": "10.0.0.11:6653",
+    "privileged": true,
+    "expect": "blocked",
+    "configured_scope_allows": true,
+    "sent": 20,
+    "delivered": 20
+   }
+  ],
+  "management_path_via_gw": false
+ },
+ "api": {
+  "cases": {
+   "sin sesión → Consola GET /alerts (P09)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/operators (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/idp/users (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/decisions": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → IAM GET /sessions (P31)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Políticas GET /thresholds": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "sin sesión → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "sin sesión → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Consola GET /alerts (P09)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/operators (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/idp/users (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/decisions": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → IAM GET /sessions (P31)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Políticas GET /thresholds": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "académico → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": "4xx",
+    "ok": false
+   },
+   "network_admin → Consola GET /alerts (P09)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/operators (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/idp/users (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/decisions": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → IAM GET /sessions (P31)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Políticas GET /thresholds": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "token de operador desde PC1": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true,
+    "owner_session_after": 401
+   }
+  },
+  "violations": [
+   "sin sesión → Políticas GET /thresholds",
+   "sin sesión → Auditoría GET /events (P08)",
+   "sin sesión → Monitor GET /metrics (P07)",
+   "académico → Políticas GET /thresholds",
+   "académico → Auditoría GET /events (P08)",
+   "académico → Monitor GET /metrics (P07)"
+  ]
+ },
+ "sessions": [
+  {
+   "sessions": 50,
+   "install_ms": {
+    "n": 50,
+    "mean": 15.47,
+    "p50": 11.39,
+    "p95": 42.31,
+    "p99": 118.8,
+    "min": 5.95,
+    "max": 118.8
+   },
+   "orders_per_s": 41.1,
+   "sw3_flows_before": 11,
+   "sw3_flows_after": 61,
+   "sw3_added": 61,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=2431423 byte_count=208643004 flow_count=61",
+   "ovs_rss_mb": [
+    51,
+    51
+   ],
+   "onos_rss_mb": 889,
+   "removed": 50
+  },
+  {
+   "sessions": 100,
+   "install_ms": {
+    "n": 100,
+    "mean": 10.29,
+    "p50": 7.99,
+    "p95": 24.3,
+    "p99": 61.56,
+    "min": 5.85,
+    "max": 61.56
+   },
+   "orders_per_s": 68.4,
+   "sw3_flows_before": 11,
+   "sw3_flows_after": 111,
+   "sw3_added": 11,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=2431433 byte_count=208643844 flow_count=111",
+   "ovs_rss_mb": [
+    51,
+    51
+   ],
+   "onos_rss_mb": 889,
+   "removed": 100
+  },
+  {
+   "sessions": 200,
+   "install_ms": {
+    "n": 200,
+    "mean": 12.69,
+    "p50": 10.8,
+    "p95": 24.72,
+    "p99": 44.8,
+    "min": 5.54,
+    "max": 58.68
+   },
+   "orders_per_s": 66.7,
+   "sw3_flows_before": 11,
+   "sw3_flows_after": 211,
+   "sw3_added": 11,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=2431444 byte_count=208644768 flow_count=211",
+   "ovs_rss_mb": [
+    51,
+    51
+   ],
+   "onos_rss_mb": 890,
+   "removed": 200
+  },
+  {
+   "sessions": 500,
+   "install_ms": {
+    "n": 500,
+    "mean": 10.04,
+    "p50": 8.44,
+    "p95": 19.82,
+    "p99": 30.14,
+    "min": 5.45,
+    "max": 57.14
+   },
+   "orders_per_s": 90.8,
+   "sw3_flows_before": 11,
+   "sw3_flows_after": 511,
+   "sw3_added": 11,
+   "ovs_aggregate": "OFPST_AGGREGATE reply (OF1.3) (xid=0x2): packet_count=2431459 byte_count=208646028 flow_count=511",
+   "ovs_rss_mb": [
+    51,
+    51
+   ],
+   "onos_rss_mb": 890,
+   "removed": 500
+  }
+ ]
+}

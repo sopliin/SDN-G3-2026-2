@@ -1,0 +1,148 @@
+{
+ "api": {
+  "cases": {
+   "sin sesión → Consola GET /alerts (P09)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/operators (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/idp/users (P14)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Consola GET /admin/decisions": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → IAM GET /sessions (P31)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Políticas GET /thresholds": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Auditoría GET /events (P08)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Monitor GET /metrics (P07)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "sin sesión → Incidentes GET /incidents (P10)": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /alerts (P09)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/operators (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/idp/users (P14)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Consola GET /admin/decisions": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → IAM GET /sessions (P31)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Políticas GET /thresholds": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Auditoría GET /events (P08)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Monitor GET /metrics (P07)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "académico → Incidentes GET /incidents (P10)": {
+    "status": 403,
+    "expect": "4xx",
+    "ok": true
+   },
+   "network_admin → Consola GET /alerts (P09)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/operators (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/idp/users (P14)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Consola GET /admin/decisions": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → IAM GET /sessions (P31)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Políticas GET /thresholds": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Auditoría GET /events (P08)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Monitor GET /metrics (P07)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "network_admin → Incidentes GET /incidents (P10)": {
+    "status": 200,
+    "expect": 200,
+    "ok": true
+   },
+   "token de operador desde PC1": {
+    "status": 401,
+    "expect": "4xx",
+    "ok": true,
+    "owner_session_after": 401
+   }
+  },
+  "violations": []
+ }
+}
