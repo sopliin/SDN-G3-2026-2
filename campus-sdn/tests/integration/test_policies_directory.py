@@ -5,7 +5,7 @@ La sincronización se prueba directamente contra `MemoryStore` sembrado con
 almacén inyectado, sin IAM ni PostgreSQL.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -134,8 +134,9 @@ def test_sync_rejects_non_directory_tables(store):
 
 def test_stale_directory_is_detected(store, monkeypatch):
     monkeypatch.setenv("DIRECTORY_MAX_STALENESS_S", "1")
-    assert is_stale(store, now=datetime(2026, 11, 19,
-                                        tzinfo=timezone.utc))
+    # Relativa al reloj: la marca del fixture es «ahora».
+    assert is_stale(store, now=datetime.now(timezone.utc)
+                    + timedelta(seconds=5))
 
 
 def test_missing_or_malformed_mark_is_stale(monkeypatch):
