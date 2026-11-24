@@ -288,6 +288,16 @@ components:
         profile:
           type: string
           description: identificador del perfil (academic, it_operator, admin_operator, sa_operator, elevation); el controlador traduce a reglas; el solicitante expresa el qué, no el cómo
+        scope:
+          type: array
+          items:
+            type: string
+          description: "destinos IPv4 (CIDR) que el perfil alcanza; vacío = sin restricción de destino (regla 200 por destino)"
+        deny:
+          type: array
+          items:
+            type: string
+          description: "destinos IPv4 (CIDR) denegados de forma explícita; regla DROP 210 que prevalece sobre la sesión (200) en el tráfico común"
     MitigationOrder:
       type: object
       required: [order, action, target, origins, parameters, context]

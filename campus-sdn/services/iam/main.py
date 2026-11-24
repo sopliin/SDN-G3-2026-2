@@ -47,6 +47,9 @@ devices: dict[str, dict] = {}      # mac → {totp_secret}
 # RADIUS: Acct-Session-Id del Start pendiente de asociarse a la sesión
 # que se está emitiendo (R1.9: Start, Interim y Stop correlacionados).
 acct_sessions: dict[str, str] = {}
+# Intentos fallidos por (población, usuario): {"failures": [ts], "locked_until": ts}
+lockouts: dict[str, dict] = {}
+lockouts_lock = threading.Lock()
 # Traza de decisiones (los seis ejes del permiso efectivo). Se persiste
 # en PostgreSQL para que srv2 y srv3 vean el mismo registro.
 decisions: deque = deque(maxlen=200)
@@ -77,6 +80,26 @@ SESSION_SCOPE = {
     "network_admin": ["10.0.0.10/32", "192.168.0.0/24"],
     "super_admin": ["10.0.0.10/32", "192.168.0.0/24"],
 }
+
+
+# Denegación explícita dentro del alcance (R2): las IP de datos de los
+# servidores llevan servicios internos (bus, PostgreSQL, ONOS, OpenFlow)
+# que ningún puesto de usuario debe alcanzar; el portal y las APIs se
+# sirven por la VIP 10.0.0.10. Medido el 2026-11-24: sin esta lista, un
+# académico llegaba a esos cuatro servicios (precisión de R2 = 60 %).
+# El adaptador I2 la traduce a DROP 210, que vence a la sesión (200).
+SESSION_DENY = {
+    "academic": ["10.0.0.11/32", "10.0.0.12/32", "10.0.0.13/32"],
+    "guest": ["10.0.0.11/32", "10.0.0.12/32", "10.0.0.13/32"],
+}
+
+
+def _session_deny(profile: str) -> list[str]:
+    """Destinos denegados del perfil; PROFILE_DENY (JSON {perfil: [CIDR,
+    …]}) los fija por despliegue, igual que PROFILE_SCOPES."""
+    configured = os.environ.get("PROFILE_DENY", "")
+    denies = json.loads(configured) if configured else SESSION_DENY
+    return denies.get(profile, [])
 
 
 def _session_scope(profile: str) -> list[str]:
@@ -146,6 +169,7 @@ def _send_profile_order(session_token: str, device_mac: str,
         "order": "APPLY_PROFILE",
         "device": {"mac": device_mac},
         "scope": _session_scope(profile),
+        "deny": _session_deny(profile),
         "validity": {"idle_timeout_s": params["idle_timeout_s"],
                      "hard_timeout_s": params["hard_timeout_s"]},
         "context": {"cookie": session_token, "requester": SERVICE,
@@ -458,6 +482,9 @@ def _init_db() -> None:
                 token TEXT PRIMARY KEY,
                 data JSONB NOT NULL,
                 expires_at DOUBLE PRECISION NOT NULL)""")
+            conn.execute("""CREATE TABLE IF NOT EXISTS iam_lockouts (
+                key TEXT PRIMARY KEY,
+                data JSONB NOT NULL)""")
             conn.execute("""CREATE TABLE IF NOT EXISTS iam_guests (
                 username TEXT PRIMARY KEY,
                 password_hash TEXT NOT NULL,
@@ -786,6 +813,21 @@ def _send_session_accounting(session: dict, status: str) -> None:
         return
 
 
+class CredentialRejected(HTTPException):
+    """Rechazo de credenciales con un único mensaje hacia afuera
+    («invalid credentials»: no revela si el usuario existe ni por qué
+    falló); el motivo real queda solo en la traza de decisiones."""
+
+    def __init__(self, reason: str):
+        super().__init__(status_code=401, detail="invalid credentials")
+        self.reason = reason
+
+
+# Hash de relleno: un usuario inexistente cuesta lo mismo que uno real
+# (sin canal de tiempo que delate la existencia de la cuenta).
+_DUMMY_HASH = bcrypt.hashpw(b"campus-sdn-dummy", bcrypt.gensalt())
+
+
 def _verify_community(username: str, password: str) -> str:
     """Reino comunidad: RADIUS contra el IdP (F-03 §2)."""
     try:
@@ -798,7 +840,7 @@ def _verify_community(username: str, password: str) -> str:
         request["User-Password"] = request.PwCrypt(password)
         reply = client.SendPacket(request)
         if reply.code != pyrad.packet.AccessAccept:
-            raise HTTPException(status_code=401, detail="invalid credentials")
+            raise CredentialRejected("radius access-reject")
 
         # Accounting (R1.9): Start con un id que la sesión conserva para
         # enviar el Interim y el Stop correlacionados.
@@ -818,29 +860,33 @@ def _verify_operator_password(username: str, password: str) -> str:
     jamás antes (el formulario no muestra el campo a desconocidos)."""
     _refresh_operators()
     operator = operators.get(username)
-    if operator is None or not bcrypt.checkpw(
-            password.encode(), _password_hash(operator["password_hash"])):
-        raise HTTPException(status_code=401, detail="invalid credentials")
+    if operator is None:
+        bcrypt.checkpw(password.encode(), _DUMMY_HASH)
+        raise CredentialRejected("unknown operator")
+    if not bcrypt.checkpw(password.encode(),
+                          _password_hash(operator["password_hash"])):
+        raise CredentialRejected("bad operator password")
     return operator["role"]
 
 
 def _verify_operator_totp(username: str, totp: str) -> None:
     if not _check_totp(operators[username]["totp_secret"], totp):
-        raise HTTPException(status_code=401, detail="totp required")
+        raise CredentialRejected("bad totp")
 
 
 def _verify_guest(username: str, password: str) -> str:
     """Reino invitados: registro efímero con TTL (componentes/04 §2.3)."""
     guest = _db_guest_get(username) if _db_ready() else guests.get(username)
     if guest is None:
-        raise HTTPException(status_code=401, detail="invalid credentials")
+        bcrypt.checkpw(password.encode(), _DUMMY_HASH)
+        raise CredentialRejected("unknown guest")
     if time.time() > guest["expires_at"]:
         guests.pop(username, None)
         _db_guest_delete(username)  # se borra solo al vencer
-        raise HTTPException(status_code=401, detail="guest expired")
+        raise CredentialRejected("guest expired")
     if not bcrypt.checkpw(password.encode(),
                           _password_hash(guest["password_hash"])):
-        raise HTTPException(status_code=401, detail="invalid credentials")
+        raise CredentialRejected("bad guest password")
     return "guest"
 
 
@@ -859,7 +905,103 @@ def verify_credentials(population: str, username: str, password: str) -> str:
         return _verify_operator_password(username, password)
     if population == "guest":
         return _verify_guest(username, password)
-    raise HTTPException(status_code=401, detail="unknown population")
+    raise CredentialRejected("unknown population")
+
+
+# ---------------------------------------------------------------------------
+# Cuarentena por intentos fallidos (R1: bloqueo de fuerza bruta)
+# ---------------------------------------------------------------------------
+
+def _lockout_threshold() -> int:
+    """N: fallos dentro de la ventana que bloquean la cuenta."""
+    return int(os.environ.get("IAM_LOCKOUT_THRESHOLD", "5"))
+
+
+def _lockout_window_s() -> float:
+    return float(os.environ.get("IAM_LOCKOUT_WINDOW_S", "300"))
+
+
+def _lockout_s() -> float:
+    """Duración de la cuarentena."""
+    return float(os.environ.get("IAM_LOCKOUT_S", "300"))
+
+
+def _lockout_key(population: str, username: str) -> str:
+    return f"{population}:{username.strip().lower()}"
+
+
+def _lockout_get(key: str) -> dict:
+    if _db_ready():
+        try:
+            with _db_conn() as conn:
+                row = conn.execute(
+                    "SELECT data FROM iam_lockouts WHERE key = %s",
+                    (key,)).fetchone()
+            if row:
+                return (row[0] if isinstance(row[0], dict)
+                        else json.loads(row[0]))
+            return {"failures": [], "locked_until": 0.0}
+        except Exception:
+            pass
+    return dict(lockouts.get(key) or {"failures": [], "locked_until": 0.0})
+
+
+def _lockout_put(key: str, state: dict | None) -> None:
+    if state is None:
+        lockouts.pop(key, None)
+    else:
+        lockouts[key] = state
+    if not _db_ready():
+        return
+    try:
+        with _db_conn() as conn:
+            if state is None:
+                conn.execute("DELETE FROM iam_lockouts WHERE key = %s",
+                             (key,))
+            else:
+                conn.execute(
+                    "INSERT INTO iam_lockouts (key, data) VALUES "
+                    "(%s, %s::jsonb) ON CONFLICT (key) DO UPDATE SET "
+                    "data = EXCLUDED.data", (key, json.dumps(state)))
+    except Exception:
+        pass
+
+
+def is_locked(population: str, username: str,
+              now: float | None = None) -> bool:
+    """True mientras la cuenta está en cuarentena. Aplica también a
+    usuarios inexistentes (bloquear solo a los reales delataría cuáles
+    existen)."""
+    now = time.time() if now is None else now
+    return _lockout_get(_lockout_key(population, username))[
+        "locked_until"] > now
+
+
+def register_failed_attempt(population: str, username: str,
+                            now: float | None = None) -> dict:
+    """Anota un fallo y, al llegar a N dentro de la ventana, abre la
+    cuarentena. Devuelve {failures, locked, locked_until}."""
+    now = time.time() if now is None else now
+    key = _lockout_key(population, username)
+    with lockouts_lock:
+        state = _lockout_get(key)
+        recent = [t for t in state.get("failures", [])
+                  if now - t <= _lockout_window_s()]
+        recent.append(now)
+        locked_until = float(state.get("locked_until", 0.0))
+        if len(recent) >= _lockout_threshold() and locked_until <= now:
+            locked_until = now + _lockout_s()
+            recent = []
+        state = {"failures": recent, "locked_until": locked_until}
+        _lockout_put(key, state)
+    return {"failures": len(recent), "locked": locked_until > now,
+            "locked_until": locked_until}
+
+
+def clear_failed_attempts(population: str, username: str) -> None:
+    """Un login correcto (fuera de cuarentena) reinicia el contador."""
+    with lockouts_lock:
+        _lockout_put(_lockout_key(population, username), None)
 
 
 # ---------------------------------------------------------------------------
@@ -1007,8 +1149,8 @@ def verify(credentials: dict):
     Operadores: dos pasos — primero credenciales, luego TOTP; el campo
     solo se muestra cuando el sistema ya reconoció al usuario."""
     population = credentials.get("population", "university")
-    username = credentials["username"]
-    password = credentials["password"]
+    username = str(credentials.get("username") or "")
+    password = str(credentials.get("password") or "")
     source_ip = credentials.get("source_ip", "")
     device_mac = credentials.get("device", "")
     axes = {
@@ -1028,11 +1170,24 @@ def verify(credentials: dict):
         "permission": "P02",
         "validity": {"profile": None},
     }
+    if not username.strip() or not password:
+        _record_decision({**axes, "decision": "deny",
+                          "reasons": ["empty credentials"]})
+        raise CredentialRejected("empty credentials")
+    if is_locked(population, username):
+        # En cuarentena ni siquiera la contraseña correcta entra; la
+        # respuesta es la misma que la de una credencial inválida.
+        _record_decision({**axes, "decision": "deny",
+                          "reasons": ["account locked"]})
+        raise CredentialRejected("account locked")
     try:
         profile = verify_credentials(population, username, password)
     except HTTPException as exc:
-        _record_decision({**axes, "decision": "deny",
-                          "reasons": [exc.detail]})
+        reasons = [getattr(exc, "reason", exc.detail)]
+        if exc.status_code == 401:
+            if register_failed_attempt(population, username)["locked"]:
+                reasons.append("account locked")
+        _record_decision({**axes, "decision": "deny", "reasons": reasons})
         raise
     axes["subject"]["role"] = profile
     axes["validity"]["profile"] = profile
@@ -1054,9 +1209,13 @@ def verify(credentials: dict):
         try:
             _verify_operator_totp(username, credentials.get("totp", ""))
         except HTTPException as exc:
+            reasons = [getattr(exc, "reason", exc.detail)]
+            if register_failed_attempt(population, username)["locked"]:
+                reasons.append("account locked")
             _record_decision({**axes, "decision": "deny",
-                              "reasons": [exc.detail]})
+                              "reasons": reasons})
             raise
+    clear_failed_attempts(population, username)
     reasons = ["credentials verified",
                f"workstation: {axes['context']['workstation'] or 'management'}"]
     if population == "operations":

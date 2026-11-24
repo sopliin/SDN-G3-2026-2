@@ -9,6 +9,7 @@ incidente). Confirma las mitigaciones con MitigationApplied por el bus.
 Sin ONOS alcanzable, las órdenes responden 503 y nada queda a medias.
 """
 
+import ipaddress
 import json
 import os
 import uuid
@@ -26,6 +27,11 @@ SCHEMAS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "events"
 
 SESSION_COOKIE_BASE = 0x0100000000000000
 INCIDENT_COOKIE_BASE = 0x0200000000000000
+# Escalera del LLD 06_reglas §3: la denegación explícita de una política
+# vence a la sesión (200) sobre el mismo tráfico y cede ante la mitigación
+# (1000), que siempre manda.
+SESSION_PRIORITY = 200
+POLICY_DENY_PRIORITY = 210
 
 cookie_registry: dict[str, str] = {}   # clave → hex del cookie en ONOS
 order_registry: dict[str, dict] = {}   # cookie de la orden → estado
@@ -224,6 +230,58 @@ def _resolve_location(mac: str) -> dict:
     raise HTTPException(status_code=404, detail="device not learned")
 
 
+def translate_policy(policies: list[dict], in_port: str,
+                     mac: str) -> list[dict]:
+    """Traduce políticas de acceso de un dispositivo a reglas OpenFlow
+    (función pura, sin ONOS). Cada política es {"effect": "permit" |
+    "deny", "destination": CIDR o None (sin restricción de destino)}.
+
+    Devuelve [{priority, criteria, action, destination}] con `action`
+    FORWARD (→ NORMAL) o DROP. Reglas de combinación:
+    - toda regla ata el tráfico al dispositivo (IN_PORT + ETH_SRC);
+    - deny va a POLICY_DENY_PRIORITY (210) y permit a SESSION_PRIORITY
+      (200): donde coinciden, prevalece la denegación;
+    - un permit contenido por completo en un deny no se instala (nunca
+      tendría efecto y gastaría TCAM);
+    - duplicados se colapsan; efecto o CIDR inválidos → ValueError.
+    """
+    base = [{"type": "IN_PORT", "port": str(in_port)},
+            {"type": "ETH_SRC", "mac": _normalize_mac(mac)}]
+    parsed = {"permit": [], "deny": []}
+    for policy in policies:
+        effect = str(policy.get("effect", "")).lower()
+        if effect not in parsed:
+            raise ValueError(f"efecto desconocido: {policy.get('effect')!r}")
+        destination = policy.get("destination")
+        network = (None if destination in (None, "")
+                   else ipaddress.ip_network(str(destination), strict=False))
+        if network is not None and network.version != 4:
+            raise ValueError(f"solo IPv4: {destination!r}")
+        if network not in parsed[effect]:
+            parsed[effect].append(network)
+
+    def covered(net, denies):
+        if None in denies:
+            return True
+        return net is not None and any(net.subnet_of(d) for d in denies)
+
+    def criteria(net):
+        if net is None:
+            return list(base)
+        return base + [{"type": "ETH_TYPE", "ethType": "0x0800"},
+                       {"type": "IPV4_DST", "ip": str(net)}]
+
+    rules = [{"priority": POLICY_DENY_PRIORITY, "criteria": criteria(net),
+              "action": "DROP",
+              "destination": None if net is None else str(net)}
+             for net in parsed["deny"]]
+    rules += [{"priority": SESSION_PRIORITY, "criteria": criteria(net),
+               "action": "FORWARD",
+               "destination": None if net is None else str(net)}
+              for net in parsed["permit"] if not covered(net, parsed["deny"])]
+    return rules
+
+
 def apply_profile(order: dict) -> tuple[list[str], list[str], list[dict]]:
     """La sesión en el switch, según la escalera (LLD 06_reglas §3):
     ida con el alcance del perfil (fuera de él, el DROP a gestión sigue
@@ -242,32 +300,38 @@ def apply_profile(order: dict) -> tuple[list[str], list[str], list[dict]]:
         location = _resolve_location(mac)
         device_ids = [location["switch"]]
         in_port = location["port"]
-    scopes = order.get("scope") or []
+    # Una regla por alcance del perfil (R2: cada recurso autorizado es un
+    # destino explícito); sin alcance, el operador no tiene restricción de
+    # destino. `deny` (opcional) excluye destinos dentro del alcance.
+    policies = ([{"effect": "permit", "destination": scope}
+                 for scope in order.get("scope") or []]
+                or [{"effect": "permit", "destination": None}])
+    policies += [{"effect": "deny", "destination": cidr}
+                 for cidr in order.get("deny") or []]
+    try:
+        translated = translate_policy(policies, in_port, mac)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     rule_ids = []
     selectors = []
     for device_id in device_ids:
-        base = [{"type": "IN_PORT", "port": in_port},
-                {"type": "ETH_SRC", "mac": mac}]
-        # Una regla por alcance del perfil (R2: cada recurso autorizado es
-        # un destino explícito); sin alcance, el operador no tiene
-        # restricción de destino.
-        outbounds = [base + [{"type": "ETH_TYPE", "ethType": "0x0800"},
-                             {"type": "IPV4_DST", "ip": scope}]
-                     for scope in scopes] or [base]
         # Solo la ida. Una «vuelta» por ETH_DST abriría el dispositivo a
         # cualquier vecino del mismo switch aunque no tenga sesión
         # (verificado en el slice: h2 sin sesión alcanzaba a h1). Las
         # respuestas legítimas entran por la confianza 60 del esqueleto
         # (troncales y servidores) o por la ida de la sesión del par.
         session_flows = [
-            {"priority": 200, "timeout": order["validity"]["hard_timeout_s"],
+            {"priority": rule["priority"],
+             "timeout": order["validity"]["hard_timeout_s"],
              "idleTimeout": order["validity"]["idle_timeout_s"],
              "isPermanent": False, "deviceId": device_id,
-             "selector": {"criteria": outbound},
-             "treatment": {"instructions": [
-                 {"type": "OUTPUT", "port": "NORMAL"}]},
+             "selector": {"criteria": rule["criteria"]},
+             # Sin instrucciones = descarte (así lo acepta ONOS).
+             "treatment": {"instructions": (
+                 [{"type": "OUTPUT", "port": "NORMAL"}]
+                 if rule["action"] == "FORWARD" else [])},
              "cookie": int(cookie, 16)}
-            for outbound in outbounds
+            for rule in translated
         ]
         for flow in session_flows:
             rule_ids.append(_onos().install_flow(device_id, flow))

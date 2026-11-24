@@ -37,22 +37,48 @@ def _policy_path() -> Path:
 POLICY_PATH = _policy_path()
 
 
+def evaluate_access(role: str, permission: str, resource_types) -> dict:
+    """Decisión rol × permiso × recurso con su motivo (C9). Denegación
+    por defecto: rol, permiso o recurso que la política no registra no
+    entran. Devuelve {decision: PERMIT|DENY, reason, assignment}."""
+    types = ([resource_types] if isinstance(resource_types, str)
+             else list(resource_types or []))
+    policy = yaml.safe_load(POLICY_PATH.read_text())
+    result = {"role": role, "permission": permission, "resources": types,
+              "decision": "DENY", "assignment": None}
+    if role not in (policy.get("roles") or {}):
+        return {**result, "reason": "unknown role (default deny)"}
+    permissions = policy.get("permissions") or {}
+    if permission not in permissions:
+        return {**result, "reason": "unknown permission (default deny)"}
+    catalog = set(permissions[permission].get("resource_types") or [])
+    if not types or not any(t in catalog for t in types):
+        return {**result, "reason": "resource not in inventory of "
+                f"{permission} (default deny)"}
+    assigned = False
+    for assignment in policy.get("assignments", []):
+        if assignment["role"] != role or \
+                assignment["permission"] != permission:
+            continue
+        assigned = True
+        resources = assignment["resources"]
+        if assignment.get("effect", "permit") == "permit" and (
+                "*" in resources or any(t in resources for t in types)):
+            return {**result, "decision": "PERMIT",
+                    "assignment": assignment.get("id"),
+                    "reason": f"assignment {assignment.get('id')}"}
+    if assigned:
+        return {**result, "reason": f"{role} has {permission} but not "
+                "over the requested resource"}
+    return {**result, "reason": f"{permission} not assigned to {role}"}
+
+
 def _allowed(role: str, permission: str, resource_types) -> bool:
     """La asignación rol→permiso cubre al menos uno de los tipos de
     recurso solicitados (C9). Un endpoint puede aceptar variantes por
     rol (p. ej. P09 `alert` para TI y `network_alert` para Admin)."""
-    types = ([resource_types] if isinstance(resource_types, str)
-             else list(resource_types))
-    policy = yaml.safe_load(POLICY_PATH.read_text())
-    for assignment in policy.get("assignments", []):
-        if assignment["role"] != role:
-            continue
-        if assignment["permission"] != permission:
-            continue
-        resources = assignment["resources"]
-        if "*" in resources or any(t in resources for t in types):
-            return True
-    return False
+    return evaluate_access(role, permission,
+                           resource_types)["decision"] == "PERMIT"
 
 
 def require_permission(permission: str, resource_type):
