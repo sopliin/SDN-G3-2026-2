@@ -363,7 +363,7 @@ def preconditions():
     if not victim_trust:
         problems.append("h4 sin confianza 60 en SW6 (SKELETON_SERVERS)")
     samplers = [i for i in s.INSTANCES
-                if s.http("gw", "GET", f"http://{i}:8003/metrics")["data"].get("metrics")]
+                if s.reader_get(f"http://{i}:8003/metrics")["data"].get("metrics")]
     if len(samplers) != 1:
         problems.append(f"se espera un solo monitor muestreando; hay {len(samplers)}")
     tools = s.ssh("h1", "command -v hping3 iperf3")[1].split()

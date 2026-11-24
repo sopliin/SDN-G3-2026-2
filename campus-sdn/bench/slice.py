@@ -114,6 +114,11 @@ SESSION_SCOPE = json.loads(os.environ.get("PROFILE_SCOPES", "") or "null") or {
     "network_admin": ["10.0.0.10/32", "192.168.0.0/24"],
     "super_admin": ["10.0.0.10/32", "192.168.0.0/24"],
 }
+# Denegaciones dentro del alcance (IAM SESSION_DENY / PROFILE_DENY).
+SESSION_DENY = json.loads(os.environ.get("PROFILE_DENY", "") or "null") or {
+    "academic": ["10.0.0.11/32", "10.0.0.12/32", "10.0.0.13/32"],
+    "guest": ["10.0.0.11/32", "10.0.0.12/32", "10.0.0.13/32"],
+}
 MANAGEMENT = "192.168.0.0/24"
 PORTAL = f"{VIP}/32"
 
@@ -259,11 +264,34 @@ def session_flows(host):
             if criterion(f, "ETH_SRC", "mac") == mac]
 
 
+_READER = {}
+
+
+def reader_get(url, refresh=False):
+    """GET a una lectura I7 protegida (P07 métricas, P08 eventos, P10
+    incidentes) con la sesión del operador de pruebas. La sesión nace en
+    PC3 (h3), su puesto de operadores; la consulta sale del gateway (la
+    autorización valida sesión y rol, no la IP). Si la sesión fue
+    reemplazada (una por dispositivo) o venció, se renueva una vez."""
+    if refresh or "token" not in _READER:
+        account = operator_account("ADMIN")
+        if not account:
+            raise SystemExit("las lecturas I7 exigen sesión: definir SLICE_ADMIN_*")
+        reply = operator_login("h3", account)
+        if reply["status"] != 200 or "session" not in reply["data"]:
+            raise SystemExit(f"login del operador lector falló: {reply['status']}")
+        _READER["token"] = reply["data"]["session"]
+    reply = http("gw", "GET", url, headers={"X-Session": _READER["token"]})
+    if reply["status"] == 401 and not refresh:
+        return reader_get(url, refresh=True)
+    return reply
+
+
 def _merged(path, key):
     """GET a cada instancia (srv2, srv3) desde el gateway, unidos."""
     rows = []
     for instance in INSTANCES:
-        reply = http("gw", "GET", f"http://{instance}{path}")
+        reply = reader_get(f"http://{instance}{path}")
         rows += reply["data"].get(key, []) if reply["status"] == 200 else []
     return rows
 
@@ -276,8 +304,8 @@ def audit_events(since_iso="", types=None):
     for instance in INSTANCES:
         cursor = 0
         while True:
-            page = http("gw", "GET", f"http://{instance}:8007/events?limit=1000"
-                        f"&cursor={cursor}{query}")["data"]
+            page = reader_get(f"http://{instance}:8007/events?limit=1000"
+                              f"&cursor={cursor}{query}")["data"]
             data = page.get("data", [])
             for event in data:
                 if event["event_id"] in seen:
@@ -301,6 +329,9 @@ def monitor_metrics(destination, since_epoch):
 def in_scope(ip, profile):
     """¿El alcance del perfil cubre `ip`? (lo que R2 debería permitir)."""
     address = ipaddress.ip_address(ip)
+    if any(address in ipaddress.ip_network(cidr)
+           for cidr in SESSION_DENY.get(profile, [])):
+        return False
     return any(address in ipaddress.ip_network(cidr)
                for cidr in SESSION_SCOPE.get(profile, []))
 

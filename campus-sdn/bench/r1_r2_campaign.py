@@ -15,6 +15,8 @@ R1 — control de acceso por rol
                  (población en el puesto equivocado); sesión robada
                  presentada desde otro equipo; tráfico de un host sin
                  sesión contado en el destino.
+  lockout      : cuarentena tras N fallos con una cuenta dedicada
+                 (USR-0005): N-1 fallos no bloquean, N sí.
   concurrency  : verificaciones concurrentes (1…40 hilos, 10 s por nivel).
   granularity  : roles, perfiles, permisos, condiciones (permissions.yaml).
 R2 — recursos privilegiados
@@ -264,12 +266,15 @@ def r1_block():
                    "password": "x"}, 10),
     ]
     if ADMIN:
+        # Contraseña y TOTP comparten el contador de cuarentena: se queda
+        # por debajo de N (2 + 2 < 5) para no bloquear al operador que usan
+        # las demás partes. La cuarentena se mide aparte (parte «lockout»).
         base = {"population": "operations", "username": ADMIN["username"]}
         identity += [
             _attempts("h3", "operador contraseña incorrecta",
-                      {**base, "password": "mala"}, 10),
+                      {**base, "password": "mala"}, 2),
             _attempts("h3", "operador TOTP incorrecto",
-                      {**base, "password": ADMIN["password"], "totp": "000000"}, 10),
+                      {**base, "password": ADMIN["password"], "totp": "000000"}, 2),
         ]
         # Solo el primer paso: 200 con totp_required y SIN sesión.
         first_step = [s.portal_login("h3", {**base, "password": ADMIN["password"]})
@@ -343,6 +348,43 @@ def r1_block():
             "dataplane": dataplane,
             "dataplane_block_rate": round(100 * (1 - delivered / sent), 2),
             "control_portal_before_login": portal}
+
+
+LOCKOUT_N = int(os.environ.get("BENCH_LOCKOUT_THRESHOLD", "5"))
+LOCKOUT_S = int(os.environ.get("BENCH_LOCKOUT_S", "300"))
+
+
+def r1_lockout():
+    """Cuarentena tras N fallos (IAM_LOCKOUT_THRESHOLD/IAM_LOCKOUT_S),
+    con una cuenta dedicada (USR-0005): N-1 fallos no bloquean; N sí, y en
+    cuarentena ni la contraseña correcta entra. Con BENCH_LOCKOUT_WAIT=1
+    espera la cuarentena y comprueba que la cuenta vuelve sola."""
+    print("== R1 cuarentena", flush=True)
+    good, bad = community(5), community(5, "mala")
+
+    def fail(n):
+        return [s.portal_login("h1", bad)["status"] for _ in range(n)]
+
+    def try_good():
+        reply = s.portal_login("h1", good)
+        if "session" in reply["data"]:
+            s.portal_logout("h1", reply["data"]["session"])
+        return reply["status"]
+
+    below = {"failures": fail(LOCKOUT_N - 1), "valid_login": try_good()}
+    started = time.time()
+    at_limit = {"failures": fail(LOCKOUT_N), "valid_login": try_good()}
+    time.sleep(5)
+    at_limit["valid_login_after_5s"] = try_good()
+    result = {"threshold": LOCKOUT_N, "lockout_s": LOCKOUT_S,
+              "below_limit": below, "at_limit": at_limit,
+              "unlocked_below_limit": below["valid_login"] == 200,
+              "locked_at_limit": at_limit["valid_login"] != 200
+              and at_limit["valid_login_after_5s"] != 200}
+    if os.environ.get("BENCH_LOCKOUT_WAIT") == "1":
+        time.sleep(max(0, LOCKOUT_S + 2 - (time.time() - started)))
+        result["valid_login_after_lockout"] = try_good()
+    return result
 
 
 def r1_concurrency():
@@ -476,6 +518,7 @@ def r2_api():
         ("Políticas GET /thresholds", "GET", f"http://{s.VIP}:8006/thresholds", "header"),
         ("Auditoría GET /events (P08)", "GET", f"http://{s.VIP}:8007/events?limit=1", "header"),
         ("Monitor GET /metrics (P07)", "GET", f"http://{s.VIP}:8003/metrics", "header"),
+        ("Incidentes GET /incidents (P10)", "GET", f"http://{s.VIP}:8005/incidents", "header"),
     ]
     cases = {}
     for actor, (host, token) in actors.items():
@@ -585,7 +628,8 @@ def r2_sessions():
 def main():
     if not s.SUDO_PASSWORD:
         sys.exit("definir SLICE_SUDO_PASSWORD")
-    parts = sys.argv[1:] or ["latency", "block", "concurrency", "granularity",
+    parts = sys.argv[1:] or ["latency", "block", "lockout", "concurrency",
+                             "granularity",
                              "precision", "api", "sessions"]
     s.preflight(["gw", "h1", "h2", "h3", "h4", "sw3", "srv1"])
     if not ADMIN:
@@ -593,6 +637,7 @@ def main():
               flush=True)
     out_dir = s.results_dir("r1r2")
     functions = {"latency": r1_latency, "block": r1_block,
+                 "lockout": r1_lockout,
                  "concurrency": r1_concurrency, "granularity": r1_granularity,
                  "precision": r2_precision, "api": r2_api,
                  "sessions": r2_sessions}
