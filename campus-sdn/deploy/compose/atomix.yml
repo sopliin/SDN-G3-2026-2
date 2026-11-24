@@ -8,6 +8,14 @@ services:
     container_name: atomix
     restart: unless-stopped
     network_mode: host
+    environment:
+      # Heap acotado: sin límite la JVM toma 1/4 de la RAM (≈1 GiB de
+      # heap, 1,2 GiB de RSS) y en los servidores de 4 GiB, junto a ONOS
+      # (-Xmx2g) y la plataforma, el kernel la mataba por OOM (srv2,
+      # 2026-11-24) y el clúster quedaba sin servicios. Los datos Raft
+      # pesan ~110 MB; con 512 MiB la puesta al día de los seguidores
+      # no alcanzaba el tiempo límite de Raft (medido): 1 GiB.
+      JAVA_TOOL_OPTIONS: -Xmx1g
     volumes:
       - ./atomix/atomix.json:/opt/atomix/atomix.json:ro
       - atomix_data:/var/lib/atomix

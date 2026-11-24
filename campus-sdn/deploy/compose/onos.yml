@@ -37,6 +37,9 @@ services:
       # gui y gui2 sirven la consola web (/onos/ui/); apps-clean deja
       # inactivas las apps no listadas y la consola responde 404.
       ONOS_APPS: drivers,openflow,hostprovider,lldpprovider,proxyarp,org.onosproject.gui,org.onosproject.gui2
-      JAVA_OPTS: -Xmx2g
+      # 1 GiB: con 6 switches ONOS usa 0,6–0,9 GiB reales; con -Xmx2g crecía
+      # sin techo y, junto a Atomix (≈1,3 GiB) y ~20 contenedores en 4 GiB,
+      # el kernel mataba a Atomix por OOM (srv2/srv3, 2026-11-24).
+      JAVA_OPTS: -Xmx1g
     volumes:
       - /opt/campus-sdn/onos/config/cluster.json:/root/onos/config/cluster.json

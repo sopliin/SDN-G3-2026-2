@@ -7,6 +7,11 @@ services:
   suricata:
     image: jasonish/suricata:7.0
     container_name: s2-suricata
+    # Solo con el perfil «mirror» (COMPOSE_PROFILES=mirror en el .env del
+    # servidor que tenga la NIC del espejo). Sin ens6 no procesa nada y en
+    # los servidores de 4 GiB su memoria (≈500 MiB) llevó a srv2/srv3 al
+    # límite tras cada `up` del despliegue (2026-11-24).
+    profiles: ["mirror"]
     restart: unless-stopped
     network_mode: host
     cap_add:

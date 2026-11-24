@@ -27,6 +27,11 @@ vrrp_instance VI_DATOS {
     virtual_router_id 42
     priority {{ keepalived_priority | default(100) }}
     advert_int 1
+    # ARP gratuito periódico del maestro: tras una caída del plano de
+    # control ONOS puede quedar con la VIP asociada a la MAC del par (el
+    # par fue maestro mientras los VRRP no cruzaban la red); sin refresco,
+    # proxyarp respondía esa MAC y nadie llegaba al portal (2026-11-24).
+    garp_master_refresh 10
     unicast_src_ip {{ unicast_src_ip }}
     unicast_peer {
         {{ keepalived_peer }}
