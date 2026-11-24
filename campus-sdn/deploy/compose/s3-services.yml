@@ -11,6 +11,9 @@ services:
     restart: unless-stopped
     environment:
       BUS_URL: ${BUS_URL:-}
+      # Lecturas I7 protegidas (require_permission): sin IAM_URL authz
+      # queda en modo prototipo y deja pasar todo (medido 2026-11-24).
+      IAM_URL: ${IAM_URL:-http://iam:8001}
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8005:8005"
     healthcheck:
@@ -64,6 +67,9 @@ services:
     restart: unless-stopped
     environment:
       BUS_URL: ${BUS_URL:-}
+      # Lecturas I7 protegidas (require_permission): sin IAM_URL authz
+      # queda en modo prototipo y deja pasar todo (medido 2026-11-24).
+      IAM_URL: ${IAM_URL:-http://iam:8001}
     ports:
       - "${SERVICE_BIND_IP:-0.0.0.0}:8007:8007"
     healthcheck:

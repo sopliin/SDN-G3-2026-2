@@ -218,3 +218,64 @@ actions:
   state: implemented
   notes: El motor decide P03 sobre la instancia restringida; la concesión instala
     una regla 200 con hard_timeout igual al TTL.
+- id: A22
+  permission: P33
+  name: Leer los umbrales de detección
+  service: Policies
+  method: GET
+  path: /thresholds
+  resource_types:
+  - detection_threshold
+  state: implemented
+  notes: Lectura y ajuste comparten P33; antes respondía sin sesión (campaña
+    R1/R2 del 2026-11-24).
+- id: A23
+  permission: P08
+  name: Consultar eventos de auditoría
+  service: Audit
+  method: GET
+  path: /events
+  resource_types:
+  - event
+  state: implemented
+- id: A24
+  permission: P07
+  name: Consultar métricas y líneas base de tráfico
+  service: Monitor
+  method: GET
+  path: /metrics
+  resource_types:
+  - metric
+  state: implemented
+  notes: También GET /baselines en Monitor y en Detección.
+- id: A25
+  permission: P10
+  name: Consultar incidentes
+  service: Incidents
+  method: GET
+  path: /incidents
+  resource_types:
+  - incident
+  - network_incident
+  state: implemented
+  notes: También GET /incidents/{id}; TI sobre incident, Admin sobre network_incident.
+- id: A26
+  permission: P11
+  name: Cerrar un incidente
+  service: Incidents
+  method: POST
+  path: /incidents/{id}/close
+  resource_types:
+  - incident
+  - network_incident
+  state: implemented
+- id: A27
+  permission: P32
+  name: Aprobar la cuarentena de un incidente
+  service: Incidents
+  method: POST
+  path: /incidents/{id}/approve
+  resource_types:
+  - critical_action_request
+  state: implemented
+  notes: Solo Admin y SA (C4 separación de funciones en el motor).

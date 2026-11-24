@@ -19,7 +19,10 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from fastapi import Depends
+
 from sdn_common.app import create_app
+from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, validate_event
 
@@ -153,6 +156,6 @@ app = create_app(SERVICE, lifespan=lifespan)
 
 
 @app.get("/baselines")
-def get_baselines():
+def get_baselines(_=Depends(require_permission("P07", "metric"))):
     """I7: línea base y estado de alerta por destino (solo lectura)."""
     return {"baselines": baseline, "alerts": alerts}

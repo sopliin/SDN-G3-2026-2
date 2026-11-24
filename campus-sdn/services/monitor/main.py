@@ -26,7 +26,10 @@ from pathlib import Path
 
 import httpx
 
+from fastapi import Depends
+
 from sdn_common.app import create_app
+from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, validate_event
 
@@ -39,6 +42,8 @@ locations: dict[str, dict] = {}          # mac → {switch, port}
 samples = deque(maxlen=3600)             # muestras publicadas (con «at»)
 mitigations: dict[str, dict] = {}        # incidente → estado de verificación
 incident_targets: dict[str, str] = {}    # incidente → IP destino
+incident_origins: dict[str, list] = {}   # incidente → orígenes atribuidos
+active: dict[str, dict] = {}             # incidente → mitigación en el switch
 state = {"ports": {}, "flows": {}, "at": None}   # contadores previos
 # Cliente HTTP compartido: httpx.get() crea un cliente y un contexto SSL
 # por llamada (medido: el grueso del CPU con sondeo de 1 s).
@@ -202,6 +207,7 @@ def handle_event(event: dict) -> bool:
 
     if event_type == "IncidentOpened":
         incident_targets[payload["incident"]] = payload["target"]
+        incident_origins[payload["incident"]] = payload.get("origins", [])
         return True
 
     if event_type == "MitigationApplied":
@@ -216,6 +222,14 @@ def handle_event(event: dict) -> bool:
             "applied_mono": time.time(),
             "before": max(recent, key=lambda s: s["pps"]) if recent else None,
             "after": [],
+        }
+        active[payload["incident"]] = {
+            "target": target,
+            "macs": sorted({o["mac"].lower() for o in
+                            incident_origins.get(payload["incident"], [])
+                            if o.get("mac")}),
+            "applied_mono": time.time(),
+            "seen": False,
         }
         return True
 
@@ -255,6 +269,48 @@ def _verify(payload: dict) -> None:
         del mitigations[incident]
 
 
+def _is_mitigation_rule(rule: dict, target: str, macs: list[str]) -> bool:
+    """Regla 1000 del incidente: por el ETH_SRC de un origen atribuido
+    o, sin orígenes, por el IPV4_DST del destino (ONOS reemplaza la
+    cookie, así que se reconoce por prioridad y selectores)."""
+    if int(rule.get("priority", 0)) != 1000:
+        return False
+    criteria = rule.get("selector", {}).get("criteria", [])
+    if macs:
+        return any(c.get("type") == "ETH_SRC"
+                   and str(c.get("mac", "")).lower() in macs
+                   for c in criteria)
+    return any(c.get("type") == "IPV4_DST"
+               and str(c.get("ip", "")).split("/")[0] == target
+               for c in criteria)
+
+
+def release_mitigation(state: dict, rules: list[dict],
+                       now: float) -> list[dict]:
+    """Detecta las mitigaciones liberadas: la regla 1000 se vio instalada
+    y ya no está (venció su hard_timeout = TTL o fue retirada). Devuelve
+    los `MitigationExpired` a publicar, con la duración medida, y saca
+    esos incidentes de `state`. Una regla que aún no aparece en las
+    estadísticas no cuenta como liberada (el sondeo de ONOS va a 1 s)."""
+    released = []
+    for incident, item in list(state.items()):
+        present = any(_is_mitigation_rule(rule, item["target"], item["macs"])
+                      for rule in rules)
+        if present:
+            item["seen"] = True
+            continue
+        if not item["seen"]:
+            continue
+        released.append({
+            "incident": incident,
+            "rule": f"1000:{item['target']}",
+            "reason": "timeout",
+            "duration_s": round(now - item["applied_mono"], 1),
+        })
+        del state[incident]
+    return released
+
+
 def sample_once(now: float | None = None) -> list[dict]:
     """Una ventana: lee contadores por I2, publica y devuelve las muestras."""
     now = time.time() if now is None else now
@@ -265,6 +321,14 @@ def sample_once(now: float | None = None) -> list[dict]:
         _publish(build_event("MetricSample", payload, sender=SERVICE))
         samples.append({**payload, "at": now})
         _verify(payload)
+    for expired in release_mitigation(active, rules, time.time()):
+        incident = expired["incident"]
+        print(f"monitor: mitigación de {incident} liberada tras "
+              f"{expired['duration_s']} s", flush=True)
+        _publish(build_event(
+            "MitigationExpired",
+            {k: expired[k] for k in ("incident", "rule", "reason")},
+            sender=SERVICE, correlation={"incident": incident}))
     return payloads
 
 
@@ -295,7 +359,8 @@ app = create_app(SERVICE, lifespan=lifespan)
 
 
 @app.get("/metrics")
-def get_metrics(destination: str = "", since: float = 0.0):
+def get_metrics(destination: str = "", since: float = 0.0,
+                _=Depends(require_permission("P07", "metric"))):
     """I7: muestras recientes (solo lectura), filtrables por destino."""
     return {"metrics": [s for s in samples
                         if (not destination or s["destination"] == destination)
@@ -303,7 +368,7 @@ def get_metrics(destination: str = "", since: float = 0.0):
 
 
 @app.get("/baselines")
-def get_baselines():
+def get_baselines(_=Depends(require_permission("P07", "metric"))):
     """I7: línea base observada por destino (solo lectura)."""
     by_destination: dict[str, list[float]] = {}
     for sample in samples:

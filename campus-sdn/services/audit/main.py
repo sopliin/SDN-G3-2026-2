@@ -11,7 +11,10 @@ from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from fastapi import Depends
+
 from sdn_common.app import create_app
+from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events
 from sdn_common.events import utc_now
 
@@ -64,7 +67,8 @@ app = create_app(SERVICE, lifespan=lifespan)
 
 @app.get("/events")
 def get_events(since: str = "", actor: str = "", cursor: int = 0,
-               limit: int = 100):
+               limit: int = 100,
+               _=Depends(require_permission("P08", "event"))):
     """I7: consulta de eventos (solo lectura; paginación por cursor)."""
     filtered = [record for record in records
                 if (not actor or record.get("sender") == actor)

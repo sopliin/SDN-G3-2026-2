@@ -205,7 +205,7 @@ def update_profiles(body: dict,
 
 
 @app.get("/thresholds")
-def get_thresholds():
+def get_thresholds(_=Depends(require_permission("P33", "detection_threshold"))):
     """I7: umbrales de detección."""
     return {"thresholds": thresholds}
 

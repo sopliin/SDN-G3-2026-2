@@ -7,11 +7,15 @@ Políticas antes de emitir QUARANTINE. La persistencia llega con
 bd_politicas (paso 5).
 """
 
+import datetime
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from fastapi import Depends
+
 from sdn_common.app import create_app
+from sdn_common.authz import require_permission
 from sdn_common.bus import consume_events, publish_event
 from sdn_common.events import build_event, utc_now, validate_event
 
@@ -77,7 +81,14 @@ def handle_event(event: dict) -> bool:
         ))
         return True
 
-    if event_type in ("MitigationVerified", "MitigationExpired", "MAC_Moved"):
+    if event_type == "MitigationExpired":
+        incident_id = event.get("correlation", {}).get("incident") or \
+            payload.get("incident")
+        if incident_id and incident_id in incidents:
+            record_release(incidents[incident_id], payload, utc_now())
+        return True
+
+    if event_type in ("MitigationVerified", "MAC_Moved"):
         incident_id = event.get("correlation", {}).get("incident") or \
             payload.get("incident")
         if incident_id and incident_id in incidents:
@@ -86,6 +97,28 @@ def handle_event(event: dict) -> bool:
         return True
 
     return False
+
+
+def _parse(stamp: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+
+
+def record_release(incident: dict, payload: dict, released_at: str) -> dict:
+    """Cierra el incidente cuando su mitigación se libera: guarda la hora
+    de liberación, la duración (apertura → liberación, en s) y la
+    evidencia. Idempotente: un segundo aviso no cambia la duración."""
+    incident["evidence"].append({"type": "MitigationExpired",
+                                 "at": released_at, "payload": payload})
+    if incident.get("released_at"):
+        return incident
+    incident["released_at"] = released_at
+    incident["release_reason"] = payload.get("reason")
+    incident["duration_s"] = round(
+        (_parse(released_at) - _parse(incident["opened_at"])).total_seconds(),
+        3)
+    if incident["state"] != "closed":
+        incident["state"] = "closed"
+    return incident
 
 
 @asynccontextmanager
@@ -105,13 +138,14 @@ app = create_app(SERVICE, lifespan=lifespan)
 
 
 @app.get("/incidents")
-def list_incidents():
+def list_incidents(_=Depends(require_permission("P10", ["incident", "network_incident"]))):
     """I7: lista de incidentes."""
     return {"incidents": list(incidents.values())}
 
 
 @app.get("/incidents/{id}")
-def get_incident(id: str):
+def get_incident(id: str,
+                 _=Depends(require_permission("P10", ["incident", "network_incident"]))):
     """I7: consulta de un incidente."""
     if id not in incidents:
         return {"error": {"code": "NOT_FOUND", "message": "incident not found"}}
@@ -119,7 +153,9 @@ def get_incident(id: str):
 
 
 @app.post("/incidents/{id}/approve")
-def approve_incident(id: str, body: dict):
+def approve_incident(id: str, body: dict,
+                     _=Depends(require_permission(
+                         "P32", "critical_action_request"))):
     """I7: aprobación de cuarentena (P32); la consulta Políticas."""
     if id not in incidents:
         return {"error": {"code": "NOT_FOUND", "message": "incident not found"}}
@@ -129,7 +165,8 @@ def approve_incident(id: str, body: dict):
 
 
 @app.post("/incidents/{id}/close")
-def close_incident(id: str):
+def close_incident(id: str,
+                   _=Depends(require_permission("P11", ["incident", "network_incident"]))):
     """I7: cierre del incidente."""
     if id not in incidents:
         return {"error": {"code": "NOT_FOUND", "message": "incident not found"}}
