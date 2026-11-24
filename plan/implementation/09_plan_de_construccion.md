@@ -234,4 +234,4 @@ Prerrequisitos:
 | [`07_plan_de_trabajo_etapa_3.md`](07_plan_de_trabajo_etapa_3.md) | Paquetes de trabajo de ejecución y medición |
 | [`04_capacidades_del_switch.md`](04_capacidades_del_switch.md), [`08_inventario_del_slice.md`](08_inventario_del_slice.md) | Verificación del slice que precede al despliegue |
 | [`00_cierre_etapa_0_permisos.md`](00_cierre_etapa_0_permisos.md), [`policy/`](policy/) | Fuente de `campus-sdn/policy/` |
-| [`../campus-sdn/README.md`](../../campus-sdn/README.md) | Entrada al código y al estado |
+| [`../../README.md`](../../README.md) | Entrada al código, réplica y estado |

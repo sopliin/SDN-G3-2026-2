@@ -27,7 +27,6 @@ Las carpetas marcadas *(pendiente)* existen a propósito: fijan el lugar de cada
 
 ```text
 campus-sdn/
-├── README.md                    # puerta de entrada: objetivos make, reglas y enlaces
 ├── Makefile                     # única puerta de operación: cada tarea es un objetivo
 ├── bench/                       # campañas de medición R1/R2/R4 contra el slice y sus resultados
 │
@@ -387,7 +386,7 @@ Las reglas de convivencia, en resumen:
 
 | Documento | Relación |
 |---|---|
-| [`../README.md`](../README.md) | Puerta de entrada y reglas |
+| [`../../README.md`](../../README.md) | Puerta de entrada: réplica, pruebas y demostración |
 | [`02-estado.md`](02-estado.md) | Qué está avanzado y qué pendiente, con fechas |
 | [`03-formatos.md`](03-formatos.md) | Cómo leer YAML, JSON, OpenAPI y Compose |
 | [`../../implementation/09_plan_de_construccion.md`](../../implementation/09_plan_de_construccion.md) | El plan que ordena la construcción de todo lo anterior |
