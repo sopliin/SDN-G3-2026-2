@@ -18,13 +18,20 @@ services:
       I2_URL: ${R4_I2_URL:-http://10.0.0.12:8090}
       # Destinos vigilados: h4, servidor web de la intranet de la campaña.
       MONITOR_TARGETS: ${R4_MONITOR_TARGETS:-10.0.0.104}
-      SAMPLE_INTERVAL_S: "1"
+      # Ventana de 2 s: cada ventana incluye al menos un sondeo de los
+      # contadores de regla de ONOS (cada 1 s); con 1 s la regla del
+      # atacante a veces no se refrescaba y no se atribuía (2026-11-27).
+      SAMPLE_INTERVAL_S: "2"
 
   detection:
     environment:
-      # Piso absoluto, ventanas consecutivas y rearme del corte nativo
-      # medido (2026-11-04); el umbral crítico desactivado: siempre meter.
-      DETECTION_MIN_PPS: "1000"
+      # Piso absoluto sobre el pico legítimo medido: 30 descargas
+      # simultáneas («publicación de notas», servidor saturado) dieron
+      # hasta 18,2 k pps hacia h4 en ventanas de 2 s; un flood de un
+      # equipo, 68–95 k pps (2026-11-27). 30 000 deja 1,6× sobre lo
+      # legítimo. Ventanas consecutivas y rearme del corte nativo;
+      # umbral crítico desactivado: siempre meter.
+      DETECTION_MIN_PPS: "30000"
       DETECTION_CONSECUTIVE: "2"
       DETECTION_CLEAR: "5"
       DETECTION_CRITICAL_PPS: "0"
