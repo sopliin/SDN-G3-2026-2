@@ -32,7 +32,7 @@ QUEUE = "detection"
 BINDINGS = ["MetricSample"]
 
 baseline: dict[str, dict] = {}  # destino → {n, mean, m2, sigma}
-alerts: dict[str, dict] = {}    # destino → {streak, active, clear}
+alerts: dict[str, dict] = {}    # destino → {streak, active, clear, origins}
 
 
 def _bus_url() -> str:
@@ -99,6 +99,7 @@ def handle_event(event: dict) -> bool:
     stats = baseline.get(destination)
     alert = alerts.setdefault(destination,
                               {"streak": 0, "active": False, "clear": 0})
+    alert.setdefault("origins", [])
 
     anomalous, deviation = False, 0.0
     if stats and stats["n"] > 2:
@@ -107,6 +108,7 @@ def handle_event(event: dict) -> bool:
 
     if not anomalous:
         alert["streak"] = 0
+        alert["origins"] = []
         if alert["active"]:
             alert["clear"] += 1
             if alert["clear"] >= _clear_windows():
@@ -117,6 +119,14 @@ def handle_event(event: dict) -> bool:
 
     alert["streak"] += 1
     alert["clear"] = 0
+    # Orígenes de toda la racha, no solo de la ventana que dispara: los
+    # contadores de puerto y de regla los sondea ONOS por separado, y en
+    # una ventana el de la regla del atacante puede no haberse refrescado
+    # (medido en el slice: ventana con 76 586 pps y ningún origen entre dos
+    # que sí lo tenían).
+    for origin in payload.get("origins", []):
+        if origin not in alert["origins"]:
+            alert["origins"].append(origin)
     if alert["active"] or alert["streak"] < _consecutive():
         return True  # no se actualiza la base con la anomalía
 
@@ -127,7 +137,7 @@ def handle_event(event: dict) -> bool:
         {
             "type": "flood",
             "target": {"ip": destination, "service": ""},
-            "origins": payload.get("origins", []),
+            "origins": list(alert["origins"]),
             "rates": {"pps": pps, "bps": payload["bps"]},
             "baseline": {"mean": round(stats["mean"], 2),
                          "sigma": round(stats["sigma"], 2)},

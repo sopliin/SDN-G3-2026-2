@@ -329,7 +329,25 @@ def sample_once(now: float | None = None) -> list[dict]:
             "MitigationExpired",
             {k: expired[k] for k in ("incident", "rule", "reason")},
             sender=SERVICE, correlation={"incident": incident}))
+        _withdraw_released(incident)
     return payloads
+
+
+def _withdraw_released(incident: str) -> None:
+    """Pide por I2 el retiro de lo que quede del incidente liberado: la
+    regla ya venció, pero su meter sigue en el switch (ONOS no lo borra
+    al expirar la regla). Mejor esfuerzo: la liberación ya quedó
+    registrada aunque el retiro falle."""
+    try:
+        _HTTP.post(f"{_i2_url()}/orders", json={
+            "order": "WITHDRAW",
+            "context": {"cookie": incident, "incident": incident,
+                        "requester": SERVICE,
+                        "reason": "mitigation expired"},
+        }, timeout=10)
+    except httpx.HTTPError as error:
+        print(f"monitor: retiro de {incident} no confirmado ({error})",
+              flush=True)
 
 
 def sample_loop() -> None:

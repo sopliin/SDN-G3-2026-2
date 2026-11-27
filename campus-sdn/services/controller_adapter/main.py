@@ -3,8 +3,8 @@
 Implementa el contrato I2 (contracts/api/i2-controller.openapi.yaml):
 traduce APPLY_PROFILE, APPLY_MITIGATION y WITHDRAW a flujos del plano de
 datos vía la API REST de ONOS, con la escalera: mitigación 1000 con
-hard_timeout = ttl, sesión 200 con idle y tope, retiro siempre por
-cookie. Las cookies siguen la convención del LLD (0x01 sesión, 0x02
+timeout = ttl (ONOS la retira tras ttl segundos sin tráfico; medido en el
+slice), sesión 200 con idle y tope, retiro siempre por cookie. Las cookies siguen la convención del LLD (0x01 sesión, 0x02
 incidente). Confirma las mitigaciones con MitigationApplied por el bus.
 Sin ONOS alcanzable, las órdenes responden 503 y nada queda a medias.
 """
@@ -113,6 +113,10 @@ class OnosClient:
 
     def remove_meter(self, device_id: str, meter_id: int) -> None:
         self._request("DELETE", f"/onos/v1/meters/{device_id}/{meter_id}")
+
+    def meters(self, device_id: str) -> list[dict]:
+        data = self._request("GET", f"/onos/v1/meters/{device_id}").json()
+        return data.get("meters", [])
 
     def hosts(self) -> list[dict]:
         data = self._request("GET", "/onos/v1/hosts").json()
@@ -377,6 +381,12 @@ def withdraw(order: dict) -> int:
     state = order_registry.get(key, {})
     selectors = state.get("selectors")
     if not selectors:
+        if order["context"].get("incident"):
+            # Liberación de una mitigación que aplicó la otra instancia
+            # (Políticas tiene dos consumidores): sus reglas ya vencieron;
+            # solo quedan meters sin uso que retirar.
+            sweep_unused_meters()
+            return 0
         raise HTTPException(status_code=404, detail="cookie not found")
     removed = 0
     for device_id in state.get("switches", []):
@@ -386,6 +396,49 @@ def withdraw(order: dict) -> int:
                 removed += 1
     for meter in order_meters.pop(key, []):
         _onos().remove_meter(meter["device"], meter["meter"])
+    if order["context"].get("incident"):
+        sweep_unused_meters()
+    return removed
+
+
+METER_SWEEP_MIN_AGE_S = 30
+
+
+def sweep_unused_meters() -> int:
+    """Retira los meters de mitigación que ya no usa ninguna regla.
+
+    Al vencer la regla 1000 (timeout de ONOS) el meter queda en el switch;
+    solo las mitigaciones de R4 instalan meters, así que un meter al que
+    no apunta ninguna regla es residuo de una mitigación ya liberada. Se respeta una
+    antigüedad mínima para no tocar el meter de una mitigación que se está
+    instalando (meter primero, regla después). Mejor esfuerzo: un fallo
+    del barrido no hace fallar el retiro. Devuelve cuántos retiró."""
+    removed = 0
+    try:
+        client = _onos()
+        for device_id in client.devices():
+            meters = client.meters(device_id)
+            if not meters:
+                continue
+            # En uso = referido por una regla del switch. `referenceCount`
+            # de ONOS no sirve: se vio en 0 con el meter en uso (slice,
+            # 2026-11-27). ONOS escribe el id igual en ambos lados.
+            used = {str(instruction.get("meterId"))
+                    for flow in client.flows(device_id)
+                    for instruction in flow.get("treatment", {})
+                    .get("instructions", [])
+                    if instruction.get("type") == "METER"}
+            for meter in meters:
+                if str(meter["id"]) in used:
+                    continue
+                if int(meter.get("life", 0)) < METER_SWEEP_MIN_AGE_S:
+                    continue
+                # ONOS lista el identificador en hexadecimal y lo borra en
+                # decimal (verificado en el slice).
+                client.remove_meter(device_id, int(str(meter["id"]), 16))
+                removed += 1
+    except (HTTPException, KeyError, ValueError, AttributeError):
+        pass
     return removed
 
 
